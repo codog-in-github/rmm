@@ -1,17 +1,19 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div></div>
 </template>
 
-<script>
-import HelloWorld from './components/HelloWorld.vue'
+<script setup>
+import { request } from '@/api';
 
-export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
+request()
+  .post('/user', {
+    hello: 'world',
+  })
+  .send()
+  .then(data => {
+    console.log('data', data);
+  });
+
 </script>
 
 <style>
