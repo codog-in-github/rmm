@@ -1,4 +1,5 @@
 import CryptoJS from 'crypto-js';
+import { ElMessage } from 'element-plus';
 
 function pad16 (str) {
   if(str.length < 16) {
@@ -11,6 +12,7 @@ function pad16 (str) {
 
 const KEY = pad16('123');
 const IV = pad16('123');
+
 export function sign (config, next) {
   const keys = Object.keys(config.data);
   keys.sort();
@@ -56,16 +58,19 @@ export function decodeParams (data, next) {
       padding: CryptoJS.pad.Pkcs7
     }
   );
-  return next(
+  const a =  next(
     JSON.parse(d.toString(CryptoJS.enc.Utf8))
   );
+  return a;
 }
 
 export function checkLoginStatus (reponse, next) {
   if(reponse.data && reponse.data.code === 0) {
     return next(reponse.data.data);
   }
-  throw Error(reponse.data.message);
+  const msg = reponse.data.message;
+  ElMessage.error(msg);
+  throw Error(msg);
 }
 
 export const request = [

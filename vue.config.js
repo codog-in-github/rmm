@@ -1,6 +1,9 @@
 const { defineConfig } = require('@vue/cli-service');
+const UnoCSS = require('@unocss/webpack').default
+
 module.exports = defineConfig({
   transpileDependencies: true,
+  outputDir: 'dist',
   devServer: {
     proxy: {
       '/api': {
@@ -8,5 +11,7 @@ module.exports = defineConfig({
       }
     }
   },
-  outputDir: 'dist',
+  chainWebpack: config => {
+    config.plugin('uno').use(UnoCSS)
+  }
 });

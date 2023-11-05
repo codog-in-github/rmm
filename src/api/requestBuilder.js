@@ -1,8 +1,12 @@
 import axios from 'axios';
 import {
-  request as requestMiddleware,
-  response as responseMiddleware
+  checkLoginStatus,
+  decodeParams,
+  encodeParams,
+  sign
 } from './middleware';
+import { isString } from 'lodash';
+import { ElMessage } from 'element-plus';
 
 const baseURL = '/api';
 
@@ -14,8 +18,12 @@ class Request {
     this.headers = {};
     this._data = {};
     this.targetUrl = url;
-    this.requestMiddleware = requestMiddleware;
-    this.responseMiddleware = responseMiddleware;
+    this.requestMiddleware = [
+      sign, encodeParams
+    ];
+    this.responseMiddleware = [
+      checkLoginStatus, decodeParams
+    ];
   }
 
   get (url = '') {
@@ -26,8 +34,12 @@ class Request {
 
   post (url, data) {
     this.method = 'post';
-    this._data = data;
-    this.targetUrl = url;
+    if(data != void 0) {
+      this._data = data;
+    }
+    if(url != void 0) {
+      this.targetUrl = url;
+    }
     return this;
   }
 
@@ -72,31 +84,34 @@ class Request {
     const instance = axios.create({
       baseURL: this.baseURL
     });
-    const _this = this;
-  
-    instance.interceptors.request.use(function (config) {
-      let next = n => n;
-      if(_this.requestMiddleware.length > 0) {
-        for(let i = _this.requestMiddleware.length - 1; i >= 0; i--) {
-          let _next = next;
-          next = prev => _this.requestMiddleware[i](prev, _next);
+    function callMiddleware (middlewares) {
+      return function (arg) {
+        let next = n => n;
+        if(middlewares.length > 0) {
+          for(let i = middlewares.length - 1; i >= 0; i--) {
+            let _next = next;
+            next = prev => middlewares[i](prev, _next);
+          }
+          return next(arg);
         }
-        return next(config);
-      }
-      return config;
-    });
+        return arg;
+      };
+    }
+    instance.interceptors.request.use(
+      callMiddleware(this.requestMiddleware)
+    );
 
-    instance.interceptors.response.use(function (rep) {
-      let next = n => n;
-      if(_this.responseMiddleware.length > 0) {
-        for(let i = _this.responseMiddleware.length - 1; i >= 0; i--) {
-          let _next = next;
-          next = prev => _this.responseMiddleware[i](prev, _next);
+    instance.interceptors.response.use(
+      callMiddleware(this.responseMiddleware),
+      callMiddleware([
+        (rep, next) => next(rep.response.data.data),
+        decodeParams,
+        (rep) => {
+          console.log('rep', rep);
+          throw Error('request failt');
         }
-        return next(rep);
-      }
-      return rep;
-    });
+      ])
+    );
 
     return instance.request({
       url: this.targetUrl,
