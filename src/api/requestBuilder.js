@@ -5,13 +5,11 @@ import {
   encodeParams,
   sign
 } from './middleware';
-import { isString } from 'lodash';
-import { ElMessage } from 'element-plus';
 
 const baseURL = '/api';
 
 class Request {
-  constructor (url = '') {
+  constructor(url = '') {
     this.baseURL = baseURL;
     this.targetUrl = '';
     this.method = 'post';
@@ -26,13 +24,13 @@ class Request {
     ];
   }
 
-  get (url = '') {
+  get(url = '') {
     this.method = 'get';
     this.targetUrl = url;
     return this;
   }
 
-  post (url, data) {
+  post(url, data) {
     this.method = 'post';
     if(data != void 0) {
       this._data = data;
@@ -43,7 +41,7 @@ class Request {
     return this;
   }
 
-  data (data) {
+  data(data) {
     this._data = data;
     return this;
   }
@@ -83,12 +81,12 @@ class Request {
    * 
    * @returns {Promise<any>}
    */
-  send () {
+  send() {
     const instance = axios.create({
       baseURL: this.baseURL
     });
-    function callMiddleware (middlewares) {
-      return function (arg) {
+    function callMiddleware(middlewares) {
+      return function(arg) {
         let next = n => n;
         if(middlewares.length > 0) {
           for(let i = middlewares.length - 1; i >= 0; i--) {
@@ -110,21 +108,24 @@ class Request {
         (rep, next) => next(rep.response.data.data),
         decodeParams,
         (rep) => {
-          console.log('rep', rep);
+          if(process.env.NODE_ENV === 'development') {
+            // eslint-disable-next-line no-console
+            console.log('rep', rep);
+          }
           throw Error('request failt');
         }
       ])
     );
 
     return instance.request({
-      url: this.targetUrl,
-      method: this.method,
-      data: this._data,
+      url:     this.targetUrl,
+      method:  this.method,
+      data:    this._data,
       headers: this.headers
     });
   }
 }
 
-export function request (url = '') {
+export function request(url = '') {
   return new Request(url);
 }

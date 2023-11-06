@@ -1,34 +1,30 @@
-import {
-  createPinia,
-  defineStore 
-} from 'pinia';
-import {
-  computed, 
-  reactive, 
-  ref 
-} from 'vue';
+import { createPinia, defineStore } from 'pinia';
+import { computed, ref } from 'vue';
 
 export const useUser = defineStore('user', () => {
+  const auth = ref([]);
   const user = ref({
     username: ''
   });
-  const auth = ref([]);
-  function logout () {
+
+  function logout() {
     user.value = {
       username: ''
     };
     auth.value = [];
   }
-  function login (loginUser, ) {
+
+  function login(user, auth) {
     auth;
   }
+
   return {
     name: computed(() => {
       return auth.value.username;
     }),
-    logout
+    logout,
+    login
   };
 });
-
 
 export default createPinia();

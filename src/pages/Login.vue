@@ -35,25 +35,26 @@
 
 <script setup>
 import { login } from '@/api';
+import { ElInput } from 'element-plus';
 import { reactive, ref } from 'vue';
 const formRef = ref();
 const formData = reactive({
   username: '',
-  password: '',
+  password: ''
 });
 
 const rules = {
-  username: { required: true, message: '请填写用户名', },
-  password: { required: true, message: '请填写密码', },
+  username: { required: true, message: '请填写用户名' },
+  password: { required: true, message: '请填写密码' }
 };
 
-async function submit () {
+async function submit() {
   try {
     await formRef.value.validate();
     const rep = await login(formData.username, formData.password);
-    
     console.log('rep', rep);
   } catch (error) {
+    // todo
   }
 }
 

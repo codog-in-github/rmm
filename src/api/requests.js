@@ -8,7 +8,7 @@ import { request } from './requestBuilder';
  *  auth: string[]
  * }>}
  */
-export const login = function (username, password) {
+export const login = function(username, password) {
   return request('/login')
     .data({
       username, password

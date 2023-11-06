@@ -8,19 +8,19 @@ import { isFunction } from 'lodash';
 
 /**
  * 判断对象是否可以异步等待
- * @param {*} val 
+ * @param {*} val
  * @returns {val is {
  *  then: Function,
  *  catch: Function,
  *  finally: Function
  * } | Promise}
  */
-export function isPromiseLike (val) {
-  return val && (
-    val instanceof Promise || (
-      isFunction(val.then) &&
-      isFunction(val.catch) &&
-      isFunction(val.finally)
-    )
+export function isPromiseLike(val) {
+  return (
+    val &&
+    (val instanceof Promise ||
+      (isFunction(val.then) &&
+        isFunction(val.catch) &&
+        isFunction(val.finally)))
   );
 }

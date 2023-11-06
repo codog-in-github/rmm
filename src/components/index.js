@@ -18,7 +18,7 @@ export default {
   /**
    * @param {import('vue').App} app 
    */
-  install (app) {
+  install(app) {
     components.forEach(item => {
       app.component(item.name, item.component);
     });

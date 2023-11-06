@@ -10,7 +10,7 @@ import components from './components';
 const app = createApp(App);
 
 app.use(ElementPlus, {
-  size: 'large',
+  size: 'large'
 });
 app.use(store);
 app.use(router);

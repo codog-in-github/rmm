@@ -1,7 +1,7 @@
 import CryptoJS from 'crypto-js';
 import { ElMessage } from 'element-plus';
 
-function pad16 (str) {
+function pad16(str) {
   if(str.length < 16) {
     str += '\0'.repeat(16 - str.length);
   } else {
@@ -13,7 +13,7 @@ function pad16 (str) {
 const KEY = pad16('123');
 const IV = pad16('123');
 
-export function sign (config, next) {
+export function sign(config, next) {
   const keys = Object.keys(config.data);
   keys.sort();
   const newObj = {};
@@ -29,14 +29,14 @@ export function sign (config, next) {
   return next(config);
 }
 
-export function encodeParams (config, next) {
+export function encodeParams(config, next) {
   const json = JSON.stringify(config.data);
   const d = CryptoJS.AES.encrypt(
     json,
     KEY,
     {
-      iv: IV,
-      mode: CryptoJS.mode.CBC,
+      iv:      IV,
+      mode:    CryptoJS.mode.CBC,
       padding: CryptoJS.pad.Pkcs7
     }
   );
@@ -48,13 +48,13 @@ export function encodeParams (config, next) {
   return next(config);
 }
 
-export function decodeParams (data, next) {
+export function decodeParams(data, next) {
   const d = CryptoJS.AES.decrypt(
     data,
     KEY,
     {
-      iv: IV,
-      mode: CryptoJS.mode.CBC,
+      iv:      IV,
+      mode:    CryptoJS.mode.CBC,
       padding: CryptoJS.pad.Pkcs7
     }
   );
@@ -64,7 +64,7 @@ export function decodeParams (data, next) {
   return a;
 }
 
-export function checkLoginStatus (reponse, next) {
+export function checkLoginStatus(reponse, next) {
   if(reponse.data && reponse.data.code === 0) {
     return next(reponse.data.data);
   }
