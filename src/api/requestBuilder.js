@@ -79,7 +79,10 @@ class Request {
     this[type] = newMiddlewares;
     return this;
   }
-
+  /**
+   * 
+   * @returns {Promise<any>}
+   */
   send () {
     const instance = axios.create({
       baseURL: this.baseURL

@@ -19,13 +19,13 @@
           </ElFormItem>
         </ElForm>
         <div class="m-t-10">
-          <ElButton
+          <GlAsyncButton
             class="float-right"
             type="primary"
-            @click="submit"
+            :click="submit"
           >
             登录
-          </ElButton>
+          </GlAsyncButton>
           <div class="clear-both" />
         </div>
       </div>
@@ -50,11 +50,11 @@ const rules = {
 async function submit () {
   try {
     await formRef.value.validate();
+    const rep = await login(formData.username, formData.password);
+    
+    console.log('rep', rep);
   } catch (error) {
-    return;
   }
-  const rep = await login(formData.username, formData.password);
-  console.log('rep', rep);
 }
 
 </script>

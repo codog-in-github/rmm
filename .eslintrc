@@ -4,6 +4,9 @@
     "plugin:vue/vue3-essential",
     "eslint:recommended"
   ],
+  "globals": {
+    "require": true
+  },
   "parserOptions": {
     "parser": "@babel/eslint-parser"
   },
