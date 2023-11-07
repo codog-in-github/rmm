@@ -35,8 +35,14 @@
 
 <script setup>
 import { login } from '@/api';
+import { useUser } from '@/store';
 import { ElInput } from 'element-plus';
 import { reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { addRouterForAuth } from '@/router';
+
+const user = useUser();
+const router = useRouter();
 const formRef = ref();
 const formData = reactive({
   username: '',
@@ -52,7 +58,11 @@ async function submit() {
   try {
     await formRef.value.validate();
     const rep = await login(formData.username, formData.password);
-    console.log('rep', rep);
+    user.login(rep.user, rep.auth);
+    addRouterForAuth(
+      rep.auth.map(item => item.key)
+    );
+    router.push('/home');
   } catch (error) {
     // todo
   }
