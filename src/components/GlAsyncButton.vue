@@ -9,6 +9,7 @@ import { isPromiseLike } from '@/helpers';
 import { ref, defineProps } from 'vue';
 
 const loading = ref(false);
+
 const props = defineProps({
   click: {
     type:     Function,

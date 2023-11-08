@@ -73,10 +73,3 @@ export function checkLoginStatus(reponse, next) {
   throw Error(msg);
 }
 
-export const request = [
-  sign, encodeParams
-];
-
-export const response = [
-  checkLoginStatus, decodeParams
-];

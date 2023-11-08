@@ -5,7 +5,7 @@ import { request } from './requestBuilder';
  * @param {string} password 密码
  * @returns {Promise<{
  *  user: User,
- *  auth: Auth[]
+ *  auths: Auth[]
  * }>}
  */
 export const login = function(username, password) {
