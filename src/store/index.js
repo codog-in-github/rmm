@@ -23,6 +23,7 @@ export const useUser = defineStore('user', () => {
     user.value = cache.user;
     localStorage.removeItem('user');
   }
+
   function logout() {
     user.value = {
       username: ''
@@ -39,12 +40,23 @@ export const useUser = defineStore('user', () => {
     user.value = newUser;
   }
 
+  const can = computed(() => {
+    const authsMap = {};
+    auths.value.forEach(item => {
+      authsMap[item.key] = true;
+    });
+    return function(authKey) {
+      return authsMap[authKey] ?? false;
+    };
+  });
+
   return {
     name: computed(() => {
-      return auths.value.username;
+      return user.value.username;
     }),
     logout,
-    login
+    login,
+    can
   };
 });
 

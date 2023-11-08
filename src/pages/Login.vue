@@ -4,7 +4,7 @@
       <template #header>
         <div class="text-center">登录</div>
       </template>
-      <div class="p5">
+      <div class="p5" @keydown.enter="submit">
         <ElForm
           labelWidth="5rem"
           :model="formData"
