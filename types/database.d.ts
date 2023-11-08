@@ -12,3 +12,11 @@ interface Auth extends Model {
   key: string,
   name: string
 }
+
+interface Storehouse extends Model {
+
+}
+
+interface Stock extends Model {
+  
+}

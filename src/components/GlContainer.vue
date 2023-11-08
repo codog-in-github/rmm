@@ -1,19 +1,28 @@
 <template>
   <ElContainer>
     <ElHeader class="bg-primary color-white">
-      <ElRow>
-        <ElCol :span="3" class="font-size-8">
+      <ElRow align="middle" class="h-full">
+        <ElCol :span="20" class="font-size-6">
           欢迎使用xxx系统
         </ElCol>
-        <ElCol :span="2">
-          你好：<ElIcon><User /></ElIcon>{{ user.name }}
+        <ElCol :span="4" class="text-right">
+          <span class="p-r-4">
+            你好：{{ user.name }}
+          </span>
+          <GlAsyncButton
+            :click="logoutClick"
+            type="danger"
+            circle
+            size="small"
+            icon="SwitchButton"
+          />
         </ElCol>
       </ElRow>
     </ElHeader>
     <ElContainer>
-      <ElAside class="bg-white">
-        <ElMenu>
-          <ElMenuItem v-for="item in menu" :key="item.key">
+      <ElAside class="bg-white" width="160px">
+        <ElMenu router>
+          <ElMenuItem v-for="item in menu" :key="item.key" :index="item.path">
             <ElIcon>
               <Component :is="item.icon" />
             </ElIcon>
@@ -22,15 +31,9 @@
         </ElMenu> 
       </ElAside>
       <ElMain>
-        <RouterView>
-          <template v-slot="{ Component }">
-            <div class="bg-white rd h-full">
-              <Transform name="el-fade-in-linear">
-                <Component :is="Component" class="h-full overflow-auto" />
-              </Transform>
-            </div>
-          </template>
-        </RouterView>
+        <div class="bg-white rd h-full p3 box-border">
+          <RouterView class="h-full w-full overflow-auto" />
+        </div>
       </ElMain>
     </ElContainer>
   </ElContainer>
@@ -39,7 +42,12 @@
 import routes from '@/router/routes';
 import { useUser } from '@/store';
 import { computed } from 'vue';
+import { logout } from '@/api';
+import { useRouter } from 'vue-router';
+import { clearRoutes } from '@/router';
+
 const user = useUser();
+const router = useRouter();
 const menu = computed(() => {
   return routes
     .filter(item => user.can(`menu.${item.key}`))
@@ -50,4 +58,15 @@ const menu = computed(() => {
       label: item.label
     }));
 });
+
+async function logoutClick() {
+  try {
+    await logout();
+    user.logout();
+    router.replace('/login');
+    clearRoutes();
+  } catch (error) {
+    //
+  }
+}
 </script>

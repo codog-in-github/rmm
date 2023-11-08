@@ -42,6 +42,7 @@ function restoreRoutes(keys) {
     };
   });
 }
+
 const router = createRouter({
   history: createWebHashHistory(),
   routes:  [{ 
@@ -83,6 +84,15 @@ export function addRouterForAuth(authsKeys) {
     }
   });
   cacheRouteKeys = newRouteKeys;
+}
+/**
+ *  清除登录路由表
+ */
+export function clearRoutes() {
+  cacheRouteKeys.forEach(key => {
+    router.removeRoute(key);
+  });
+  cacheRouteKeys = [];
 }
 
 export default router;
