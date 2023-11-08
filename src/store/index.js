@@ -2,7 +2,8 @@ import { createPinia, defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
 export const useUser = defineStore('user', () => {
-  const auth = ref([]);
+  const auths = ref([]);
+  
   const user = ref({
     username: ''
   });
@@ -11,16 +12,21 @@ export const useUser = defineStore('user', () => {
     user.value = {
       username: ''
     };
-    auth.value = [];
+    auths.value = [];
   }
 
-  function login(user, auth) {
-    auth;
+  /**
+   * @param {User} newUser 
+   * @param {Auth[]} newAuths 
+   */
+  function login(newUser, newAuths) {
+    auths.value = newAuths;
+    user.value = newUser;
   }
 
   return {
     name: computed(() => {
-      return auth.value.username;
+      return auths.value.username;
     }),
     logout,
     login

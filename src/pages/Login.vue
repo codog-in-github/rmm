@@ -35,8 +35,11 @@
 
 <script setup>
 import { login } from '@/api';
+import { useUser } from '@/store';
 import { ElInput } from 'element-plus';
 import { reactive, ref } from 'vue';
+
+const userStore = useUser();
 const formRef = ref();
 const formData = reactive({
   username: '',
@@ -52,7 +55,8 @@ async function submit() {
   try {
     await formRef.value.validate();
     const rep = await login(formData.username, formData.password);
-    console.log('rep', rep);
+    rep.auth.
+      console.log('rep', rep);
   } catch (error) {
     // todo
   }
