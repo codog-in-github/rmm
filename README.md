@@ -1,24 +1,19 @@
-# rmm
+# 还没想好啥名字
+暂时不升级`typescript` 使用 `jsdoc` 体验也还行
 
-## Project setup
-```
-pnpm install
-```
+包管理管理工具 `pnpm`
+代码风格检查工具 `eslint`
+整体框架 `vue3`
+ui `elment-plus`
+工具函数 `lodash` `moment`
+其他 ` scss` `unocss`
 
-### Compiles and hot-reloads for development
+启动开发服务器
 ```
-pnpm run serve
-```
-
-### Compiles and minifies for production
-```
-pnpm run build
+pnpm serve
 ```
 
-### Lints and fixes files
+打包
 ```
-pnpm run lint
+pnpm build
 ```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
