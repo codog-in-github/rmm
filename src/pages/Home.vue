@@ -1,5 +1,7 @@
 <template>
-  <GlAsyncButton :click="testAPI">点我</GlAsyncButton>
+  <div>
+    <GlAsyncButton :click="testAPI">点我</GlAsyncButton>
+  </div>
 </template>
 <script setup>
 import { request } from '@/api';

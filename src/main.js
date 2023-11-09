@@ -9,9 +9,7 @@ import 'element-plus/dist/index.css';
 import 'uno.css';
 
 const app = createApp(App);
-app.use(ElementPlus, {
-  size: 'large'
-});
+app.use(ElementPlus);
 Object.keys(icons).forEach(name => {
   app.component(name, icons[name]);
 });

@@ -1,3 +1,5 @@
+import './gl.scss';
+
 const reqComp = require.context('./', true, /\/Gl[A-Za-z]+\.vue$/);
 
 const components = reqComp.keys().reduce((total, current) => {

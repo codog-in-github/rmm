@@ -63,8 +63,8 @@ async function logoutClick() {
   try {
     await logout();
     user.logout();
-    router.replace('/login');
     clearRoutes();
+    router.replace('/login');
   } catch (error) {
     //
   }

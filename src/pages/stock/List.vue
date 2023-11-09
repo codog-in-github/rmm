@@ -1,13 +1,27 @@
 <template>
-  <div>stock list</div>
+  <div class="flex flex-col">
+    <GlFilterBar :model="filters" @search="onSearch" class="m-b-4">
+      <GlFilterItem label="id" prop="id" />
+      <template v-slot:after>
+        <ElButton>新增入库</ElButton>
+      </template>
+    </GlFilterBar>
+    <div class="flex-auto">
+      <ElTable :data="list" border height="100%">
+        <ElTableColumn label="测试" prop="name" />
+      </ElTable>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { getSelfStorehouse, getStock } from '@/api';
 import { ElMessage } from 'element-plus';
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 
 const storehouseId = ref(null);
+const list = ref([]);
+const filters = reactive({});
 
 getSelfStorehouse()
   .then(storehouseList => {
