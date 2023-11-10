@@ -37,3 +37,17 @@ export function getStock(storehouseId) {
     .data({ id: storehouseId })
     .send();
 }
+
+export function getStockRecord(storehouseId) {
+  return request('/getStockRecord')
+    .data({ id: storehouseId })
+    .send();
+}
+
+export function getStockAddOptions() {
+  return request('/getAddOptions').send();
+}
+
+export function stockAdd(form) {
+  return request('/stockAdd').data(form).send();
+}

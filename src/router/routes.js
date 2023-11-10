@@ -16,6 +16,13 @@ export default [
     label:     '库存管理',
     path:      '/stock',
     component: () => import('@/pages/stock/List.vue')
+  },
+  {
+    key:       'stockRecord',
+    icon:      'List',
+    label:     '出入库记录',
+    path:      '/stockRecord',
+    component: () => import('@/pages/stock/Record.vue')
   }
 ];
 

@@ -1,19 +1,26 @@
 <template>
   <div class="flex flex-col">
-    <GlFilterBar :model="filters" @search="getList" class="m-b-4">
-      <template v-slot:after>
-        <ElButton @click="add">新增入库</ElButton>
-      </template>
-    </GlFilterBar>
+    <GlFilterBar :model="filters" @search="getList" class="m-b-4" />
     <div class="flex-auto" v-loading="loading">
       <ElTable :data="list" border height="100%">
         <ElTableColumn label="库存类型" prop="goods_type">
           <template v-slot="{ row }">{{ GOODS_TYPE_MAP[row['goods_type']] }}</template>
         </ElTableColumn>
+        <ElTableColumn label="类型" prop="type">
+          <template v-slot="{ row }">
+            {{ row['type'] === 1 ? '入库' : '出库' }}
+          </template>
+        </ElTableColumn>
         <ElTableColumn label="库存名称" prop="goods_name" />
         <ElTableColumn label="规格" prop="goods_specification_name" />
-        <ElTableColumn label="库存总数" prop="goods_num" />
-        <ElTableColumn label="库存总价" prop="goods_total" />
+        <ElTableColumn label="数量" prop="num" />
+        <ElTableColumn label="价值" prop="total" />
+        <ElTableColumn label="操作人" prop="username" />
+        <ElTableColumn label="操作时间" prop="created_at">
+          <template v-slot="{ row }">
+            {{ moment(row['created_at']).format('YYYY-MM-DD hh:mm:ss') }}
+          </template>
+        </ElTableColumn>
       </ElTable>
     </div>
     <Dialog v-model:visible="showDialog" :model="dialogData" @success="getList" />
@@ -21,11 +28,12 @@
 </template>
 
 <script setup>
-import { getSelfStorehouse, getStock } from '@/api';
+import { getSelfStorehouse, getStockRecord } from '@/api';
 import { ElMessage } from 'element-plus';
 import { ref, reactive } from 'vue';
 import Dialog from './Dialog.vue';
 import { GOODS_TYPE_MAP } from '@/constant';
+import moment from 'moment';
 
 const storehouseId = ref(null);
 const list = ref([]);
@@ -33,24 +41,11 @@ const filters = reactive({});
 const loading = ref(false);
 const showDialog = ref(false);
 const dialogData = ref(null);
-function add() {
-  dialogData.value = {
-    storehouseId:    storehouseId.value,
-    goodsId:         null,
-    goodsType:       null,
-    specificationId: null,
-    num:             null,
-    total:           null,
-    comment:         ''
-  };
-  showDialog.value  = true;
-}
 
 function getList() {
   loading.value = true;
-  getStock(storehouseId.value)
+  getStockRecord(storehouseId.value)
     .then(rep => {
-      console.log('rep', rep);
       list.value = rep;
     })
     .finally(() => {
