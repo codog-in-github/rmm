@@ -49,6 +49,7 @@ getSelfStorehouse()
       storehouseId.value = storehouseList[0].id;
       return getList();
     }
+    loading.value = false;
     const errMsg = '您的账号未绑定仓库，请联系管理员添加';
     ElMessage.error(errMsg);
     throw Error(errMsg);

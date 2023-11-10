@@ -1,21 +1,36 @@
 <template>
   <ElDialog v-model="visibleChanger" title="新增入库">
     <template v-if="localValue">
-      <ElForm inline>
-        <ElRow align="end">
-          <ElCol>
+      <ElForm inline labelWidth="6em">
+        <ElRow>
+          <ElCol :span="12">
             <ElFormItem label="货物类型">
-              <ElSelect v-model="localValue.id">
-                <ElOption 
-                  v-for="item in goodsTypeList"
-                  :label="item.label" 
-                  :value="item.value"
-                  :key="item.value"
-                />
-              </ElSelect>
+              <ElSelectV2 :options="goodsTypeList" v-model="localValue.id" />
+            </ElFormItem>
+          </ElCol>
+          <ElCol :span="12">
+            <ElFormItem label="货物类型">
+              <ElSelectV2 :options="goodsTypeList" v-model="localValue.id" />
             </ElFormItem>
           </ElCol>
         </ElRow>
+        <ElRow>
+          <ElCol :span="12">
+            <ElFormItem label="货物类型">
+              <ElSelectV2 :options="goodsTypeList" v-model="localValue.id" />
+            </ElFormItem>
+          </ElCol>
+          <ElCol :span="12">
+            <ElFormItem label="数量">
+              <ElInputNumber controlsPosition="right" v-model="localValue.id" />
+            </ElFormItem>
+          </ElCol>
+        </ElRow>
+        <div>
+          <ElFormItem label="备注">
+            <ElInput type="textarea" v-model="localValue.id"  />
+          </ElFormItem>
+        </div>
       </ElForm>
     </template>
   </ElDialog>
