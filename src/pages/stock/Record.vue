@@ -33,25 +33,27 @@
 </template>
 
 <script setup>
-import { getSelfStorehouse, getStockRecord } from '@/api';
+import { getSelfStorehouse, useGetStockRecordWidthPagination } from '@/api';
 import { ElMessage } from 'element-plus';
 import { ref, reactive } from 'vue';
 import Dialog from './Dialog.vue';
 import { GOODS_TYPE_MAP } from '@/constant';
 import moment from 'moment';
-
+import { usePagination } from '@/helpers/paginate';
 const storehouseId = ref(null);
 const list = ref([]);
 const filters = reactive({});
 const loading = ref(false);
 const showDialog = ref(false);
 const dialogData = ref(null);
-
+const pagination = usePagination();
+const getStockRecord = useGetStockRecordWidthPagination(pagination.paginate);
 function getList() {
   loading.value = true;
   getStockRecord(storehouseId.value)
     .then(rep => {
-      list.value = rep;
+      console.log('rep', rep);
+      // list.value = rep;
     })
     .finally(() => {
       loading.value = false;

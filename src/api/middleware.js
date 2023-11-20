@@ -1,6 +1,11 @@
 import CryptoJS from 'crypto-js';
 import { ElMessage } from 'element-plus';
 
+/**
+ * 将字符串填充或截断为16字节长度
+ * @param {string} str - 要处理的字符串
+ * @returns {Object} - 加密的16字节字符串
+ */
 function pad16(str) {
   if(str.length < 16) {
     str += '\0'.repeat(16 - str.length);
@@ -29,6 +34,12 @@ export function sign(config, next) {
   return next(config);
 }
 
+/**
+ * 加密请求参数
+ * @param {Object} config - axios的config对象
+ * @param {Function} next - 后续的处理函数
+ * @returns {Object} - 加密后的config对象
+ */
 export function encodeParams(config, next) {
   const json = JSON.stringify(config.data);
   const d = CryptoJS.AES.encrypt(
@@ -48,6 +59,12 @@ export function encodeParams(config, next) {
   return next(config);
 }
 
+/**
+ * 解密请求参数
+ * @param {Object} data - 解密后的请求参数
+ * @param {Function} next - 后续的处理函数
+ * @returns {Object} - 解密后的请求参数
+ */
 export function decodeParams(data, next) {
   const d = CryptoJS.AES.decrypt(
     data,

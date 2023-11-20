@@ -42,9 +42,40 @@ class Request {
   }
 
   data(data) {
-    this._data = data;
+    if(data) {
+      this._data = data;
+    }
     return this;
   }
+
+  addRequestMiddleware() {
+    return this.addMiddleware(
+      'requestMiddleware',
+      ...arguments
+    );
+  }
+
+  addResponseMiddleware() {
+    return this.addMiddleware(
+      'responseMiddleware',
+      ...arguments
+    );
+  }
+  /**
+   * 添加中间件
+   * @access protected
+   * @param {'requestMiddleware' | 'responseMiddleware'} type 
+   * @param  {...Function} middlewares 
+   * @returns {Request}
+   */
+  addMiddleware(key, middleware, index) {
+    if(index !== void 0) {
+      this[key].splice(index, 0, middleware);
+    } else {
+      this[key].push(middleware);
+    }
+  }
+  
 
   responseWithout() {
     return this._excludeMiddleware(
@@ -105,13 +136,13 @@ class Request {
     instance.interceptors.response.use(
       callMiddleware(this.responseMiddleware),
       callMiddleware([
-        (rep, next) => next(rep.response.data.data),
+        (rep, next) => {
+          return next(rep.response.data.data);
+        },
         decodeParams,
         (rep) => {
-          if(process.env.NODE_ENV === 'development') {
-            // eslint-disable-next-line no-console
-            console.log('rep', rep);
-          }
+          // eslint-disable-next-line no-console
+          console.log('rep', rep);
           throw Error('request failt');
         }
       ])

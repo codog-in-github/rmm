@@ -1,3 +1,4 @@
+import { requestWithPagination } from '@/helpers/paginate';
 import { request } from './requestBuilder';
 /**
  * 用户登录
@@ -38,10 +39,13 @@ export function getStock(storehouseId) {
     .send();
 }
 
-export function getStockRecord(storehouseId) {
-  return request('/getStockRecord')
-    .data({ id: storehouseId })
-    .send();
+export function useGetStockRecordWidthPagination(paginate) {
+  const _request = requestWithPagination(
+    request('/getStockRecord'), paginate
+  );
+  return function(id) {
+    return _request.data({ id }).send();
+  };
 }
 
 export function getStockAddOptions() {
