@@ -1,9 +1,11 @@
 const { defineConfig } = require('@vue/cli-service');
 const UnoCSS = require('@unocss/webpack').default
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
 module.exports = defineConfig({
   transpileDependencies: true,
-  outputDir: 'dist',
+  productionSourceMap: false,
+  outputDir:  process.env.OUTPUT_DIR ?? 'dist',
   devServer: {
     proxy: {
       '/api': {
@@ -12,6 +14,14 @@ module.exports = defineConfig({
     }
   },
   chainWebpack: config => {
-    config.plugin('uno').use(UnoCSS)
+    config.plugin('UnoCSS').use(UnoCSS)
+    config.plugin('CleanWebpackPlugin').use(CleanWebpackPlugin, [{
+      cleanOnceBeforeBuildPatterns: [
+        '**/*',
+        '!*.php',
+        '!.htaccess',
+        '!robots.txt'
+      ]
+    }])
   }
 });
