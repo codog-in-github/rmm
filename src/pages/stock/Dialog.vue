@@ -28,7 +28,7 @@
               <template v-slot="{ row }">
                 <ElInputNumber 
                   controlsPosition="right"
-                  v-model="row.num"
+                  v-model.lazy="row.num"
                   :min="0"
                   @change="numChange(row, $event)"
                 />
@@ -152,6 +152,7 @@ const props = defineProps({
   }
 });
 const emit = defineEmits(['update:visible', 'success']);
+
 const visibleChanger = computed({
   get() {
     return props.visible;
@@ -160,6 +161,7 @@ const visibleChanger = computed({
     emit('update:visible', val);
   }
 });
+
 function emptyRow() {
   return {
     goodsId:         null,
@@ -171,6 +173,7 @@ function emptyRow() {
     total:           null
   };
 }
+
 function changeGoodsType(goodsType) {
   if(goodsType) {
     localValue.value.records = [emptyRow()];
