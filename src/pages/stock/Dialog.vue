@@ -1,57 +1,94 @@
 <template>
-  <ElDialog v-model="visibleChanger" title="新增入库">
+  <ElDialog v-model="visibleChanger" title="新增入库" width="1000px">
     <template v-if="localValue">
-      <ElForm inline labelWidth="6em" class="p-r-8">
-        <ElRow>
-          <ElCol :span="12">
-            <ElFormItem label="货物类型">
-              <ElSelectV2 
-                :options="goodsTypeList"
-                v-model="localValue.goodsType"
-                @change="
-                  localValue.goodsId = null;
-                  localValue.specificationId = null;
-                "
-              />
-            </ElFormItem>
-          </ElCol>
-          <ElCol :span="12">
-            <ElFormItem label="货物名称">
-              <ElSelectV2 
-                :options="options.goods.value"
-                v-model="localValue.goodsId" 
-                @change="localValue.specificationId = null;"
-              />
-            </ElFormItem>
-          </ElCol>
-        </ElRow>
-        <ElRow>
-          <ElCol :span="10">
-            <ElFormItem label="货物规格">
-              <ElSelectV2 :options="options.specifications.value" v-model="localValue.specificationId" />
-            </ElFormItem>
-          </ElCol>
-          <ElCol :span="2" class="p-l">
-            <ElButton icon="plus" class="w-full" @click="addSpecification" />
-          </ElCol>
-        </ElRow>
-        <ElRow>
-          <ElCol :span="12">
-            <ElFormItem label="数量">
-              <ElInputNumber :min="0" controlsPosition="right" v-model="localValue.num" />
-            </ElFormItem>
-          </ElCol>
-          <ElCol :span="12">
-            <ElFormItem label="总金额">
-              <ElInputNumber :min="0" controlsPosition="right" v-model="localValue.total" />
-            </ElFormItem>
-          </ElCol>
-        </ElRow>
-        <div>
-          <ElFormItem label="备注">
-            <ElInput type="textarea" v-model="localValue.comment"  />
-          </ElFormItem>
-        </div>
+      <ElForm labelWidth="6em" class="p-r-8">
+        <ElFormItem label="入库类型">
+          <ElSelectV2 v-model="localValue.goodsType" :options="goodsTypeList" @change="changeGoodsType" />
+        </ElFormItem>
+        <ElFormItem label="明细">
+          <ElTable :data="localValue.records" border>
+            <ElTableColumn label="名称">
+              <template v-slot="{ row }">
+                <ElSelectV2
+                  :options="options.goods"
+                  v-model="row.goodsId"
+                  @change="changeGoods(row, $event)"
+                />
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="规格">
+              <template v-slot="{ row }">
+                <ElSelectV2
+                  :options="options.specifications.value(row.goodsId)"
+                  v-model="row.specificationId"
+                />
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="入库数量">
+              <template v-slot="{ row }">
+                <ElInputNumber 
+                  controlsPosition="right"
+                  v-model="row.num"
+                  :min="0"
+                  @change="numChange(row, $event)"
+                />
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="单位" porp="unit">
+              <template v-slot="{ row }">
+                <ElSelectV2
+                  :options="options.units.value(row.goodsId)"
+                  v-model="row.unit"
+                />
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="单价" prop="price">
+              <template v-slot="{ row }">
+                <ElInputNumber 
+                  controlsPosition="right"
+                  v-model.lazy="row.price"
+                  :min="0"
+                  @change="priceChange(row, $event)"
+                />
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="总价" prop="total">
+              <template v-slot="{ row }">
+                <ElInputNumber
+                  controlsPosition="right"
+                  v-model.lazy="row.total"
+                  :min="0"
+                  @change="totalChange(row, $event)"
+                />
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="操作">
+              <template v-slot="{ $index }">
+                <ElButton
+                  size="small"
+                  type="danger"
+                  icon="delete"
+                  @click="remove($index)"
+                >
+                  删除
+                </ElButton>
+              </template>
+            </ElTableColumn>
+          </ElTable>
+          <div class="w-full text-right m-t-2">
+            <ElButton
+              size="small"
+              type="primary"
+              icon="plus"
+              @click="addRecord"
+            >
+              添加
+            </ElButton>
+          </div>
+        </ElFormItem>
+        <ElFormItem label="备注">
+          <ElInput type="textarea" v-model="localValue.comment"  />
+        </ElFormItem>
       </ElForm>
     </template>
     <template v-slot:footer>
@@ -71,7 +108,8 @@ import { getStockAddOptions, stockAdd } from '@/api';
 
 const optionsByid = ref({
   goods:          {},
-  specifications: {}
+  specifications: {},
+  units:          {}
 });
 
 const options = {
@@ -82,14 +120,24 @@ const options = {
     return [];
   }),
   specifications: computed(() => {
-    if(localValue.value?.goodsId && optionsByid.value.specifications[localValue.value.goodsId]) {
-      return optionsByid.value.specifications[localValue.value.goodsId];
-    }
-    return [];
+    return function(goodsId) {
+      if(goodsId && optionsByid.value.specifications[goodsId]) {
+        return optionsByid.value.specifications[goodsId];
+      }
+      return [];
+    };
+  }),
+  units: computed(() => {
+    return function(goodsId) {
+      if(goodsId && optionsByid.value.units[goodsId]) {
+        return optionsByid.value.units[goodsId];
+      }
+      return [];
+    };
   })
 };
-
 const goodsTypeList = map2array(GOODS_TYPE_MAP);
+const localValue = ref(null);
 const props = defineProps({
   visible: {
     required: true,
@@ -112,7 +160,75 @@ const visibleChanger = computed({
     emit('update:visible', val);
   }
 });
-const localValue = ref(null);
+function emptyRow() {
+  return {
+    goodsId:         null,
+    goodsType:       null,
+    specificationId: null,
+    num:             null,
+    unit:            null,
+    price:           null,
+    total:           null
+  };
+}
+function changeGoodsType(goodsType) {
+  if(goodsType) {
+    localValue.value.records = [emptyRow()];
+  } else {
+    localValue.value.records = [];
+  }
+}
+
+function changeGoods(row, goodsId) {
+  if(goodsId) {
+    row.specificationId = null;
+    row.unit = null;
+    row.price = null;
+    row.total = null;
+  }
+}
+
+function numChange(row, num) {
+  if(num) {
+    if(row.price) {
+      row.total = num * row.price;
+    } else if(row.total) {
+      row.price = row.total / num;
+    }
+  } 
+}
+
+function totalChange(row, total) {
+  if(total && row.num) {
+    row.price = total / row.num;
+  }
+}
+
+function priceChange(row, price) {
+  if(price && row.num) {
+    row.total = price * row.num;
+  }
+}
+function remove(index) {
+  if(localValue.value.records.length === 1) {
+    ElMessage.warning('至少保留一条明细');
+    localValue.value.records = [emptyRow()];
+  } else {
+    localValue.value.records.splice(index, 1);
+  }
+}
+
+function addRecord() {
+  if(!localValue.value.goodsType) {
+    ElMessage.warning('请选择商品类型');
+    return;
+  }
+  if(localValue.value.records.length >= 10) {
+    ElMessage.warning('最多添加10条明细');
+    return;
+  }
+  localValue.value.records.push(emptyRow());
+}
 
 watch(() => props.model, val => {
   localValue.value = cloneDeep(val);
@@ -136,7 +252,7 @@ getStockAddOptions().then(data => {
 });
 
 async function doAdd() {
-  const rep = await stockAdd(localValue.value);
+  await stockAdd(localValue.value);
   ElMessage.success('保存成功');
   emit('update:visible', false);
   emit('success');

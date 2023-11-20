@@ -35,13 +35,8 @@ const showDialog = ref(false);
 const dialogData = ref(null);
 function add() {
   dialogData.value = {
-    storehouseId:    storehouseId.value,
-    goodsId:         null,
-    goodsType:       null,
-    specificationId: null,
-    num:             null,
-    total:           null,
-    comment:         ''
+    records: [],
+    comment: ''
   };
   showDialog.value  = true;
 }

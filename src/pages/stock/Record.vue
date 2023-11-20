@@ -2,13 +2,18 @@
   <div class="flex flex-col">
     <GlFilterBar :model="filters" @search="getList" class="m-b-4" />
     <div class="flex-auto" v-loading="loading">
-      <ElTable :data="list" border height="100%">
+      <ElTable
+        :data="list"
+        border
+        height="100%"
+      >
         <ElTableColumn label="库存类型" prop="goods_type">
           <template v-slot="{ row }">{{ GOODS_TYPE_MAP[row['goods_type']] }}</template>
         </ElTableColumn>
         <ElTableColumn label="类型" prop="type">
           <template v-slot="{ row }">
-            {{ row['type'] === 1 ? '入库' : '出库' }}
+            <span v-if="row['type'] === 1" class="color-success">入库</span>
+            <span v-else class="color-warning">出库</span>
           </template>
         </ElTableColumn>
         <ElTableColumn label="库存名称" prop="goods_name" />
@@ -16,7 +21,7 @@
         <ElTableColumn label="数量" prop="num" />
         <ElTableColumn label="价值" prop="total" />
         <ElTableColumn label="操作人" prop="username" />
-        <ElTableColumn label="操作时间" prop="created_at">
+        <ElTableColumn label="操作时间" prop="created_at" width="180">
           <template v-slot="{ row }">
             {{ moment(row['created_at']).format('YYYY-MM-DD hh:mm:ss') }}
           </template>
