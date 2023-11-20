@@ -1,16 +1,16 @@
 import { reactive } from 'vue';
 
-export function usePagination(hook) {
+export function usePagination() {
   const paginate = reactive({
-    page:     1,
-    perPage:  10,
-    total:    0,
-    lastPage: 0,
-    loading:  false
+    currentPage: 1,
+    perPage:     10,
+    total:       0,
+    lastPage:    0,
+    loading:     false
   });
   return {
     paginate,
-    moveByPage(page) {
+    moveByPage(page, hook) {
       if (page > 0 && page <= paginate.lastPage) {
         paginate.loading = true;
         hook()
@@ -40,6 +40,15 @@ export function requestWithPagination(request, paginate) {
       return next(request);
     },
     0
+  );
+  request.addResponseMiddleware(
+    (data, next) => {
+      paginate.perPage = data.perPage;
+      paginate.total = data.total;
+      paginate.lastPage = data.perPage;
+      paginate.currentPage = data.currentPage;
+      return next(data.data);
+    }
   );
   return request;
 }

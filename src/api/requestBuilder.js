@@ -42,9 +42,7 @@ class Request {
   }
 
   data(data) {
-    if(data) {
-      this._data = data;
-    }
+    this._data = data ?? {};
     return this;
   }
 
