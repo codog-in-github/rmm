@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col">
-    <GlFilterBar :model="filters" @search="getList" class="m-b-4" />
-    <div class="flex-auto" v-loading="loading">
+    <GlFilterBar :model="filters" @search="pagination.reset(getList)" class="m-b-4" />
+    <div class="flex-auto" v-loading="pagination.paginate.loading">
       <ElTable
         :data="list"
         border
@@ -28,18 +28,22 @@
         </ElTableColumn>
       </ElTable>
     </div>
+    <div class="m-t-2">
+      <GlPagination :pagination="pagination" :requestHook="getList" />
+    </div>
     <Dialog v-model:visible="showDialog" :model="dialogData" @success="getList" />
   </div>
 </template>
 
 <script setup>
-import { getSelfStorehouse, useGetStockRecordWidthPagination } from '@/api';
+import { getSelfStorehouse, useGetStockRecordWithPagination } from '@/api';
 import { ElMessage } from 'element-plus';
 import { ref, reactive } from 'vue';
 import Dialog from './Dialog.vue';
 import { GOODS_TYPE_MAP } from '@/constant';
 import moment from 'moment';
-import { usePagination } from '@/helpers/paginate';
+import { usePagination } from '@/helpers/pagination';
+
 const storehouseId = ref(null);
 const list = ref([]);
 const filters = reactive({});
@@ -47,27 +51,21 @@ const loading = ref(false);
 const showDialog = ref(false);
 const dialogData = ref(null);
 const pagination = usePagination();
-const getStockRecord = useGetStockRecordWidthPagination(pagination.paginate);
+const getStockRecord = useGetStockRecordWithPagination(pagination);
+
 function getList() {
-  loading.value = true;
-  getStockRecord(storehouseId.value)
+  return getStockRecord(storehouseId.value)
     .then(rep => {
-      console.log('rep', rep);
-      // list.value = rep;
-    })
-    .finally(() => {
-      loading.value = false;
+      list.value = rep;
     });
 }
 
 getSelfStorehouse()
   .then(storehouseList => {
-    loading.value = true;
     if(storehouseList.length > 0) {
       storehouseId.value = storehouseList[0].id;
-      return getList();
+      return pagination.reset(getList);
     }
-    loading.value = false;
     const errMsg = '您的账号未绑定仓库，请联系管理员添加';
     ElMessage.error(errMsg);
     throw Error(errMsg);

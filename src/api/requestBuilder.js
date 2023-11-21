@@ -72,6 +72,7 @@ class Request {
     } else {
       this[key].push(middleware);
     }
+    return this;
   }
   
 
