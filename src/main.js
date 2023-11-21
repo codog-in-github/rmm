@@ -8,10 +8,12 @@ import * as icons from '@element-plus/icons-vue';
 import components from './components';
 import 'element-plus/dist/index.css';
 import 'uno.css';
+
 envScripts[process.env.NODE_ENV].main();
+ElDialog.props.closeOnClickModal = false;
+
 const app = createApp(App);
 app.use(ElementPlus);
-ElDialog.props.closeOnClickModal = false;
 Object.keys(icons).forEach(name => {
   app.component(name, icons[name]);
 });

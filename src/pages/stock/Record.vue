@@ -28,9 +28,7 @@
         </ElTableColumn>
       </ElTable>
     </div>
-    <div class="m-t-2">
-      <GlPagination :pagination="pagination" :requestHook="getList" />
-    </div>
+    <GlPagination class="m-t-2" :pagination="pagination" :requestHook="getList" />
     <Dialog v-model:visible="showDialog" :model="dialogData" @success="getList" />
   </div>
 </template>
@@ -47,7 +45,6 @@ import { usePagination } from '@/helpers/pagination';
 const storehouseId = ref(null);
 const list = ref([]);
 const filters = reactive({});
-const loading = ref(false);
 const showDialog = ref(false);
 const dialogData = ref(null);
 const pagination = usePagination();

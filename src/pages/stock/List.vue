@@ -35,8 +35,9 @@ const showDialog = ref(false);
 const dialogData = ref(null);
 function add() {
   dialogData.value = {
-    records: [],
-    comment: ''
+    storehouseId: storehouseId.value,
+    records:      [],
+    comment:      ''
   };
   showDialog.value  = true;
 }
@@ -45,7 +46,6 @@ function getList() {
   loading.value = true;
   getStock(storehouseId.value)
     .then(rep => {
-      console.log('rep', rep);
       list.value = rep;
     })
     .finally(() => {
