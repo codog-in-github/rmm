@@ -28,6 +28,9 @@ export function logout() {
 export function getSelfStorehouse() {
   return request('/getSelfStorehouse').send();
 }
+export function getSelfWorkshop() {
+  return request('/getSelfWorkshop').send();
+}
 /**
  * 
  * @param {number} storehouseId 
@@ -53,10 +56,15 @@ export function getStockRecordDetail(id) {
     .data({ id })
     .send();
 }
-
 export function getStockAddOptions() {
   return request('/getAddOptions').send();
 }
 export function stockAdd(form) {
   return request('/stockAdd').data(form).send();
+}
+
+export function stockRecordUndo(id, comment) {
+  return request('/stockRecordUndo')
+    .data({ id, comment })
+    .send();
 }

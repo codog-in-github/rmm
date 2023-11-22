@@ -12,8 +12,12 @@
         </ElTableColumn>
         <ElTableColumn label="库存名称" prop="goodsName" />
         <ElTableColumn label="规格" prop="specificationName" />
-        <ElTableColumn label="库存总数" prop="goodsNum" />
-        <ElTableColumn label="库存总价" prop="goodsTotal" />
+        <ElTableColumn label="库存总数" prop="goodsNum">
+          <template v-slot="{ row }">
+            {{ row.goodsNum }}<span v-if="row.baseUnitName">（{{ row.baseUnitName }}）</span>
+          </template>
+        </ElTableColumn>
+        <ElTableColumn label="库存总价（元）" prop="goodsTotal" />
       </ElTable>
     </div>
     <Dialog v-model:visible="showDialog" :model="dialogData" @success="getList" />

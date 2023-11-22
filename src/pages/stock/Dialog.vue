@@ -1,7 +1,12 @@
 <template>
   <ElDialog v-model="visibleChanger" :title="props.readonly ? '详情' : '新增'" width="1000px">
     <template v-if="localValue">
-      <ElForm labelWidth="6em" class="p-r-8" :disabled="props.readonly">
+      <ElForm
+        labelWidth="6em"
+        class="p-r-8"
+        :disabled="props.readonly"
+        size="small"
+      >
         <ElFormItem label="入库类型">
           <ElSelectV2 v-model="localValue.goodsType" :options="goodsTypeList" @change="changeGoodsType" />
         </ElFormItem>
@@ -29,7 +34,6 @@
                 <ElInputNumber 
                   controlsPosition="right"
                   v-model.lazy="row.num"
-                  :min="0"
                   @change="numChange(row, $event)"
                 />
               </template>
@@ -42,7 +46,7 @@
                 />
               </template>
             </ElTableColumn>
-            <ElTableColumn label="单价" prop="price">
+            <ElTableColumn label="单价（元/单位）" prop="price">
               <template v-slot="{ row }">
                 <ElInputNumber 
                   controlsPosition="right"
@@ -52,12 +56,11 @@
                 />
               </template>
             </ElTableColumn>
-            <ElTableColumn label="总价" prop="total">
+            <ElTableColumn label="总价（元）" prop="total">
               <template v-slot="{ row }">
                 <ElInputNumber
                   controlsPosition="right"
                   v-model.lazy="row.total"
-                  :min="0"
                   @change="totalChange(row, $event)"
                 />
               </template>
@@ -66,7 +69,7 @@
               <template v-slot="{ $index }">
                 <ElButton
                   size="small"
-                  type="danger"
+                  type="text"
                   icon="delete"
                   @click="remove($index)"
                 >

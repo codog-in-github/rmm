@@ -23,6 +23,13 @@ export default [
     label:     '出入库记录',
     path:      '/stockRecord',
     component: () => import('@/pages/stock/Record.vue')
+  },
+  {
+    key:       'process',
+    icon:      'CircleClose',
+    label:     '加工清单',
+    path:      '/process',
+    component: () => import('@/pages/workshop/Process.vue')
   }
 ];
 

@@ -14,29 +14,27 @@
           <template v-slot="{ row }">
             <span v-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_IN" class="color-success">入库</span>
             <span v-else-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_OUT" class="color-warning">出库</span>
+            <span v-else-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_UNDO" class="color-danger">反冲</span>
             <span v-else class="color-danger">未知</span>
           </template>
         </ElTableColumn>
-        <ElTableColumn label="出/入库成本" prop="total" />
+        <ElTableColumn label="出/入库成本（元）" prop="total" />
         <ElTableColumn label="操作人" prop="username" />
-        <ElTableColumn label="操作时间" prop="created_at" width="180">
+        <ElTableColumn label="操作时间" prop="createdAt" width="180">
           <template v-slot="{ row }">
-            {{ moment(row['created_at']).format('YYYY-MM-DD hh:mm:ss') }}
+            {{ moment(row.createdAt).format('YYYY-MM-DD hh:mm') }}
           </template>
         </ElTableColumn>
         <ElTableColumn label="操作" width="180">
           <template v-slot="{ row }">
             <GlAsyncButton type="text" :click="() => showDetail(row)">详情</GlAsyncButton>
             <GlAsyncButton
-              v-if="
-                bitHas(
-                  row['type'],
-                  CONSTANT.STOCK_CHANGE_TYPE_IN
-                    | CONSTANT.STOCK_CHANGE_TYPE_OUT
-                )
-              "
+              v-if="[
+                CONSTANT.STOCK_CHANGE_TYPE_IN,
+                CONSTANT.STOCK_CHANGE_TYPE_OUT
+              ].includes(row.type) && !row.undidAt"
               type="text"
-              :click="() => reverse(row)"
+              :click="() => undo(row.id)"
             >
               反冲
             </GlAsyncButton>
@@ -50,14 +48,18 @@
 </template>
 
 <script setup>
-import { getSelfStorehouse, getStockRecordDetail, useGetStockRecordWithPagination } from '@/api';
-import { ElMessage } from 'element-plus';
+import { 
+  getSelfStorehouse,
+  getStockRecordDetail, 
+  useGetStockRecordWithPagination,
+  stockRecordUndo
+} from '@/api';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { ref, reactive } from 'vue';
 import Dialog from './Dialog.vue';
 import * as CONSTANT from '@/constant';
 import moment from 'moment';
 import { usePagination } from '@/helpers/pagination';
-import { bitHas } from '@/helpers';
 
 const storehouseId = ref(null);
 const list = ref([]);
@@ -78,6 +80,20 @@ async function showDetail(row) {
   const rep = await getStockRecordDetail(row.id);
   dialogData.value = rep;
   showDialog.value = true;
+}
+
+async function undo(id) {
+  try {
+    const { value: comment } = await ElMessageBox.prompt('确定要反冲吗？', '请输入原因', {
+      inputPattern:      /^[\u4e00-\u9fa5\w\s]{1,20}$/,
+      inputErrorMessage: '请输入1-20个字符'
+    });
+    await stockRecordUndo(id, comment);
+    ElMessage.success('反冲成功');
+    getList();
+  } catch (error) {
+    //
+  }
 }
 
 getSelfStorehouse()
