@@ -7,40 +7,57 @@
         border
         height="100%"
       >
-        <ElTableColumn label="库存类型" prop="goods_type">
-          <template v-slot="{ row }">{{ GOODS_TYPE_MAP[row['goods_type']] }}</template>
+        <ElTableColumn label="库存类型" prop="goodsType">
+          <template v-slot="{ row }">{{ CONSTANT.GOODS_TYPE_MAP[row['goodsType']] }}</template>
         </ElTableColumn>
         <ElTableColumn label="类型" prop="type">
           <template v-slot="{ row }">
-            <span v-if="row['type'] === 1" class="color-success">入库</span>
-            <span v-else class="color-warning">出库</span>
+            <span v-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_IN" class="color-success">入库</span>
+            <span v-else-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_OUT" class="color-warning">出库</span>
+            <span v-else class="color-danger">未知</span>
           </template>
         </ElTableColumn>
-        <ElTableColumn label="库存名称" prop="goods_name" />
-        <ElTableColumn label="规格" prop="goods_specification_name" />
-        <ElTableColumn label="数量" prop="num" />
-        <ElTableColumn label="价值" prop="total" />
+        <ElTableColumn label="出/入库成本" prop="total" />
         <ElTableColumn label="操作人" prop="username" />
         <ElTableColumn label="操作时间" prop="created_at" width="180">
           <template v-slot="{ row }">
             {{ moment(row['created_at']).format('YYYY-MM-DD hh:mm:ss') }}
           </template>
         </ElTableColumn>
+        <ElTableColumn label="操作" width="180">
+          <template v-slot="{ row }">
+            <GlAsyncButton type="text" :click="() => showDetail(row)">详情</GlAsyncButton>
+            <GlAsyncButton
+              v-if="
+                bitHas(
+                  row['type'],
+                  CONSTANT.STOCK_CHANGE_TYPE_IN
+                    | CONSTANT.STOCK_CHANGE_TYPE_OUT
+                )
+              "
+              type="text"
+              :click="() => reverse(row)"
+            >
+              反冲
+            </GlAsyncButton>
+          </template>
+        </ElTableColumn>
       </ElTable>
     </div>
     <GlPagination class="m-t-2" :pagination="pagination" :requestHook="getList" />
-    <Dialog v-model:visible="showDialog" :model="dialogData" @success="getList" />
+    <Dialog v-model:visible="showDialog" :model="dialogData" readonly />
   </div>
 </template>
 
 <script setup>
-import { getSelfStorehouse, useGetStockRecordWithPagination } from '@/api';
+import { getSelfStorehouse, getStockRecordDetail, useGetStockRecordWithPagination } from '@/api';
 import { ElMessage } from 'element-plus';
 import { ref, reactive } from 'vue';
 import Dialog from './Dialog.vue';
-import { GOODS_TYPE_MAP } from '@/constant';
+import * as CONSTANT from '@/constant';
 import moment from 'moment';
 import { usePagination } from '@/helpers/pagination';
+import { bitHas } from '@/helpers';
 
 const storehouseId = ref(null);
 const list = ref([]);
@@ -55,6 +72,12 @@ function getList() {
     .then(rep => {
       list.value = rep;
     });
+}
+
+async function showDetail(row) {
+  const rep = await getStockRecordDetail(row.id);
+  dialogData.value = rep;
+  showDialog.value = true;
 }
 
 getSelfStorehouse()

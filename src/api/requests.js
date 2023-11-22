@@ -1,4 +1,4 @@
-import { requestWithPagination } from '@/helpers/pagination';
+import { requestWithPagination } from '@/helpers';
 import { request } from './requestBuilder';
 /**
  * 用户登录
@@ -48,10 +48,15 @@ export function useGetStockRecordWithPagination(paginate) {
   };
 }
 
+export function getStockRecordDetail(id) {
+  return request('/getStockRecordDetail')
+    .data({ id })
+    .send();
+}
+
 export function getStockAddOptions() {
   return request('/getAddOptions').send();
 }
-
 export function stockAdd(form) {
   return request('/stockAdd').data(form).send();
 }

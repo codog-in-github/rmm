@@ -1,3 +1,4 @@
+import { changeKeysCase } from '@/helpers';
 import CryptoJS from 'crypto-js';
 import { ElMessage } from 'element-plus';
 
@@ -75,10 +76,9 @@ export function decodeParams(data, next) {
       padding: CryptoJS.pad.Pkcs7
     }
   );
-  const a =  next(
-    JSON.parse(d.toString(CryptoJS.enc.Utf8))
+  return next(
+    changeKeysCase(JSON.parse(d.toString(CryptoJS.enc.Utf8)))
   );
-  return a;
 }
 
 export function checkLoginStatus(reponse, next) {

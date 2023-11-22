@@ -7,13 +7,13 @@
     </GlFilterBar>
     <div class="flex-auto" v-loading="loading">
       <ElTable :data="list" border height="100%">
-        <ElTableColumn label="库存类型" prop="goods_type">
-          <template v-slot="{ row }">{{ GOODS_TYPE_MAP[row['goods_type']] }}</template>
+        <ElTableColumn label="库存类型" prop="goodsType">
+          <template v-slot="{ row }">{{ GOODS_TYPE_MAP[row['goodsType']] }}</template>
         </ElTableColumn>
-        <ElTableColumn label="库存名称" prop="goods_name" />
-        <ElTableColumn label="规格" prop="goods_specification_name" />
-        <ElTableColumn label="库存总数" prop="goods_num" />
-        <ElTableColumn label="库存总价" prop="goods_total" />
+        <ElTableColumn label="库存名称" prop="goodsName" />
+        <ElTableColumn label="规格" prop="specificationName" />
+        <ElTableColumn label="库存总数" prop="goodsNum" />
+        <ElTableColumn label="库存总价" prop="goodsTotal" />
       </ElTable>
     </div>
     <Dialog v-model:visible="showDialog" :model="dialogData" @success="getList" />
@@ -36,7 +36,7 @@ const dialogData = ref(null);
 function add() {
   dialogData.value = {
     storehouseId: storehouseId.value,
-    records:      [],
+    details:      [],
     comment:      ''
   };
   showDialog.value  = true;

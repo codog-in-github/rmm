@@ -1,12 +1,12 @@
 <template>
-  <ElDialog v-model="visibleChanger" title="新增入库" width="1000px">
+  <ElDialog v-model="visibleChanger" :title="props.readonly ? '详情' : '新增'" width="1000px">
     <template v-if="localValue">
-      <ElForm labelWidth="6em" class="p-r-8">
+      <ElForm labelWidth="6em" class="p-r-8" :disabled="props.readonly">
         <ElFormItem label="入库类型">
           <ElSelectV2 v-model="localValue.goodsType" :options="goodsTypeList" @change="changeGoodsType" />
         </ElFormItem>
         <ElFormItem label="明细">
-          <ElTable :data="localValue.records" border>
+          <ElTable :data="localValue.details" border>
             <ElTableColumn label="名称">
               <template v-slot="{ row }">
                 <ElSelectV2
@@ -34,11 +34,11 @@
                 />
               </template>
             </ElTableColumn>
-            <ElTableColumn label="单位" porp="unit">
+            <ElTableColumn label="单位" porp="unitId">
               <template v-slot="{ row }">
                 <ElSelectV2
                   :options="options.units.value(row.goodsId)"
-                  v-model="row.unit"
+                  v-model="row.unitId"
                 />
               </template>
             </ElTableColumn>
@@ -62,7 +62,7 @@
                 />
               </template>
             </ElTableColumn>
-            <ElTableColumn label="操作">
+            <ElTableColumn label="操作" v-if="!props.readonly">
               <template v-slot="{ $index }">
                 <ElButton
                   size="small"
@@ -80,7 +80,9 @@
               size="small"
               type="primary"
               icon="plus"
-              @click="addRecord"
+              @click="add"
+              v-show="!props.readonly"
+              :disabled="!localValue.goodsType"
             >
               添加
             </ElButton>
@@ -92,7 +94,8 @@
       </ElForm>
     </template>
     <template v-slot:footer>
-      <ElButton type="primary" @click="doAdd">确定</ElButton>
+      <ElButton type="primary" @click="doAdd" v-show="!props.readonly">确定</ElButton>
+      <ElButton @click="visibleChanger = false">关闭</ElButton>
     </template>
   </ElDialog>
 </template>
@@ -147,8 +150,9 @@ const props = defineProps({
     required: true,
     type:     Object
   },
-  type: {
-    default: 'add'
+  readonly: {
+    type:    Boolean,
+    default: false
   }
 });
 const emit = defineEmits(['update:visible', 'success']);
@@ -168,7 +172,7 @@ function emptyRow() {
     goodsType:       null,
     specificationId: null,
     num:             null,
-    unit:            null,
+    unitId:          null,
     price:           null,
     total:           null
   };
@@ -176,16 +180,16 @@ function emptyRow() {
 
 function changeGoodsType(goodsType) {
   if(goodsType) {
-    localValue.value.records = [emptyRow()];
+    localValue.value.details = [emptyRow()];
   } else {
-    localValue.value.records = [];
+    localValue.value.details = [];
   }
 }
 
 function changeGoods(row, goodsId) {
   if(goodsId) {
     row.specificationId = null;
-    row.unit = null;
+    row.unitId = null;
     row.price = null;
     row.total = null;
   }
@@ -213,24 +217,24 @@ function priceChange(row, price) {
   }
 }
 function remove(index) {
-  if(localValue.value.records.length === 1) {
+  if(localValue.value.details.length === 1) {
     ElMessage.warning('至少保留一条明细');
-    localValue.value.records = [emptyRow()];
+    localValue.value.details = [emptyRow()];
   } else {
-    localValue.value.records.splice(index, 1);
+    localValue.value.details.splice(index, 1);
   }
 }
 
-function addRecord() {
+function add() {
   if(!localValue.value.goodsType) {
     ElMessage.warning('请选择商品类型');
     return;
   }
-  if(localValue.value.records.length >= 10) {
+  if(localValue.value.details.length >= 10) {
     ElMessage.warning('最多添加10条明细');
     return;
   }
-  localValue.value.records.push(emptyRow());
+  localValue.value.details.push(emptyRow());
 }
 
 watch(() => props.model, val => {
