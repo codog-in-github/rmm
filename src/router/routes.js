@@ -26,8 +26,8 @@ export default [
   },
   {
     key:       'process',
-    icon:      'CircleClose',
-    label:     '加工清单',
+    icon:      'Files',
+    label:     '作业清单',
     path:      '/process',
     component: () => import('@/pages/workshop/Process.vue')
   }

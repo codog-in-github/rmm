@@ -2,7 +2,7 @@
   <div class="gl-filter-bar">
     <slot />
     <div class="gl-filter-bar__search">
-      <ElButton type="primary" @click="onSeachButtonClick">{{ searchButtonText }}</ElButton>
+      <ElButton type="primary" @click="onSeachButtonClick" icon="refresh">{{ searchButtonText }}</ElButton>
     </div>
     <div class="gl-filter-bar__after" v-if="$slots.after"><slot name="after" /></div>
   </div>

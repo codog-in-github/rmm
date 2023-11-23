@@ -68,3 +68,15 @@ export function stockRecordUndo(id, comment) {
     .data({ id, comment })
     .send();
 }
+
+export const getOptions =
+  names => request('/getOptions')
+    .data({ names })
+    .send();
+
+export function useGetPocessListWithPagination(pagination) {
+  const _reqest = requestWithPagination(request('/getProcessList'), pagination);
+  return function(id) {
+    return _reqest.data({ id }).send();
+  };
+}

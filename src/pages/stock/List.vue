@@ -2,7 +2,7 @@
   <div class="flex flex-col">
     <GlFilterBar :model="filters" @search="getList" class="m-b-4">
       <template v-slot:after>
-        <ElButton @click="add">新增入库</ElButton>
+        <ElButton @click="add" type="primary" icon="plus">新增入库</ElButton>
       </template>
     </GlFilterBar>
     <div class="flex-auto" v-loading="loading">
