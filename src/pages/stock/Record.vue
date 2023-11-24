@@ -84,7 +84,7 @@ async function showDetail(row) {
 
 async function undo(id) {
   try {
-    const { value: comment } = await ElMessageBox.prompt('确定要反冲吗？', '请输入原因', {
+    const { value: comment } = await ElMessageBox.prompt('请输入原因', '确定要反冲吗？', {
       inputPattern:      /^[\u4e00-\u9fa5\w\s]{1,20}$/,
       inputErrorMessage: '请输入1-20个字符'
     });
