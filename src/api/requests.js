@@ -92,3 +92,18 @@ export function rawApply(form) {
 export function getProcessDetail(id) {
   return request('/getProcessDetail').data({ id }).send();
 }
+
+export function useGetApplyListWithPagination(paginate) {
+  const req = requestWithPagination(request('/getApplyList'), paginate);
+  return function(id) {
+    return req.data({ id }).send();
+  };
+}
+
+export function getApplyDetail(id) {
+  return request('/getApplyDetail').data({ id }).send();
+}
+
+export function doApply(id) {
+  return request('/doApply').data({ id }).send();
+}

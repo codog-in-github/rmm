@@ -1,5 +1,4 @@
 import { camelCase, isArray, isObject } from 'lodash';
-
 export function map2array(map) {
   const list = [];
   for(const [value, label] of Object.entries(map)) {

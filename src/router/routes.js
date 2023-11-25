@@ -21,15 +21,22 @@ export default [
     key:       'stockRecord',
     icon:      'List',
     label:     '出入库记录',
-    path:      '/stockRecord',
+    path:      '/stock/record',
     component: () => import('@/pages/stock/Record.vue')
   },
   {
     key:       'process',
     icon:      'Files',
     label:     '作业清单',
-    path:      '/process',
+    path:      '/workshop/process',
     component: () => import('@/pages/workshop/Process.vue')
+  },
+  {
+    key:       'goodsApply',
+    icon:      'Tickets',
+    label:     '配料申请',
+    path:      '/stock/apply',
+    component: () => import('@/pages/stock/Apply.vue')
   }
 ];
 

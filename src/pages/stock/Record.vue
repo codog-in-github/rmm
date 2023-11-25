@@ -20,11 +20,12 @@
         </ElTableColumn>
         <ElTableColumn label="出/入库成本（元）" prop="total" />
         <ElTableColumn label="操作人" prop="showName" />
-        <ElTableColumn label="操作时间" prop="createdAt" width="180">
-          <template v-slot="{ row }">
-            {{ moment(row.createdAt).format('YYYY-MM-DD hh:mm') }}
-          </template>
-        </ElTableColumn>
+        <ElTableColumn
+          label="操作时间"
+          prop="createdAt"
+          width="180"
+          :formatter="formatDate"
+        />
         <ElTableColumn label="操作" width="180">
           <template v-slot="{ row }">
             <GlAsyncButton type="text" :click="() => showDetail(row)">详情</GlAsyncButton>
@@ -58,8 +59,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { ref, reactive } from 'vue';
 import Dialog from './Dialog.vue';
 import * as CONSTANT from '@/constant';
-import moment from 'moment';
-import { usePagination } from '@/helpers/pagination';
+import { usePagination, formatDate } from '@/helpers';
 
 const storehouseId = ref(null);
 const list = ref([]);
