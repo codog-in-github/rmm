@@ -80,3 +80,15 @@ export function useGetPocessListWithPagination(pagination) {
     return _reqest.data({ id }).send();
   };
 }
+
+export function getNewProcessOptions() {
+  return request('/getNewProcessOptions').send();
+}
+
+export function rawApply(form) {
+  return request('/rawApply').data(form).send();
+}
+
+export function getProcessDetail(id) {
+  return request('/getProcessDetail').data({ id }).send();
+}

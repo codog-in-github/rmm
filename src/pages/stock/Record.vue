@@ -19,7 +19,7 @@
           </template>
         </ElTableColumn>
         <ElTableColumn label="出/入库成本（元）" prop="total" />
-        <ElTableColumn label="操作人" prop="username" />
+        <ElTableColumn label="操作人" prop="showName" />
         <ElTableColumn label="操作时间" prop="createdAt" width="180">
           <template v-slot="{ row }">
             {{ moment(row.createdAt).format('YYYY-MM-DD hh:mm') }}

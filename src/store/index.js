@@ -4,7 +4,7 @@ import { computed, ref } from 'vue';
 
 export const useUser = defineStore('user', () => {
   const auths = ref([]);
-  const user = ref({ username: '' });
+  const user = ref({ showName: '' });
   onBeforeUnload(function() {
     const cache = {
       user:  user.value,
@@ -26,7 +26,7 @@ export const useUser = defineStore('user', () => {
 
   function logout() {
     user.value = {
-      username: ''
+      showName: ''
     };
     auths.value = [];
   }
@@ -52,7 +52,7 @@ export const useUser = defineStore('user', () => {
 
   return {
     name: computed(() => {
-      return user.value.username;
+      return user.value.showName;
     }),
     logout,
     login,
