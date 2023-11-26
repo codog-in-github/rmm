@@ -1,6 +1,6 @@
 <template>
-  <div class="flex justify-center flex-items-center">
-    <ElCard class="w-xl">
+  <div class="bg flex justify-center flex-items-center bg-primary">
+    <ElCard class="w-xl ">
       <template #header>
         <div class="text-center">登录</div>
       </template>
@@ -69,3 +69,11 @@ async function submit() {
 }
 
 </script>
+<style lang="scss">
+.bg {
+  background-image: url('@/assets/login-bg.webp');
+  background-size: cover;
+  background-position: center;
+  background-blend-mode: multiply;
+}
+</style>

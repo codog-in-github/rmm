@@ -3,7 +3,7 @@
     <ElHeader class="bg-primary color-white">
       <ElRow align="middle" class="h-full">
         <ElCol :span="20" class="font-size-6">
-          欢迎使用xxx系统
+          泓贝再生资源回收有限公司
         </ElCol>
         <ElCol :span="4" class="text-right">
           <span class="p-r-4">
