@@ -91,7 +91,7 @@ async function init() {
     return;
   }
   workshopId.value = rep[0].id;
-  pagination.reset(getList);
+  getList;
 }
 async function toProcessing(row) {
   await toProcessingApi(row.id);

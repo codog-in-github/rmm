@@ -12,10 +12,7 @@ export function usePagination() {
     if (!hook) {
       return;
     }
-    paginate.loading = true;
-    hook().finally(() => {
-      paginate.loading = false;
-    });
+    hook();
   }
   return {
     paginate,
@@ -34,6 +31,7 @@ export function usePagination() {
       }
     },
     requestMiddleware(request, next) {
+      paginate.loading = true;
       if(request.data) {
         request.data.page = paginate.page;
         request.data.perPage = paginate.perPage;
@@ -46,6 +44,7 @@ export function usePagination() {
       return next(request);
     },
     responseMiddleware(response, next) {
+      paginate.loading = false;
       if (response) {
         paginate.perPage = response.perPage;
         paginate.total = response.total;
