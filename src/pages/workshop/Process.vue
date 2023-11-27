@@ -23,7 +23,6 @@
           {{ moment(row.createdAt).format('YYYY-MM-DD HH:mm') }}
         </template>
       </ElTableColumn>
-      
       <ElTableColumn label="操作">
         <template v-slot="{ row }">
           <ElButton type="text" @click="showDetail(row.id)">详情</ElButton>
@@ -81,7 +80,6 @@ async function getList() {
   list.value =  await getProcessList(workshopId.value);
 }
 async function init() {
-  pagination.paginate.loading = true;
   getOptions('storehouse').then(res => {
     storehouses.value = res.storehouse;
   });
@@ -91,7 +89,7 @@ async function init() {
     return;
   }
   workshopId.value = rep[0].id;
-  getList;
+  getList();
 }
 async function toProcessing(row) {
   await toProcessingApi(row.id);

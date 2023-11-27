@@ -2,11 +2,11 @@ import { reactive } from 'vue';
 
 export function usePagination() {
   const paginate = reactive({
-    currentPage: 1,
-    perPage:     10,
-    total:       0,
-    lastPage:    0,
-    loading:     false
+    page:     1,
+    perPage:  10,
+    total:    0,
+    lastPage: 0,
+    loading:  false
   });
   function callHook(hook) {
     if (!hook) {
@@ -17,12 +17,12 @@ export function usePagination() {
   return {
     paginate,
     reset(hook) {
-      paginate.currentPage = 1;
+      paginate.page = 1;
       callHook(hook);
     },
     changeSize(size, hook) {
       paginate.perPage = size;
-      paginate.currentPage = 1;
+      paginate.page = 1;
       callHook(hook);
     },
     moveByPage(page, hook) {
@@ -49,7 +49,7 @@ export function usePagination() {
         paginate.perPage = response.perPage;
         paginate.total = response.total;
         paginate.lastPage = response.perPage;
-        paginate.currentPage = response.currentPage;
+        paginate.page = response.page;
       }
       return next(response.data);
     }
