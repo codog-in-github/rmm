@@ -107,7 +107,7 @@
 import { GOODS_TYPE_MAP } from '@/constant';
 import { map2array } from '@/helpers/utils';
 import { computed } from '@vue/reactivity';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage } from 'element-plus';
 import { cloneDeep } from 'lodash';
 import { ref, watch } from 'vue';
 import { getStockAddOptions, stockAdd } from '@/api';
@@ -244,7 +244,7 @@ watch(() => props.model, val => {
   localValue.value = cloneDeep(val);
 });
 
-
+/*
 async function addSpecification() {
   try {
     const data = await ElMessageBox.prompt('请输入规格', {
@@ -256,6 +256,7 @@ async function addSpecification() {
     //
   }
 }
+*/
 
 getStockAddOptions().then(data => {
   optionsByid.value = data;

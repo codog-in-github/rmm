@@ -13,9 +13,10 @@
         <ElTableColumn label="类型" prop="type">
           <template v-slot="{ row }">
             <span v-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_IN" class="color-success">入库</span>
-            <span v-else-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_OUT" class="color-warning">出库</span>
-            <span v-else-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_UNDO" class="color-danger">反冲</span>
-            <span v-else class="color-danger">未知</span>
+            <span v-else-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_OUT" class="color-danger">出库</span>
+            <span v-else-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_TRANSFER" class="color-danger">加工配料</span>
+            <span v-else-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_UNDO" class="color-warning">反冲</span>
+            <span v-else class="color-info">未知</span>
           </template>
         </ElTableColumn>
         <ElTableColumn label="出/入库成本（元）" prop="total" />
@@ -95,15 +96,14 @@ async function undo(id) {
     //
   }
 }
-
-getSelfStorehouse()
-  .then(storehouseList => {
-    if(storehouseList.length > 0) {
-      storehouseId.value = storehouseList[0].id;
-      return pagination.reset(getList);
-    }
-    const errMsg = '您的账号未绑定仓库，请联系管理员添加';
-    ElMessage.error(errMsg);
-    throw Error(errMsg);
-  });
+async function init() {
+  pagination.paginate.loading = true;
+  const storehouseList = await getSelfStorehouse();
+  if(storehouseList.length > 0) {
+    storehouseId.value = storehouseList[0].id;
+    return pagination.reset(getList);
+  }
+  ElMessage.error('您的账号未绑定仓库，请联系管理员添加');
+}
+init();
 </script>

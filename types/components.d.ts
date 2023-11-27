@@ -3,6 +3,7 @@ import GlContainer from '@/components/GlContainer.vue'
 import GlFilterBar from '@/components/GlFilterBar.vue'
 import GlFilterItem from '@/components/GlFilterItem.vue'
 import GlPagination from '@/components/GlPagination.vue'
+import GlStockApplyStatusContent from '@/components/GlStockApplyStatusContent.vue'
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
@@ -10,6 +11,7 @@ declare module '@vue/runtime-core' {
     GlFilterBar: typeof GlFilterBar,
     GlFilterItem: typeof GlFilterItem,
     GlAsyncButton: typeof GlAsyncButton,
-    GlPagination: typeof GlPagination
+    GlPagination: typeof GlPagination,
+    GlStockApplyStatusContent: typeof GlStockApplyStatusContent,
   }
 }

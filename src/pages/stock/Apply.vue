@@ -4,6 +4,11 @@
     <div class="flex-auto">
       <ElTable :data="list" v-loading="pagnation.paginate.loading">
         <ElTableColumn label="申请编号" prop="id" />
+        <ElTableColumn label="申请状态">
+          <template v-slot="{ row }">
+            <GlStockApplyStatusContent :status="row.status" :type="row.type" />
+          </template>
+        </ElTableColumn>
         <ElTableColumn label="申请车间" prop="workshopName" />
         <ElTableColumn label="申请时间" prop="createdAt" :formatter="formatDate" />
         <ElTableColumn label="申请人" prop="applyUserName" />
@@ -19,10 +24,16 @@
   </div>
 </template>
 <script setup>
-import { getSelfStorehouse, useGetApplyListWithPagination, getApplyDetail, doApply } from '@/api';
+import {
+  getSelfStorehouse,
+  useGetApplyListWithPagination,
+  getApplyDetail,
+  doApply
+} from '@/api';
 import { usePagination, formatDate } from '@/helpers';
 import { ElMessage } from 'element-plus';
 import { ref } from 'vue';
+import * as CONSTANT from '@/constant';
 import ApplyDetail from './ApplyDetail.vue';
 
 const pagnation = usePagination();
@@ -37,6 +48,7 @@ async function getList() {
   list.value = rep;
 }
 async function init() {
+  pagnation.paginate.loading = true;
   const storehouseList = await getSelfStorehouse();
   if(storehouseList.length > 0) {
     storehouseId.value = storehouseList[0].id;
@@ -48,19 +60,19 @@ init();
 
 async function showDetail(id) {
   const rep = await getApplyDetail(id);
-  console.log('rep', rep);
   detailVisible.value = true;
   detailData.value = rep;
 }
 
 async function submitHandler(id) {
   try {
-    const rep = await doApply(id);
-    console.log('rep', rep);
+    await doApply(id);
+    ElMessage.success('操作成功');
+    list.value.find(item => item.id === id).status = CONSTANT.STOCK_APPLY_STATUS_PASS;
     detailVisible.value = false;
     detailData.value = null;
   } catch (error) {
-    console.log('error', error);
+    //
   }
 }
 </script>

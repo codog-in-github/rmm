@@ -107,3 +107,7 @@ export function getApplyDetail(id) {
 export function doApply(id) {
   return request('/doApply').data({ id }).send();
 }
+
+export function toProcessing(id) {
+  return request('/toProcessing').data({ id }).send();
+}

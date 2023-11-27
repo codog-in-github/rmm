@@ -89,7 +89,7 @@
       </ElButton>
       <ElButton
         type="primary"
-        v-else-if="localForm.status === PROCESS_STATUS_PASS"
+        v-else-if="localForm.status === PROCESS_STATUS_WAIT"
         @click="visibleChanger = false"
       >
         入库申请
@@ -100,7 +100,7 @@
 
 <script setup>
 import { getNewProcessOptions, rawApply } from '@/api';
-import { PROCESS_STATUS_MAP, PROCESS_STATUS_PASS } from '@/constant';
+import { PROCESS_STATUS_MAP, PROCESS_STATUS_WAIT } from '@/constant';
 import { ElMessage } from 'element-plus';
 import { cloneDeep } from 'lodash';
 import { computed, reactive, ref, watch } from 'vue';
@@ -119,7 +119,7 @@ const props = defineProps({
   }
 });
 const localForm = ref(null);
-const emit = defineEmits(['update:visible']);
+const emit = defineEmits(['update:visible', 'reload']);
 const visibleChanger = computed({
   get() {
     return props.visible;
@@ -168,7 +168,7 @@ function handleDeleteProduct(index) {
   localForm.value.products.splice(index, 1);
 }
 const canEditRaw  = computed(() => localForm.value?.status === null);
-const canEditProduct = computed(() => localForm.value?.status === PROCESS_STATUS_PASS);
+const canEditProduct = computed(() => localForm.value?.status === PROCESS_STATUS_WAIT);
 const options = reactive({
   raws:           [],
   products:       [],
@@ -239,5 +239,6 @@ async function rawApplySubmit() {
   }
   await rawApply(localForm.value);
   visibleChanger.value = false;
+  emit('reload');
 }
 </script>
