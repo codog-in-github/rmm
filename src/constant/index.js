@@ -30,15 +30,13 @@ export const STOCK_APPLY_STATUS_REJECT  = -1;
 export const STOCK_APPLY_STATUS_CANCEL  = -2;
 
 // 加工状态
-export const PROCESS_STATUS_APPLY      = 1;
-export const PROCESS_STATUS_WAIT       = 2;
-export const PROCESS_STATUS_PROCESSING = 3;
-export const PROCESS_STATUS_PROCESED   = 4;
-export const PROCESS_STATUS_FINISH     = 5;
+export const PROCESS_STATUS_APPLY   = 1;
+export const PROCESS_STATUS_WAIT    = 2;
+export const PROCESS_STATUS_PROCESS = 3;
+export const PROCESS_STATUS_FINISH  = 4;
 export const PROCESS_STATUS_MAP = /** @type {const} */({
-  [PROCESS_STATUS_APPLY]:      '配料申请中',
-  [PROCESS_STATUS_WAIT]:       '仓库配料完成',
-  [PROCESS_STATUS_PROCESSING]: '加工中',
-  [PROCESS_STATUS_PROCESED]:   '加工完成',
-  [PROCESS_STATUS_FINISH]:     '入库完成'
+  [PROCESS_STATUS_APPLY]:   '配料申请中',
+  [PROCESS_STATUS_WAIT]:    '仓库配料完成',
+  [PROCESS_STATUS_PROCESS]: '加工中',
+  [PROCESS_STATUS_FINISH]:  '加工完成'
 });

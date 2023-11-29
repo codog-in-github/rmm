@@ -14,10 +14,10 @@
         <ElTableColumn label="规格" prop="specificationName" />
         <ElTableColumn label="库存总数" prop="goodsNum">
           <template v-slot="{ row }">
-            {{ row.goodsNum }}<span v-if="row.baseUnitName">（{{ row.baseUnitName }}）</span>
+            {{ row.goodsNum.toFixed(3) }}<span v-if="row.baseUnitName">（{{ row.baseUnitName }}）</span>
           </template>
         </ElTableColumn>
-        <ElTableColumn label="库存总价（元）" prop="goodsTotal" />
+        <ElTableColumn label="库存总价（元）" prop="goodsTotal" :formatter="(_, __, val) => val?.toFixed(2)" />
       </ElTable>
     </div>
     <Dialog v-model:visible="showDialog" :model="dialogData" @success="getList" />

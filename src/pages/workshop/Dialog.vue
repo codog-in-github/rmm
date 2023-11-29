@@ -8,10 +8,10 @@
       <ElFormItem label="仓库">
         <ElSelectV2 v-model="localForm.storehouseId" :options="storehouses" :disabled="!canEditRaw" />
       </ElFormItem>
-      <ElFormItem label="原材料申请">
+      <ElFormItem label="配料申请">
         <ElTable :data="localForm.raws">
           <ElTableColumn prop="name" label="原材料名称">
-            <template #default="{ row }">
+            <template v-slot="{ row }">
               <ElSelectV2
                 v-model="row.goodsId" 
                 :options="options.raws"
@@ -21,7 +21,7 @@
             </template>
           </ElTableColumn>
           <ElTableColumn prop="specification" label="规格">
-            <template #default="{ row }">
+            <template v-slot="{ row }">
               <ElSelectV2
                 v-model="row.specificationId"
                 :options="specifications(row.goodsId)"
@@ -30,7 +30,7 @@
             </template>
           </ElTableColumn> 
           <ElTableColumn prop="num" label="数量">
-            <template v-slot="{row}">
+            <template v-slot="{ row}">
               <ElInputNumber
                 controlsPosition="right"
                 v-model="row.num"
@@ -49,7 +49,7 @@
             </template>
           </ElTableColumn>
           <ElTableColumn label="操作" v-if="canEditRaw">
-            <template #default="{ $index }">
+            <template v-slot="{ $index }">
               <ElButton type="danger" @click="handleDeleteRaw($index)">删除</ElButton>
             </template>
           </ElTableColumn>
@@ -60,12 +60,46 @@
       </ElFormItem>
       <ElFormItem label="成品入库">
         <ElTable :data="localForm.products">
-          <ElTableColumn prop="name" label="成品名称" />
-          <ElTableColumn prop="specification" label="规格" />
-          <ElTableColumn prop="num" label="数量" />
-          <ElTableColumn prop="unit" label="单位" />
+          <ElTableColumn prop="name" label="成品名称">
+            <template v-slot="{ row }">
+              <ElSelectV2
+                v-model="row.goodsId"
+                :options="options.products"
+                :disabled="!canEditProduct"
+                @change="row.specificationId = null; row.unitId = null"
+              />
+            </template>
+          </ElTableColumn>
+          <ElTableColumn prop="specification" label="规格">
+            <template v-slot="{ row }">
+              <ElSelectV2
+                v-model="row.specificationId"
+                :options="specifications(row.goodsId)"
+                :disabled="!canEditProduct"
+              />
+            </template>
+          </ElTableColumn>
+          <ElTableColumn prop="num" label="数量">
+            <template v-slot="{ row }">
+              <ElInputNumber
+                controlsPosition="right"
+                v-model="row.num"
+                :min="1"
+                :disabled="!canEditProduct"
+              />
+            </template>
+          </ElTableColumn>
+          <ElTableColumn prop="unit" label="单位">
+            <template v-slot="{ row }">
+              <ElSelectV2
+                v-model="row.unitId"
+                :options="units(row.goodsId)"
+                :disabled="!canEditProduct"
+              />
+            </template>
+          </ElTableColumn>
           <ElTableColumn label="操作">
-            <template #default="{ $index }">
+            <template v-slot="{ $index }">
               <ElButton type="danger" @click="handleDeleteProduct($index)">删除</ElButton>
             </template>
           </ElTableColumn>
@@ -85,11 +119,11 @@
         v-if="localForm.status === null"
         @click="rawApplySubmit"
       >
-        原材料申请
+        配料申请
       </ElButton>
       <ElButton
         type="primary"
-        v-else-if="localForm.status === PROCESS_STATUS_WAIT"
+        v-else-if="canEditProduct"
         @click="visibleChanger = false"
       >
         入库申请
@@ -100,7 +134,7 @@
 
 <script setup>
 import { getNewProcessOptions, rawApply } from '@/api';
-import { PROCESS_STATUS_MAP, PROCESS_STATUS_WAIT } from '@/constant';
+import { PROCESS_STATUS_MAP, PROCESS_STATUS_PROCESS } from '@/constant';
 import { ElMessage } from 'element-plus';
 import { cloneDeep } from 'lodash';
 import { computed, reactive, ref, watch } from 'vue';
@@ -168,7 +202,7 @@ function handleDeleteProduct(index) {
   localForm.value.products.splice(index, 1);
 }
 const canEditRaw  = computed(() => localForm.value?.status === null);
-const canEditProduct = computed(() => localForm.value?.status === PROCESS_STATUS_WAIT);
+const canEditProduct = computed(() => localForm.value?.status === PROCESS_STATUS_PROCESS);
 const options = reactive({
   raws:           [],
   products:       [],
@@ -203,35 +237,24 @@ init();
 
 async function rawApplySubmit() {
   if(!localForm.value.name) {
-    ElMessage.warning('请填写名称');
-    return;
+    return ElMessage.warning('请填写名称');
   }
   if(localForm.value.raws.length === 0) {
-    ElMessage.warning('请添加原材料');
-    return;
+    return ElMessage.warning('请添加原材料');
   }
   if(!localForm.value.storehouseId) {
-    ElMessage.warning('请选择仓库');
-    return;
+    return ElMessage.warning('请选择仓库');
   }
   if(
     localForm.value.raws.some((raw, i) => {
-      if(!raw.goodsId) {
-        ElMessage.warning(`原材料${i + 1}未选择`);
+      function error(name = '') {
+        ElMessage.warning(`原材料${i + 1}未填写${name}`);
         return true;
       }
-      if(!raw.specificationId) {
-        ElMessage.warning(`原材料${i + 1}未选择规格`);
-        return true;
-      }
-      if(!raw.num) {
-        ElMessage.warning(`原材料${i + 1}未填写数量`);
-        return true;
-      }
-      if(!raw.unitId) {
-        ElMessage.warning(`原材料${i + 1}未选择单位`);
-        return true;
-      }
+      if(!raw.goodsId) return error('名称');
+      if(!raw.specificationId) return error('规格');
+      if(!raw.num) return error('数量');
+      if(!raw.unitId) return error('单位');
       return false;
     })
   ) {

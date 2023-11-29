@@ -48,7 +48,7 @@ import {
   getProcessDetail,
   toProcessing as toProcessingApi
 } from '@/api';
-import { PROCESS_STATUS_MAP, PROCESS_STATUS_PROCESSING, PROCESS_STATUS_WAIT } from '@/constant';
+import { PROCESS_STATUS_MAP, PROCESS_STATUS_PROCESS, PROCESS_STATUS_WAIT } from '@/constant';
 import { usePagination } from '@/helpers';
 import { ElMessage } from 'element-plus';
 import Dialog from './Dialog.vue';
@@ -94,7 +94,7 @@ async function init() {
 async function toProcessing(row) {
   await toProcessingApi(row.id);
   ElMessage.success('开始加工成功');
-  row.status = PROCESS_STATUS_PROCESSING;
+  row.status = PROCESS_STATUS_PROCESS;
 }
 async function showDetail(id) {
   if(id) {
