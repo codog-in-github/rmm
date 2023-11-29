@@ -1,0 +1,32 @@
+<template>
+  <div class="flex flex-col">
+    <GlFilterBar @search="pagnation.reset(getList)" />
+    <div class="flex-auto">
+      <ElTable :data="list" v-loading="pagnation.paginate.loading">
+        <ElTableColumn label="类型">
+          <template v-slot="{ row }">
+            {{ PROFIT_TYPE_MAP[row.type] }}
+          </template>
+        </ElTableColumn>
+        <ElTableColumn label="金额（元）" prop="value" :formatter="(_, __, value) => value?.toFixed(2)" />
+        <ElTableColumn label="时间" prop="createdAt" :formatter="formatDate" />
+      </ElTable>
+    </div>
+    <GlPagination :pagination="pagnation" :requestHook="getList" />
+  </div>
+</template>
+<script setup>
+import { formatDate, usePagination } from '@/helpers';
+import { useReportProfitWithPagination } from '@/api';
+import { PROFIT_TYPE_MAP } from '@/constant';
+import { ref } from 'vue';
+
+const pagnation = usePagination();
+const api = useReportProfitWithPagination(pagnation);
+const list = ref([]);
+async function getList() {
+  list.value = await api();
+}
+
+getList();
+</script>

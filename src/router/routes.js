@@ -37,6 +37,20 @@ export default [
     label:     '配料申请',
     path:      '/stock/apply',
     component: () => import('@/pages/stock/Apply.vue')
+  },
+  {
+    key:       'report.profit',
+    icon:      'Histogram',
+    label:     '利润统计',
+    path:      '/report/profit',
+    component: () => import('@/pages/report/Profit.vue')
+  },
+  {
+    key:       'report.process',
+    icon:      'PieChart',
+    label:     '成品率统计',
+    path:      '/report/process',
+    component: () => import('@/pages/report/Process.vue')
   }
 ];
 

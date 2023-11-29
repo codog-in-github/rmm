@@ -40,3 +40,16 @@ export const PROCESS_STATUS_MAP = /** @type {const} */({
   [PROCESS_STATUS_PROCESS]: '加工中',
   [PROCESS_STATUS_FINISH]:  '加工完成'
 });
+
+export const PROFIT_TYPE_INCOME_SALE_PRODUCT  = 1;
+export const PROFIT_TYPE_INCOME_SALE_FUTURES  = 2;
+export const PROFIT_TYPE_EXPENSE_CONSUMPTION  = 3;
+export const PROFIT_TYPE_EXPENSE_PROCESS_LOSS = 4;
+export const PROFIT_TYPE_ADMIN_ADJUST         = 5;
+export const PROFIT_TYPE_MAP = /** @type {const} */({
+  [PROFIT_TYPE_INCOME_SALE_PRODUCT]:  '销售收入',
+  [PROFIT_TYPE_INCOME_SALE_FUTURES]:  '销售收入',
+  [PROFIT_TYPE_EXPENSE_CONSUMPTION]:  '消费支出',
+  [PROFIT_TYPE_EXPENSE_PROCESS_LOSS]: '原材料损耗',
+  [PROFIT_TYPE_ADMIN_ADJUST]:         '管理员调整'
+});

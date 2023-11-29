@@ -88,6 +88,9 @@ export function getNewProcessOptions() {
 export function rawApply(form) {
   return request('/rawApply').data(form).send();
 }
+export function finishProcess(form) {
+  return request('/finishProcess').data(form).send();
+}
 
 export function getProcessDetail(id) {
   return request('/getProcessDetail').data({ id }).send();
@@ -111,3 +114,17 @@ export function doApply(id) {
 export function toProcessing(id) {
   return request('/toProcessing').data({ id }).send();
 }
+
+export function useReportProfitWithPagination(paginate) {
+  const req = requestWithPagination(request('/report/profit'), paginate);
+  return function() {
+    return req.send();
+  };
+}
+export function useReportProcessWithPagination(paginate) {
+  const req = requestWithPagination(request('/report/process'), paginate);
+  return function() {
+    return req.send();
+  };
+}
+

@@ -25,8 +25,15 @@
       </ElTableColumn>
       <ElTableColumn label="操作">
         <template v-slot="{ row }">
-          <ElButton type="text" @click="showDetail(row.id)">详情</ElButton>
-          <ElButton type="text" v-if="row.status === PROCESS_STATUS_WAIT" @click="toProcessing(row)">开始加工</ElButton>
+          <ElButton type="primary" link @click="showDetail(row.id)">详情</ElButton>
+          <ElButton
+            type="primary"
+            link
+            v-if="row.status === PROCESS_STATUS_WAIT"
+            @click="toProcessing(row)"
+          >
+            开始加工
+          </ElButton>
         </template>
       </ElTableColumn>
     </ElTable>
@@ -72,6 +79,7 @@ function add() {
     status:       null,
     raws:         [],
     products:     [],
+    total:        null,
     comment:      ''
   };
 }

@@ -3,7 +3,7 @@
     <ElForm :model="localForm" labelWidth="120px" v-if="localForm">
       <ElFormItem label="加工状态">{{ localForm.status !== null ? PROCESS_STATUS_MAP[localForm.status] : '新增作业' }}</ElFormItem>
       <ElFormItem label="名称">
-        <ElInput v-model="localForm.name" />
+        <ElInput v-model="localForm.name" :disabled="localForm.status !== null" />
       </ElFormItem>
       <ElFormItem label="仓库">
         <ElSelectV2 v-model="localForm.storehouseId" :options="storehouses" :disabled="!canEditRaw" />
@@ -58,7 +58,7 @@
           <ElButton type="primary" @click="handleAddRaw" :disabled="!canEditRaw">添加原材料</ElButton>
         </div>
       </ElFormItem>
-      <ElFormItem label="成品入库">
+      <ElFormItem label="成品">
         <ElTable :data="localForm.products">
           <ElTableColumn prop="name" label="成品名称">
             <template v-slot="{ row }">
@@ -98,7 +98,7 @@
               />
             </template>
           </ElTableColumn>
-          <ElTableColumn label="操作">
+          <ElTableColumn label="操作" v-if="canEditProduct">
             <template v-slot="{ $index }">
               <ElButton type="danger" @click="handleDeleteProduct($index)">删除</ElButton>
             </template>
@@ -108,8 +108,16 @@
           <ElButton type="primary" @click="handleAddProduct" :disabled="!canEditProduct">添加成品</ElButton>
         </div>
       </ElFormItem>
+      <ElFormItem label="总金额">
+        <ElInputNumber controlsPosition="right" v-model="localForm.total" :disabled="!canEditProduct"  />
+      </ElFormItem>
       <ElFormItem label="备注">
-        <ElInput v-model="localForm.remark" type="textarea" autosize />
+        <ElInput
+          v-model="localForm.remark"
+          type="textarea"
+          :disabled="!canEditProduct"
+          autosize
+        />
       </ElFormItem>
     </ElForm>
     <template #footer v-if="localForm">
@@ -124,16 +132,16 @@
       <ElButton
         type="primary"
         v-else-if="canEditProduct"
-        @click="visibleChanger = false"
+        @click="finishProcess"
       >
-        入库申请
+        作业完成
       </ElButton>
     </template>
   </ElDialog>
 </template>
 
 <script setup>
-import { getNewProcessOptions, rawApply } from '@/api';
+import { getNewProcessOptions, rawApply, finishProcess as finishProcessApi } from '@/api';
 import { PROCESS_STATUS_MAP, PROCESS_STATUS_PROCESS } from '@/constant';
 import { ElMessage } from 'element-plus';
 import { cloneDeep } from 'lodash';
@@ -246,22 +254,47 @@ async function rawApplySubmit() {
     return ElMessage.warning('请选择仓库');
   }
   if(
-    localForm.value.raws.some((raw, i) => {
-      function error(name = '') {
-        ElMessage.warning(`原材料${i + 1}未填写${name}`);
-        return true;
-      }
-      if(!raw.goodsId) return error('名称');
-      if(!raw.specificationId) return error('规格');
-      if(!raw.num) return error('数量');
-      if(!raw.unitId) return error('单位');
-      return false;
+    !localForm.value.raws.every(raw => {
+      return raw.goodsId && raw.specificationId&& raw.num && raw.unitId;
     })
   ) {
-    return;
+    return ElMessage.warning('原材料未填写完整');
   }
   await rawApply(localForm.value);
   visibleChanger.value = false;
   emit('reload');
+}
+
+async function finishProcess() {
+  try {
+    if(localForm.value.products.length === 0) {
+      return ElMessage.warning('请添加成品');
+    }
+    if(!localForm.value.products.every(product => {
+      return product.goodsId && product.specificationId && product.num && product.unitId;
+    })) {
+      return ElMessage.warning('成品未填写完整');
+    }
+    if(!localForm.value.total) {
+      return ElMessage.warning('请填写总金额');
+    }
+    await finishProcessApi({
+      id:       localForm.value.id,
+      total:    localForm.value.total,
+      remark:   localForm.value.remark,
+      products: localForm.value.products.map(product => {
+        return {
+          goodsId:         product.goodsId,
+          specificationId: product.specificationId,
+          num:             product.num,
+          unitId:          product.unitId
+        };
+      })
+    });
+    // visibleChanger.value = false;
+    emit('reload');
+  } catch (error) {
+    // 
+  }
 }
 </script>
