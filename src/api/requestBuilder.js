@@ -5,6 +5,7 @@ import {
   encodeParams,
   sign
 } from './middleware';
+import { cloneDeep } from 'lodash';
 
 const baseURL = '/api';
 
@@ -41,9 +42,25 @@ class Request {
     return this;
   }
 
-  data(data) {
-    this._data = data ?? {};
+  data(data, replace = false) {
+    if(replace) {
+      this._data = data;
+      return this;
+    }
+    this._data = Object.assign(this._data, data);
     return this;
+  }
+
+  clone() {
+    const request = new Request();
+    request.baseURL = this.baseURL;
+    request.targetUrl = this.targetUrl;
+    request.method = this.method;
+    request.headers = cloneDeep(this.headers);
+    request._data = cloneDeep(this._data);
+    request.requestMiddleware = [...this.requestMiddleware];
+    request.responseMiddleware = [...this.responseMiddleware];
+    return; 
   }
 
   addRequestMiddleware() {
