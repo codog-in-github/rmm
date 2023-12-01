@@ -23,10 +23,14 @@
             </ElTableColumn>
             <ElTableColumn label="规格">
               <template v-slot="{ row }">
-                <ElSelectV2
-                  :options="options.specifications.value(row.goodsId)"
-                  v-model="row.specificationId"
-                />
+                <ElAutocomplete
+                  v-model="row.specification"
+                  :fetchSuggestions="querySearch(row.goodsId)"
+                >
+                  <template v-slot:suffix>
+                    <template v-if="isStandardSpecification(row.specification)">mm</template>
+                  </template>
+                </ElAutocomplete>
               </template>
             </ElTableColumn>
             <ElTableColumn label="入库数量">
@@ -111,6 +115,7 @@ import { ElMessage } from 'element-plus';
 import { cloneDeep } from 'lodash';
 import { ref, watch } from 'vue';
 import { getStockAddOptions, stockAdd } from '@/api';
+import { isStandardSpecification } from '@/helpers';
 
 const optionsByid = ref({
   goods:          {},
@@ -171,13 +176,13 @@ const visibleChanger = computed({
 
 function emptyRow() {
   return {
-    goodsId:         null,
-    goodsType:       null,
-    specificationId: null,
-    num:             null,
-    unitId:          null,
-    price:           null,
-    total:           null
+    goodsId:       null,
+    goodsType:     null,
+    specification: null,
+    num:           null,
+    unitId:        null,
+    price:         null,
+    total:         null
   };
 }
 
@@ -191,7 +196,7 @@ function changeGoodsType(goodsType) {
 
 function changeGoods(row, goodsId) {
   if(goodsId) {
-    row.specificationId = null;
+    row.specification = null;
     row.unitId = null;
     row.price = null;
     row.total = null;
@@ -240,23 +245,16 @@ function add() {
   localValue.value.details.push(emptyRow());
 }
 
+function querySearch(id) {
+  const _options = options.specifications.value(id).map(item => ({ value: item.label }));
+  return function(_, cb) {
+    cb(_options);
+  };
+}
+
 watch(() => props.model, val => {
   localValue.value = cloneDeep(val);
 });
-
-/*
-async function addSpecification() {
-  try {
-    const data = await ElMessageBox.prompt('请输入规格', {
-      inputPattern:      /^\d+\*\d+\*\d+$/,
-      inputErrorMessage: '请正确输入规格'
-    });
-    console.log('data', data);
-  } catch (error) {
-    //
-  }
-}
-*/
 
 getStockAddOptions().then(data => {
   optionsByid.value = data;

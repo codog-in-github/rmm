@@ -7,10 +7,18 @@
       <ElFormItem label="状态">
         <GlStockApplyStatusContent :status="model.apply.status" :type="model.apply.type" />
       </ElFormItem>
-      <ElFormItem label="申请材料">
-        <ElTable :data="model.details">
+      <ElFormItem label="原材料">
+        <ElTable :data="model.raws">
           <ElTableColumn label="名称" prop="goodsName" />
-          <ElTableColumn label="规格" prop="specificationName" />
+          <ElTableColumn label="规格" prop="specification" :formatter="(_, __, value) => value + '(mm)'" />
+          <ElTableColumn label="数量" prop="num" />
+          <ElTableColumn label="单位" prop="unitName" />
+        </ElTable>
+      </ElFormItem>
+      <ElFormItem label="耗材">
+        <ElTable :data="model.uses">
+          <ElTableColumn label="名称" prop="goodsName" />
+          <ElTableColumn label="规格" prop="specification"  />
           <ElTableColumn label="数量" prop="num" />
           <ElTableColumn label="单位" prop="unitName" />
         </ElTable>

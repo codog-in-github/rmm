@@ -11,7 +11,7 @@
           <template v-slot="{ row }">{{ GOODS_TYPE_MAP[row['goodsType']] }}</template>
         </ElTableColumn>
         <ElTableColumn label="库存名称" prop="goodsName" />
-        <ElTableColumn label="规格" prop="specificationName" />
+        <ElTableColumn label="规格" prop="specification" :formatter="specificationUnit" />
         <ElTableColumn label="库存总数" prop="goodsNum">
           <template v-slot="{ row }">
             {{ row.goodsNum.toFixed(3) }}<span v-if="row.baseUnitName">（{{ row.baseUnitName }}）</span>
@@ -30,6 +30,7 @@ import { ElMessage } from 'element-plus';
 import { ref, reactive } from 'vue';
 import Dialog from './Dialog.vue';
 import { GOODS_TYPE_MAP } from '@/constant';
+import { isStandardSpecification } from '@/helpers';
 
 const storehouseId = ref(null);
 const list = ref([]);
@@ -44,6 +45,12 @@ function add() {
     comment:      ''
   };
   showDialog.value  = true;
+}
+function specificationUnit(_, __, value) {
+  if(isStandardSpecification(value)) {
+    return value + '(mm)';
+  } 
+  return value;
 }
 
 function getList() {

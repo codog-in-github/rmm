@@ -15,7 +15,7 @@
             <span v-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_IN" class="color-success">入库</span>
             <span v-else-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_OUT" class="color-danger">出库</span>
             <span v-else-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_TRANSFER" class="color-danger">加工配料</span>
-            <span v-else-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_UNDO" class="color-warning">反冲</span>
+            <span v-else-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_UNDO" class="color-warning">撤销</span>
             <span v-else class="color-info">未知</span>
           </template>
         </ElTableColumn>
@@ -38,7 +38,7 @@
               type="text"
               :click="() => undo(row.id)"
             >
-              反冲
+              撤销
             </GlAsyncButton>
           </template>
         </ElTableColumn>
@@ -85,12 +85,12 @@ async function showDetail(row) {
 
 async function undo(id) {
   try {
-    const { value: comment } = await ElMessageBox.prompt('请输入原因', '确定要反冲吗？', {
+    const { value: comment } = await ElMessageBox.prompt('请输入原因', '确定要撤销吗？', {
       inputPattern:      /^[\u4e00-\u9fa5\w\s]{1,20}$/,
       inputErrorMessage: '请输入1-20个字符'
     });
     await stockRecordUndo(id, comment);
-    ElMessage.success('反冲成功');
+    ElMessage.success('撤销成功');
     getList();
   } catch (error) {
     //

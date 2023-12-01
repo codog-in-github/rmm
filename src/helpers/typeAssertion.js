@@ -24,3 +24,7 @@ export function isPromiseLike(val) {
         isFunction(val.finally)))
   );
 }
+
+export function isStandardSpecification(specification) {
+  return /^\d+(?:\.\d+)?\*\d+(?:\.\d+)?$/.test(specification);
+}

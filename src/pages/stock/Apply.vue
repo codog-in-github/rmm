@@ -60,6 +60,7 @@ init();
 
 async function showDetail(id) {
   const rep = await getApplyDetail(id);
+  console.log('rep', rep);
   detailVisible.value = true;
   detailData.value = rep;
 }

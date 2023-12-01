@@ -27,14 +27,14 @@ export default [
   {
     key:       'process',
     icon:      'Files',
-    label:     '作业清单',
+    label:     '加工车间',
     path:      '/workshop/process',
     component: () => import('@/pages/workshop/Process.vue')
   },
   {
     key:       'goodsApply',
     icon:      'Tickets',
-    label:     '配料申请',
+    label:     '配料审核',
     path:      '/stock/apply',
     component: () => import('@/pages/stock/Apply.vue')
   },

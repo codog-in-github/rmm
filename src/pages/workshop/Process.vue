@@ -2,7 +2,7 @@
   <div class="flex flex-col">
     <GlFilterBar class="m-b-2" :model="filters" @search="pagination.reset(getList)">
       <template v-slot:after>
-        <ElButton type="primary" @click="add" icon="plus">新增作业</ElButton>
+        <ElButton type="primary" @click="add" icon="plus">配料申请</ElButton>
       </template>
     </GlFilterBar>
     <ElTable
@@ -79,6 +79,8 @@ function add() {
     status:       null,
     raws:         [],
     products:     [],
+    uses:         [],
+    semis:        [],
     total:        null,
     comment:      ''
   };
@@ -111,7 +113,7 @@ async function showDetail(id) {
       dialogVisible.value = true;
       form.value = rep;
     } else {
-      ElMessage.error('未找到该作业');
+      ElMessage.error('未找到该加工');
     }
   }
 }
