@@ -1,7 +1,25 @@
 <template>
   <div class="flex flex-col">
-    <GlFilterBar :model="filters" @search="pagination.reset(getList)" class="m-b-4" />
-    <div class="flex-auto" v-loading="pagination.paginate.loading">
+    <GlFilterBar :model="filters" @search="pagination.reset(getList)" class="m-b-4">
+      <GlFilterItem
+        prop="goodsType"
+        type="select"
+        label="库存类型"
+        :options="goodsTypeList"
+      />
+      <GlFilterItem
+        prop="type"
+        type="select"
+        label="类型"
+        :options="stockChangeList"
+      />
+      <GlFilterItem
+        prop="createdAt"
+        type="daterange"
+        label="操作时间"
+      />
+    </GlFilterBar>
+    <div class="flex-auto overflow-auto h-1" v-loading="pagination.paginate.loading">
       <ElTable
         :data="list"
         border
@@ -14,12 +32,12 @@
           <template v-slot="{ row }">
             <span v-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_IN" class="color-success">入库</span>
             <span v-else-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_OUT" class="color-danger">出库</span>
+            <span v-else-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_RETURN" class="color-success">加工入库</span>
             <span v-else-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_TRANSFER" class="color-danger">加工配料</span>
             <span v-else-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_UNDO" class="color-warning">撤销</span>
             <span v-else class="color-info">未知</span>
           </template>
         </ElTableColumn>
-        <ElTableColumn label="出/入库成本（元）" prop="total" />
         <ElTableColumn label="操作人" prop="showName" />
         <ElTableColumn
           label="操作时间"
@@ -60,18 +78,24 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { ref, reactive } from 'vue';
 import Dialog from './Dialog.vue';
 import * as CONSTANT from '@/constant';
-import { usePagination, formatDate } from '@/helpers';
+import { usePagination, formatDate, map2array } from '@/helpers';
 
 const storehouseId = ref(null);
 const list = ref([]);
-const filters = reactive({});
+const filters = reactive({
+  goodsType: '',
+  type:      '',
+  createdAt: []
+});
 const showDialog = ref(false);
 const dialogData = ref(null);
 const pagination = usePagination();
+const goodsTypeList = map2array(CONSTANT.GOODS_TYPE_MAP);
+const stockChangeList = map2array(CONSTANT.STOCK_CHANGE_TYPE_MAP);
 const getStockRecord = useGetStockRecordWithPagination(pagination);
 
 function getList() {
-  return getStockRecord(storehouseId.value)
+  return getStockRecord(storehouseId.value, filters)
     .then(rep => {
       list.value = rep;
     });

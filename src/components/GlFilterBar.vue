@@ -2,7 +2,7 @@
   <div class="gl-filter-bar">
     <slot />
     <div class="gl-filter-bar__search">
-      <ElButton type="primary" @click="onSeachButtonClick" icon="refresh">{{ searchButtonText }}</ElButton>
+      <ElButton type="primary" @click="onSeachButtonClick" :icon="searchButtonIcon">{{ searchButtonText }}</ElButton>
     </div>
     <div class="gl-filter-bar__after" v-if="$slots.after"><slot name="after" /></div>
   </div>
@@ -24,5 +24,8 @@ const onSeachButtonClick  = debounce(function(e) {
 }, 200);
 const searchButtonText = computed(() => {
   return slots.default ? '搜索' : '刷新';
+});
+const searchButtonIcon = computed(() => {
+  return slots.default ? 'search' : 'refresh';
 });
 </script>

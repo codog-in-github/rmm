@@ -4,3 +4,13 @@
   align-items: center;
   gap: 10px;
 }
+
+.gl-filter-bar{
+  flex-wrap: wrap;
+}
+
+.gl-filter-item__control {
+  .el-date-editor.el-date-editor--daterange{
+    width: 220px;
+  }
+}

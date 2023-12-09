@@ -58,12 +58,11 @@ async function submit() {
   try {
     await formRef.value.validate();
     const rep = await login(formData.username, formData.password);
-    console.log('rep', rep);
     user.login(rep.user, rep.auths);
     addRouterForAuth(
       rep.auths.map(item => item.key)
     );
-    router.push('/home');
+    router.push('/stock');
   } catch (error) {
     // todo
   }

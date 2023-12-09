@@ -44,3 +44,13 @@ export function changeKeysCase(obj, format = camelCase) {
 export function bitHas(num, bit) {
   return (num & bit) === bit;
 }
+
+/**
+ * @param {string} specification
+ */
+export function conversionSpecification(specification) {
+  let [r, w] = specification.split('*');
+  r = Number(r);
+  w = Number(w);
+  return (r - w) * w * 0.02796;
+}

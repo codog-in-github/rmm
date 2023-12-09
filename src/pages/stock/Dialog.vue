@@ -114,9 +114,9 @@ import { computed } from '@vue/reactivity';
 import { ElMessage } from 'element-plus';
 import { cloneDeep } from 'lodash';
 import { ref, watch } from 'vue';
-import { getStockAddOptions, stockAdd } from '@/api';
+import { getMapping, getStockAddOptions, stockAdd } from '@/api';
 import { isStandardSpecification } from '@/helpers';
-
+let goodsDefaultUnitMapping = {};
 const optionsByid = ref({
   goods:          {},
   specifications: {},
@@ -178,7 +178,7 @@ function emptyRow() {
   return {
     goodsId:       null,
     goodsType:     null,
-    specification: null,
+    specification: '',
     num:           null,
     unitId:        null,
     price:         null,
@@ -197,7 +197,7 @@ function changeGoodsType(goodsType) {
 function changeGoods(row, goodsId) {
   if(goodsId) {
     row.specification = null;
-    row.unitId = null;
+    row.unitId = goodsDefaultUnitMapping[goodsId] ?? null;
     row.price = null;
     row.total = null;
   }
@@ -258,6 +258,13 @@ watch(() => props.model, val => {
 
 getStockAddOptions().then(data => {
   optionsByid.value = data;
+});
+getMapping('goods').then(({ goods }) => {
+  for(const id in goods) {
+    if(goods[id].baseUnitId) {
+      goodsDefaultUnitMapping[id] = goods[id].baseUnitId;
+    }
+  }
 });
 
 async function doAdd() {

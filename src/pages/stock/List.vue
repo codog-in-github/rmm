@@ -1,23 +1,31 @@
 <template>
   <div class="flex flex-col">
     <GlFilterBar :model="filters" @search="getList" class="m-b-4">
+      <GlFilterItem
+        label="库存类型"
+        prop="type"
+        type="select"
+        :options="goodsOptions"
+      />
       <template v-slot:after>
         <ElButton @click="add" type="primary" icon="plus">新增入库</ElButton>
       </template>
     </GlFilterBar>
-    <div class="flex-auto" v-loading="loading">
+    <div class="flex-auto h-1" v-loading="loading">
       <ElTable :data="list" border height="100%">
         <ElTableColumn label="库存类型" prop="goodsType">
           <template v-slot="{ row }">{{ GOODS_TYPE_MAP[row['goodsType']] }}</template>
         </ElTableColumn>
         <ElTableColumn label="库存名称" prop="goodsName" />
-        <ElTableColumn label="规格" prop="specification" :formatter="specificationUnit" />
+        <ElTableColumn label="规格" prop="specification" :formatter="specificationContent" />
         <ElTableColumn label="库存总数" prop="goodsNum">
           <template v-slot="{ row }">
-            {{ row.goodsNum.toFixed(3) }}<span v-if="row.baseUnitName">（{{ row.baseUnitName }}）</span>
+            <div class="flex justify-between">
+              <span>{{ formatNum(row.goodsNum) }}</span>
+              <span v-if="row.baseUnitName">（{{ row.baseUnitName }}）</span>
+            </div>
           </template>
         </ElTableColumn>
-        <ElTableColumn label="库存总价（元）" prop="goodsTotal" :formatter="(_, __, val) => val?.toFixed(2)" />
       </ElTable>
     </div>
     <Dialog v-model:visible="showDialog" :model="dialogData" @success="getList" />
@@ -29,12 +37,14 @@ import { getSelfStorehouse, getStock } from '@/api';
 import { ElMessage } from 'element-plus';
 import { ref, reactive } from 'vue';
 import Dialog from './Dialog.vue';
-import { GOODS_TYPE_MAP } from '@/constant';
-import { isStandardSpecification } from '@/helpers';
-
+import { GOODS_TYPE_MAP, GOODS_TYPE_RAW } from '@/constant';
+import { isStandardSpecification, map2array } from '@/helpers';
+const goodsOptions = map2array(GOODS_TYPE_MAP);
 const storehouseId = ref(null);
 const list = ref([]);
-const filters = reactive({});
+const filters = reactive({
+  type: GOODS_TYPE_RAW
+});
 const loading = ref(false);
 const showDialog = ref(false);
 const dialogData = ref(null);
@@ -46,16 +56,25 @@ function add() {
   };
   showDialog.value  = true;
 }
-function specificationUnit(_, __, value) {
+function specificationContent(row, _, value) {
+  let content = '';
+  if(row.subSpecification) {
+    content = `【${row.subSpecification}】`;
+  }
+  content += value;
   if(isStandardSpecification(value)) {
-    return value + '(mm)';
+    content += '(mm)';
   } 
-  return value;
+  return content;
+}
+
+function formatNum(val) {
+  return val.toFixed(4).replace(/\.?0+$/, '');
 }
 
 function getList() {
   loading.value = true;
-  getStock(storehouseId.value)
+  getStock(storehouseId.value, filters)
     .then(rep => {
       list.value = rep;
     })

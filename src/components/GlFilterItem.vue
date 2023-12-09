@@ -9,6 +9,21 @@
           v-model="localValue"
           v-bind="$attrs"
         />
+        <ElSelectV2
+          v-if="props.type ==='select'"
+          :placeholder="`请选择${props.label}`"
+          v-model="localValue"
+          :options="props.options"
+          v-bind="$attrs"
+        />
+        <ElDatePicker
+          v-if="props.type === 'daterange'"
+          type="daterange"
+          placeholder="请选择日期"
+          v-model="localValue"
+          valueFormat="YYYY-MM-DD"
+          v-bind="$attrs"
+        />
       </slot>
     </div>
   </div>

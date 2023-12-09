@@ -3,13 +3,13 @@
  * @type {AuthRoute[]}
  */
 export default [
-  {
-    key:       'home',
-    icon:      'HomeFilled',
-    label:     '首页',
-    path:      '/home',
-    component: () => import('@/pages/Home.vue')
-  },
+  // {
+  //   key:       'home',
+  //   icon:      'HomeFilled',
+  //   label:     '首页',
+  //   path:      '/home',
+  //   component: () => import('@/pages/Home.vue')
+  // },
   {
     key:       'stock',
     icon:      'Grid',
@@ -34,17 +34,17 @@ export default [
   {
     key:       'goodsApply',
     icon:      'Tickets',
-    label:     '配料审核',
+    label:     '出入库审核',
     path:      '/stock/apply',
     component: () => import('@/pages/stock/Apply.vue')
   },
-  {
-    key:       'report.profit',
-    icon:      'Histogram',
-    label:     '利润统计',
-    path:      '/report/profit',
-    component: () => import('@/pages/report/Profit.vue')
-  },
+  // {
+  //   key:       'report.profit',
+  //   icon:      'Histogram',
+  //   label:     '利润统计',
+  //   path:      '/report/profit',
+  //   component: () => import('@/pages/report/Profit.vue')
+  // },
   {
     key:       'report.process',
     icon:      'PieChart',

@@ -1,8 +1,8 @@
 <template>
   <div class="flex flex-col">
     <GlFilterBar @search="pagnation.reset(getList)" />
-    <div class="flex-auto">
-      <ElTable :data="list" v-loading="pagnation.paginate.loading">
+    <div class="flex-auto h-1">
+      <ElTable :data="list" height="100%" v-loading="pagnation.paginate.loading">
         <ElTableColumn label="类型">
           <template v-slot="{ row }">
             {{ PROFIT_TYPE_MAP[row.type] }}
@@ -12,7 +12,7 @@
         <ElTableColumn label="时间" prop="createdAt" :formatter="formatDate" />
       </ElTable>
     </div>
-    <GlPagination :pagination="pagnation" :requestHook="getList" />
+    <GlPagination class="m-t-2" :pagination="pagnation" :requestHook="getList" />
   </div>
 </template>
 <script setup>

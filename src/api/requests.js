@@ -36,9 +36,9 @@ export function getSelfWorkshop() {
  * @param {number} storehouseId 
  * @returns {Promise<Stock[]>}
  */
-export function getStock(storehouseId) {
+export function getStock(storehouseId, filters) {
   return request('/getStock')
-    .data({ id: storehouseId })
+    .data({ id: storehouseId, filters })
     .send();
 }
 
@@ -46,8 +46,8 @@ export function useGetStockRecordWithPagination(paginate) {
   const _request = requestWithPagination(
     request('/getStockRecord'), paginate
   );
-  return function(id) {
-    return _request.data({ id }).send();
+  return function(id, filters) {
+    return _request.data({ id, filters }).send();
   };
 }
 
@@ -74,10 +74,14 @@ export const getOptions =
     .data({ names })
     .send();
 
+export const getMapping =
+    names => request('/getMapping')
+      .data({ names })
+      .send();
 export function useGetPocessListWithPagination(pagination) {
   const _reqest = requestWithPagination(request('/getProcessList'), pagination);
-  return function(id) {
-    return _reqest.data({ id }).send();
+  return function(id, filters) {
+    return _reqest.data({ id, filters }).send();
   };
 }
 
@@ -87,6 +91,9 @@ export function getNewProcessOptions() {
 
 export function rawApply(form) {
   return request('/rawApply').data(form).send();
+}
+export function usedApply(form) {
+  return request('/usedApply').data(form).send();
 }
 export function finishProcess(form) {
   return request('/finishProcess').data(form).send();
@@ -126,5 +133,9 @@ export function useReportProcessWithPagination(paginate) {
   return function() {
     return req.send();
   };
+}
+
+export function saveStep(data) {
+  return request('/saveStep').data(data).send();
 }
 

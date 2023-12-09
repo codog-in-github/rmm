@@ -37,8 +37,8 @@ function restoreRoutes(keys) {
     const matchedRoute = routeMap[key];
     return {
       name:      key,
-      path:      matchedRoute.path,
-      component: matchedRoute.component
+      path:      matchedRoute?.path,
+      component: matchedRoute?.component
     };
   });
 }

@@ -27,6 +27,7 @@ export function usePagination() {
     },
     moveByPage(page, hook) {
       if (page > 0 && page <= paginate.lastPage) {
+        paginate.page = page;
         callHook(hook);
       }
     },

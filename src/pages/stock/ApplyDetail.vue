@@ -7,15 +7,21 @@
       <ElFormItem label="状态">
         <GlStockApplyStatusContent :status="model.apply.status" :type="model.apply.type" />
       </ElFormItem>
-      <ElFormItem label="原材料">
+      <ElFormItem label="原材料" v-if="model.raws.length > 0">
         <ElTable :data="model.raws">
           <ElTableColumn label="名称" prop="goodsName" />
-          <ElTableColumn label="规格" prop="specification" :formatter="(_, __, value) => value + '(mm)'" />
+          <ElTableColumn label="规格" prop="specification">
+            <template v-slot="{row}">
+              <template v-if="row.subSpecification">【{{ row.subSpecification }}】</template>
+              {{ row.specification }}
+              <template v-if="isStandardSpecification(row.specification)">(mm)</template> 
+            </template>
+          </ElTableColumn>
           <ElTableColumn label="数量" prop="num" />
           <ElTableColumn label="单位" prop="unitName" />
         </ElTable>
       </ElFormItem>
-      <ElFormItem label="耗材">
+      <ElFormItem label="耗材" v-if="model.uses.length > 0">
         <ElTable :data="model.uses">
           <ElTableColumn label="名称" prop="goodsName" />
           <ElTableColumn label="规格" prop="specification"  />
@@ -32,17 +38,22 @@
     </ElForm>
     <template #footer>
       <ElButton @click="visibleChanger = false">关闭</ElButton>
-      <ElButton v-if="model?.apply.status === STOCK_APPLY_STATUS_WAITING" type="primary" @click="submit">确认配料</ElButton>
+      <template v-if="model?.apply.status === STOCK_APPLY_STATUS_WAITING">
+        <ElButton v-if="model.apply.type === STOCK_APPLY_TYPE_IN" type="primary" @click="submit">确认入库</ElButton>
+        <ElButton v-else-if="model.apply.type === STOCK_APPLY_TYPE_OUT" type="primary" @click="submit">确认出库</ElButton>
+      </template>
     </template>
   </ElDialog>
 </template>
 <script setup>
 
 import {
-  STOCK_APPLY_STATUS_WAITING
+  STOCK_APPLY_STATUS_WAITING, STOCK_APPLY_TYPE_IN, STOCK_APPLY_TYPE_OUT
 } from '@/constant';
 import moment from 'moment';
 import { computed } from 'vue';
+import { isStandardSpecification } from '@/helpers';
+
 const props = defineProps({
   visible: {
     type:    Boolean,

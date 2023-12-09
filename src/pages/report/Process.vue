@@ -6,11 +6,11 @@
         <ElTableColumn label="加工名称" prop="name" />
         <ElTableColumn label="成品率" prop="rate" :formatter="(_, __, value) => (value * 100).toFixed(2)+'%'" />
         <ElTableColumn label="时间" prop="createdAt" :formatter="formatDate" />
-        <ElTableColumn label="操作">
+        <!-- <ElTableColumn label="操作">
           <template v-slot="{ row }">
             <ElButton type="primary" link @click="showDetail(row.id)">详情</ElButton>
           </template>
-        </ElTableColumn>
+        </ElTableColumn> -->
       </ElTable>
     </div>
     <GlPagination :pagination="pagnation" :requestHook="getList" />

@@ -3,10 +3,11 @@ export const GOODS_TYPE_RAW     = 1;
 export const GOODS_TYPE_PRODUCT = 2;
 export const GOODS_TYPE_USE     = 4;
 export const GOODS_TYPE_FUTURES = 8;
+export const GOODS_TYPE_SEMI    = 16;
+export const GOODS_TYPE_TRASH   = 32;
 
 export const GOODS_TYPE_MAP = /** @type {const} */({
-  [GOODS_TYPE_RAW]:     '原料',
-  [GOODS_TYPE_PRODUCT]: '成品',
+  [GOODS_TYPE_RAW]:     '材料',
   [GOODS_TYPE_USE]:     '耗材',
   [GOODS_TYPE_FUTURES]: '期货'
 });
@@ -17,7 +18,13 @@ export const STOCK_CHANGE_TYPE_TRANSFER = 3;
 export const STOCK_CHANGE_TYPE_RETURN   = 4;
 export const STOCK_CHANGE_TYPE_ADJUST   = -1;
 export const STOCK_CHANGE_TYPE_UNDO     = -2;
-
+export const STOCK_CHANGE_TYPE_MAP = /** @type {const} */({
+  [STOCK_CHANGE_TYPE_IN]:       '入库',
+  [STOCK_CHANGE_TYPE_OUT]:      '出库',
+  [STOCK_CHANGE_TYPE_TRANSFER]: '加工配料',
+  [STOCK_CHANGE_TYPE_RETURN]:   '加工入库',
+  [STOCK_CHANGE_TYPE_UNDO]:     '撤销'
+});
 // 出入库申请类型
 export const STOCK_APPLY_TYPE_IN  = 1;
 export const STOCK_APPLY_TYPE_OUT = 2;
@@ -52,4 +59,11 @@ export const PROFIT_TYPE_MAP = /** @type {const} */({
   [PROFIT_TYPE_EXPENSE_CONSUMPTION]:  '消费支出',
   [PROFIT_TYPE_EXPENSE_PROCESS_LOSS]: '原材料损耗',
   [PROFIT_TYPE_ADMIN_ADJUST]:         '管理员调整'
+});
+
+export const PROCESS_STEP_TYPE_LAGUAN  = 1;
+export const PROCESS_STEP_TYPE_JIAOZHI = 2;
+export const PROCESS_STEP_MAP = /** @type {const} */({
+  [PROCESS_STEP_TYPE_LAGUAN]:  '拉管',
+  [PROCESS_STEP_TYPE_JIAOZHI]: '矫直'
 });
