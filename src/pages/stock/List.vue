@@ -14,9 +14,16 @@
     <div class="flex-auto h-1" v-loading="loading">
       <ElTable :data="list" border height="100%">
         <ElTableColumn label="库存类型" prop="goodsType">
-          <template v-slot="{ row }">{{ GOODS_TYPE_MAP[row['goodsType']] }}</template>
+          <template v-slot="{ row }">
+            <template v-if="row.processType === 0">
+              {{ GOODS_TYPE_MAP[row.goodsType] }}
+            </template>
+            <template v-else>
+              {{ GOODS_PROCESS_TYPE_MAP[row.processType] }}
+            </template>
+          </template>
         </ElTableColumn>
-        <ElTableColumn label="库存名称" prop="goodsName" />
+        <ElTableColumn label="名称" prop="goodsName" />
         <ElTableColumn label="规格" prop="specification" :formatter="specificationContent" />
         <ElTableColumn label="库存总数" prop="goodsNum">
           <template v-slot="{ row }">
@@ -37,9 +44,9 @@ import { getSelfStorehouse, getStock } from '@/api';
 import { ElMessage } from 'element-plus';
 import { ref, reactive } from 'vue';
 import Dialog from './Dialog.vue';
-import { GOODS_TYPE_MAP, GOODS_TYPE_RAW } from '@/constant';
+import { GOODS_PROCESS_TYPE_MAP, GOODS_TYPE_MAP, GOODS_TYPE_RAW, STOCK_TYPE_MAP } from '@/constant';
 import { isStandardSpecification, map2array } from '@/helpers';
-const goodsOptions = map2array(GOODS_TYPE_MAP);
+const goodsOptions = map2array(STOCK_TYPE_MAP);
 const storehouseId = ref(null);
 const list = ref([]);
 const filters = reactive({
@@ -71,7 +78,6 @@ function specificationContent(row, _, value) {
 function formatNum(val) {
   return val.toFixed(4).replace(/\.?0+$/, '');
 }
-
 function getList() {
   loading.value = true;
   getStock(storehouseId.value, filters)

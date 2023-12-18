@@ -46,6 +46,7 @@ export function bitHas(num, bit) {
 }
 
 /**
+ * 规格长度换算比例
  * @param {string} specification
  */
 export function conversionSpecification(specification) {
@@ -53,4 +54,20 @@ export function conversionSpecification(specification) {
   r = Number(r);
   w = Number(w);
   return (r - w) * w * 0.02796;
+}
+
+/**
+ * 加载js文件
+ * @param {string} url 
+ * @returns Promise<void>
+ */
+export function loadJs(url) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = url;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
 }

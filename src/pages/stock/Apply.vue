@@ -3,7 +3,7 @@
     <GlFilterBar class="m-b-2" :model="filters" @search="pagnation.reset(getList)" />
     <div class="flex-auto h-1">
       <ElTable :data="list" height="100%" v-loading="pagnation.paginate.loading">
-        <ElTableColumn label="申请编号" prop="id" />
+        <ElTableColumn label="名称" prop="name" />
         <ElTableColumn label="申请状态">
           <template v-slot="{ row }">
             <GlStockApplyStatusContent :status="row.status" :type="row.type" />

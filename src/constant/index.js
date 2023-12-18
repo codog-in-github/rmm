@@ -11,6 +11,28 @@ export const GOODS_TYPE_MAP = /** @type {const} */({
   [GOODS_TYPE_USE]:     '耗材',
   [GOODS_TYPE_FUTURES]: '期货'
 });
+
+export const STOCK_TYPE_RAW     = 1;
+export const STOCK_TYPE_PRODUCT = 2;
+export const STOCK_TYPE_TRASH   = 3;
+export const STOCK_TYPE_USE     = 4;
+export const STOCK_TYPE_MAP = /** @type {const} */({
+  [STOCK_TYPE_RAW]:     '管坯',
+  [STOCK_TYPE_PRODUCT]: '成品',
+  [STOCK_TYPE_TRASH]:   '废料',
+  [STOCK_TYPE_USE]:     '耗材'
+});
+
+export const GOODS_PROCESS_TYPE_RAW     = 1;
+export const GOODS_PROCESS_TYPE_PRODUCT = 2;
+export const GOODS_PROCESS_TYPE_TRASH   = -1;
+export const GOODS_PROCESS_TYPE_MAP = /** @type {const} */({
+  [GOODS_PROCESS_TYPE_RAW]:     '管坯',
+  [GOODS_PROCESS_TYPE_PRODUCT]: '成品',
+  [GOODS_PROCESS_TYPE_TRASH]:   '废料'
+});
+
+
 // 入库记录变更状态
 export const STOCK_CHANGE_TYPE_IN       = 1;
 export const STOCK_CHANGE_TYPE_OUT      = 2;

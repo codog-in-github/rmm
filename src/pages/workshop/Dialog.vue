@@ -155,9 +155,9 @@
       </ElFormItem>
       <ElFormItem label="备注">
         <ElInput
-          v-model="localForm.remark"
+          v-model="localForm.comment"
           type="textarea"
-          :disabled="!canEditProduct"
+          :disabled="!canEditProduct && !canEditRaw"
           autosize
         />
       </ElFormItem>
@@ -217,7 +217,7 @@ const props = defineProps({
     default: () => []
   }
 });
-const emit = defineEmits(['update:visible', 'reload']);
+const emit = defineEmits(['update:visible', 'reload', 'print']);
 const unitConversionMapping = ref(null);
 async function init() {
   const [rep, { unit , goods }] = await Promise.all([
@@ -338,7 +338,6 @@ function querySearch(id) {
 // ------------ 表单相关操作 start -------------
 
 function rawChange(id, row) {
-  console.log('id', id);
   row.specification = null;
   row.unitId = goodsDefaultUnitMapping[id];
 }
@@ -411,9 +410,28 @@ async function rawApplySubmit() {
     return ElMessage.warning('原材料未填写完整');
   }
   await rawApply(form);
-  visibleChanger.value = false;
   emit('reload');
+  visibleChanger.value = false;
+  try {
+    await ElMessageBox.confirm('原料申请成功，是否打印？');
+    emit('print', printData());
+  } catch (none) {
+    //
+  }
 }
+
+function printData() {
+  const data = cloneDeep(localForm.value);
+  data.raw.goodsName = goods.value(GOODS_TYPE_RAW)
+    .find(item => item.value === data.raw.goodsId).label;
+  data.raw.unitName = units.value(data.raw.goodsId)
+    .find(item => item.value === data.raw.unitId).label;
+  if(data.status === null) {
+    data.name = moment().format('YYYYMMDD') + '-' + data.name;
+  }
+  return data;
+}
+
 async function finishProcess() {
   let stepCount = 0;
   for(const st in localForm.value.steps) {

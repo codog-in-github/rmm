@@ -9,6 +9,7 @@
   ],
   "globals": {
     "require": true,
+    "LODOP": "readonly",
     "process": "readonly"
   },
   "parserOptions": {

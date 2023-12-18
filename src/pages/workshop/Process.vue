@@ -5,6 +5,7 @@
       <template v-slot:after>
         <ElButton type="primary" @click="add" icon="plus">配料申请</ElButton>
         <ElButton type="primary" @click="showUsedDetail" icon="plus">耗材申请</ElButton>
+        <ElButton type="primary" @click="printSettingsShow = true" icon="tools">打印设置</ElButton>
       </template>
     </GlFilterBar>
     <div class="flex-auto h-1">
@@ -48,6 +49,7 @@
       :model="form"
       :storehouses="storehouses"
       @reload="getList"
+      @print="doPrint"
     />
     <UsedDialog
       v-model:visible="usedDialogVisible"
@@ -55,6 +57,7 @@
       :storehouses="storehouses"
       @submit="submit"
     />
+    <PrintSetting v-model:visible="printSettingsShow" :model="printSettings" @submit="savePrintSettings" />
   </div>
 </template>
 <script setup>
@@ -72,7 +75,9 @@ import { usePagination } from '@/helpers';
 import { ElMessage } from 'element-plus';
 import Dialog from './Dialog.vue';
 import UsedDialog from './UsedDialog.vue';
+import PrintSetting from './PrintSetting.vue';
 import moment from 'moment';
+import { useUser } from '@/store';
 
 const workshopId = ref(null);
 const filters = reactive({
@@ -86,6 +91,23 @@ const form = ref(null);
 const usedDialogVisible = ref(false);
 const usedForm = ref(null);
 const storehouses = ref([]);
+const printSettingsShow = ref(false);
+let _printSettings = JSON.parse(
+  localStorage.getItem('printSettings')
+);
+if(!_printSettings) {
+  _printSettings = {
+    printerIndex:   null,
+    paperSizeIndex: null
+  };
+}
+const printSettings = ref(_printSettings);
+function savePrintSettings(settings) {
+  if(settings) {
+    localStorage.setItem('printSettings', JSON.stringify(settings));
+    printSettings.value = settings;
+  }
+}
 
 function add() {
   dialogVisible.value = true;
@@ -137,12 +159,33 @@ async function showDetail(id) {
     }
   }
 }
-
+function doPrint(data) {
+  LODOP.PRINT_INITA();
+  LODOP.SET_PRINTER_INDEX(printSettings.value.printerIndex);
+  LODOP.SET_PRINT_STYLE('FontSize', 16);
+  LODOP.ADD_PRINT_TEXT(20, 20, 200, 20, '名称');
+  LODOP.ADD_PRINT_TEXT(20, 120, 200, 20, data.name);
+  LODOP.ADD_PRINT_TEXT(60, 20, 200, 20, '材料');
+  LODOP.ADD_PRINT_TEXT(60, 120, 200, 20, '名称');
+  LODOP.ADD_PRINT_TEXT(100, 120, 200, 20, data.raw.goodsName);
+  LODOP.ADD_PRINT_TEXT(60, 220, 200, 20, '规格(MM)');
+  LODOP.ADD_PRINT_TEXT(100, 220, 200, 20, data.raw.specification);
+  LODOP.ADD_PRINT_TEXT(60, 340, 200, 20, '数量');
+  LODOP.ADD_PRINT_TEXT(100, 340, 200, 20, data.raw.num);
+  LODOP.ADD_PRINT_TEXT(60, 420, 200, 20, '单位');
+  LODOP.ADD_PRINT_TEXT(100, 420, 200, 20, data.raw.unitName);
+  LODOP.ADD_PRINT_TEXT(140, 20, 200, 20, '备注');
+  LODOP.ADD_PRINT_TEXT(140, 120, 300, 500, data.comment);
+  LODOP.ADD_PRINT_TEXT(260, 20, 200, 20, '打印人');
+  LODOP.ADD_PRINT_TEXT(260, 120, 200, 20, useUser().name);
+  LODOP.ADD_PRINT_TEXT(300, 20, 200, 20, '打印时间');
+  LODOP.ADD_PRINT_TEXT(300, 120, 200, 20, moment().format('YYYY-MM-DD HH:mm'));
+  LODOP.PRINT();
+}
 async function submit(form) {
   await usedApply(form);
   ElMessage.success('耗材申请成功');
 }
-
 function showUsedDetail() {
   usedForm.value = {
     workshopId:   workshopId.value,
@@ -151,6 +194,5 @@ function showUsedDetail() {
   };
   usedDialogVisible.value = true;
 }
-
 init();
 </script>
