@@ -11,14 +11,14 @@
               <ElSelectV2
                 v-model="row.goodsId" 
                 :options="options.goods"
-                @change="row.specification = null; row.unitId = null"
+                @change="row.spec = null; row.unitId = null"
               />
             </template>
           </ElTableColumn>
-          <ElTableColumn prop="specification" label="规格">
+          <ElTableColumn prop="spec" label="规格">
             <template v-slot="{ row }">
               <ElAutocomplete
-                v-model="row.specification"
+                v-model="row.spec"
                 :fetchSuggestions="querySearch(row.goodsId)"
               />
             </template>
@@ -81,9 +81,9 @@ const props = defineProps({
 const emit = defineEmits(['submit', 'update:visible']);
 const localForm = ref(null);
 const options = reactive({
-  goods:          [],
-  units:          {},
-  specifications: {}
+  goods: [],
+  units: {},
+  specs: {}
 });
 const visibleChanger = computed({
   get() {
@@ -100,7 +100,7 @@ async function init() {
   const rep = await getNewProcessOptions();
   options.goods = rep.goods[GOODS_TYPE_USE] ?? [];
   options.units = rep.units;
-  options.specifications = rep.specifications;
+  options.specs = rep.specs;
 }
 const units = computed(() => {
   return function(id) {
@@ -110,16 +110,16 @@ const units = computed(() => {
     return [];
   };
 });
-const specifications = computed(() => {
+const specs = computed(() => {
   return function(id) {
-    if(id && options.specifications[id]) {
-      return options.specifications[id];  
+    if(id && options.specs[id]) {
+      return options.specs[id];
     }
     return [];
   };
 });
 function querySearch(id) {
-  const _options = specifications.value(id).map(item => ({ value: item.label }));
+  const _options = specs.value(id).map(item => ({ value: item.label }));
   return function(_, cb) {
     cb(_options);
   };
@@ -127,10 +127,10 @@ function querySearch(id) {
 function handleAddRaw() {
   if(localForm.value.items) {
     localForm.value.items.push({
-      goodsId:       null,
-      specification: null,
-      unitId:        null,
-      num:           null
+      goodsId: null,
+      spec:    null,
+      unitId:  null,
+      num:     null
     });
   }
 }

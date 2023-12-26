@@ -24,7 +24,7 @@
           </template>
         </ElTableColumn>
         <ElTableColumn label="名称" prop="goodsName" />
-        <ElTableColumn label="规格" prop="specification" :formatter="specificationContent" />
+        <ElTableColumn label="规格" prop="spec" :formatter="specContent" />
         <ElTableColumn label="库存总数" prop="goodsNum">
           <template v-slot="{ row }">
             <div class="flex justify-between">
@@ -45,7 +45,7 @@ import { ElMessage } from 'element-plus';
 import { ref, reactive } from 'vue';
 import Dialog from './Dialog.vue';
 import { GOODS_PROCESS_TYPE_MAP, GOODS_TYPE_MAP, GOODS_TYPE_RAW, STOCK_TYPE_MAP } from '@/constant';
-import { isStandardSpecification, map2array } from '@/helpers';
+import { isStandardSpec, map2array } from '@/helpers';
 const goodsOptions = map2array(STOCK_TYPE_MAP);
 const storehouseId = ref(null);
 const list = ref([]);
@@ -63,13 +63,13 @@ function add() {
   };
   showDialog.value  = true;
 }
-function specificationContent(row, _, value) {
+function specContent(row, _, value) {
   let content = '';
-  if(row.subSpecification) {
-    content = `【${row.subSpecification}】`;
+  if(row.subSpec) {
+    content = `【${row.subSpec}】`;
   }
   content += value;
-  if(isStandardSpecification(value)) {
+  if(isStandardSpec(value)) {
     content += '(mm)';
   } 
   return content;

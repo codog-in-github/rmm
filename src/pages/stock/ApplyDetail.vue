@@ -10,11 +10,11 @@
       <ElFormItem label="原材料" v-if="model.raws.length > 0">
         <ElTable :data="model.raws">
           <ElTableColumn label="名称" prop="goodsName" />
-          <ElTableColumn label="规格" prop="specification">
+          <ElTableColumn label="规格" prop="spec">
             <template v-slot="{row}">
-              <template v-if="row.subSpecification">【{{ row.subSpecification }}】</template>
-              {{ row.specification }}
-              <template v-if="isStandardSpecification(row.specification)">(mm)</template> 
+              <template v-if="row.subSpec">【{{ row.subSpec }}】</template>
+              {{ row.spec }}
+              <template v-if="isStandardSpec(row.spec)">(mm)</template>
             </template>
           </ElTableColumn>
           <ElTableColumn label="数量" prop="num" />
@@ -24,7 +24,7 @@
       <ElFormItem label="耗材" v-if="model.uses.length > 0">
         <ElTable :data="model.uses">
           <ElTableColumn label="名称" prop="goodsName" />
-          <ElTableColumn label="规格" prop="specification"  />
+          <ElTableColumn label="规格" prop="spec"  />
           <ElTableColumn label="数量" prop="num" />
           <ElTableColumn label="单位" prop="unitName" />
         </ElTable>
@@ -52,7 +52,7 @@ import {
 } from '@/constant';
 import moment from 'moment';
 import { computed } from 'vue';
-import { isStandardSpecification } from '@/helpers';
+import { isStandardSpec } from '@/helpers';
 
 const props = defineProps({
   visible: {

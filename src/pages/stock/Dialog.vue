@@ -24,11 +24,11 @@
             <ElTableColumn label="规格">
               <template v-slot="{ row }">
                 <ElAutocomplete
-                  v-model="row.specification"
+                  v-model="row.spec"
                   :fetchSuggestions="querySearch(row.goodsId)"
                 >
                   <template v-slot:suffix>
-                    <template v-if="isStandardSpecification(row.specification)">mm</template>
+                    <template v-if="isStandardSpec(row.spec)">mm</template>
                   </template>
                 </ElAutocomplete>
               </template>
@@ -115,12 +115,12 @@ import { ElMessage } from 'element-plus';
 import { cloneDeep } from 'lodash';
 import { ref, watch } from 'vue';
 import { getMapping, getStockAddOptions, stockAdd } from '@/api';
-import { isStandardSpecification } from '@/helpers';
+import { isStandardSpec } from '@/helpers';
 let goodsDefaultUnitMapping = {};
 const optionsByid = ref({
-  goods:          {},
-  specifications: {},
-  units:          {}
+  goods: {},
+  specs: {},
+  units: {}
 });
 
 const options = {
@@ -130,10 +130,10 @@ const options = {
     }
     return [];
   }),
-  specifications: computed(() => {
+  specs: computed(() => {
     return function(goodsId) {
-      if(goodsId && optionsByid.value.specifications[goodsId]) {
-        return optionsByid.value.specifications[goodsId];
+      if(goodsId && optionsByid.value.specs[goodsId]) {
+        return optionsByid.value.specs[goodsId];
       }
       return [];
     };
@@ -176,13 +176,13 @@ const visibleChanger = computed({
 
 function emptyRow() {
   return {
-    goodsId:       null,
-    goodsType:     null,
-    specification: '',
-    num:           null,
-    unitId:        null,
-    price:         null,
-    total:         null
+    goodsId:   null,
+    goodsType: null,
+    spec:      '',
+    num:       null,
+    unitId:    null,
+    price:     null,
+    total:     null
   };
 }
 
@@ -196,7 +196,7 @@ function changeGoodsType(goodsType) {
 
 function changeGoods(row, goodsId) {
   if(goodsId) {
-    row.specification = null;
+    row.spec = null;
     row.unitId = goodsDefaultUnitMapping[goodsId] ?? null;
     row.price = null;
     row.total = null;
@@ -246,7 +246,7 @@ function add() {
 }
 
 function querySearch(id) {
-  const _options = options.specifications.value(id).map(item => ({ value: item.label }));
+  const _options = options.specs.value(id).map(item => ({ value: item.label }));
   return function(_, cb) {
     cb(_options);
   };

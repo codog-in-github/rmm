@@ -22,10 +22,10 @@
               />
             </template>
           </ElTableColumn>
-          <ElTableColumn prop="specification" label="规格（MM）">
+          <ElTableColumn prop="spec" label="规格（MM）">
             <template v-slot="{ row }">
               <ElAutocomplete
-                v-model="row.specification"
+                v-model="row.spec"
                 :fetchSuggestions="querySearch(row.goodsId)"
                 :disabled="!canEditRaw"
               />
@@ -69,10 +69,10 @@
                 />
               </template>
             </ElTableColumn>
-            <ElTableColumn prop="specification" label="规格(MM)">
+            <ElTableColumn prop="spec" label="规格(MM)">
               <template v-slot="{ row }">
                 <ElAutocomplete
-                  v-model="row.specification"
+                  v-model="row.spec"
                   :fetchSuggestions="querySearch(row.goodsId)"
                   :disabled="row.id || Number(step) === PROCESS_STEP_TYPE_JIAOZHI"
                 />
@@ -198,7 +198,7 @@ import {
   PROCESS_STEP_TYPE_LAGUAN,
   PROCESS_STEP_MAP
 } from '@/constant';
-import { conversionSpecification, isStandardSpecification } from '@/helpers';
+import { conversionSpec, isStandardSpec } from '@/helpers';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
@@ -232,9 +232,10 @@ async function init() {
     goodsDefaultUnitMapping[id] = goods[id].baseUnitId;
   }
   unitConversionMapping.value = map;
+  console.log(rep);
   options.goods = rep.goods;
   options.units = rep.units;
-  options.specifications = rep.specifications;
+  options.specs = rep.specs;
 }
 watch(() => props.model, val => {
   const form = cloneDeep(val);
@@ -285,24 +286,24 @@ const visibleChanger = computed({
 const canEditRaw  = computed(() => localForm.value?.status === null);
 const canEditProduct = computed(() => localForm.value?.status === PROCESS_STATUS_PROCESS);
 function lengthCalc(row) {
-  if(!row.num || !row.specification || !isStandardSpecification(row.specification)) return '';
+  if(!row.num || !row.spec || !isStandardSpec(row.spec)) return '';
   return (
-    row.num / conversionSpecification(row.specification)
+    row.num / conversionSpec(row.spec)
   ).toFixed(2).replace(/\.?0+$/, '');
 }
 
 function priceCalc(row) {
-  if(!row.num || !row.specification || !row.pricePerLength || !isStandardSpecification(row.specification)) return '';
+  if(!row.num || !row.spec || !row.pricePerLength || !isStandardSpec(row.spec)) return '';
   return (
-    row.num / conversionSpecification(row.specification) * row.pricePerLength
+    row.num / conversionSpec(row.spec) * row.pricePerLength
   ).toFixed(2).replace(/\.?0+$/, '');
 }
 // ------------ 属性计算 end ------------
 // ------------ 选项 start -------------
 const options = reactive({
-  goods:          {},
-  units:          {},
-  specifications: {}
+  goods: {},
+  units: {},
+  specs: {}
 });
 const units = computed(() => {
   return function(id) {
@@ -312,10 +313,10 @@ const units = computed(() => {
     return [];
   };
 });
-const specifications = computed(() => {
+const specs = computed(() => {
   return function(id) {
-    if(id && options.specifications[id]) {
-      return options.specifications[id];
+    if(id && options.specs[id]) {
+      return options.specs[id];
     }
     return [];
   };
@@ -329,7 +330,7 @@ const goods = computed(() => {
   };
 });
 function querySearch(id) {
-  const _options = specifications.value(id).map(item => ({ value: item.label }));
+  const _options = specs.value(id).map(item => ({ value: item.label }));
   return function(_, cb) {
     cb(_options);
   };
@@ -338,7 +339,7 @@ function querySearch(id) {
 // ------------ 表单相关操作 start -------------
 
 function rawChange(id, row) {
-  row.specification = null;
+  row.spec = null;
   row.unitId = goodsDefaultUnitMapping[id];
 }
 
@@ -352,16 +353,16 @@ function addStep(step) {
   const row = {
     id:             null,
     goodsId:        form.raw.goodsId,
-    specification:  null,
+    spec:           null,
     num:            lastWeight.value,
     length:         null,
     pricePerLength: null
   };
   if(step === PROCESS_STEP_TYPE_JIAOZHI) {
     if(form.steps[PROCESS_STEP_TYPE_LAGUAN].length > 0) {
-      row.specification = form.steps[PROCESS_STEP_TYPE_LAGUAN][form.steps[PROCESS_STEP_TYPE_LAGUAN].length - 1].specification;
+      row.spec = form.steps[PROCESS_STEP_TYPE_LAGUAN][form.steps[PROCESS_STEP_TYPE_LAGUAN].length - 1].spec;
     } else {
-      row.specification = form.raw.specification;
+      row.spec = form.raw.spec;
     }
   }
   form.steps[step].push(row);
@@ -370,10 +371,10 @@ async function saveStep(type, row) {
   if(!row.num){
     return ElMessage.warning('数量未填写');
   }
-  if(!row.specification){
+  if(!row.spec){
     return ElMessage.warning('规格未填写');
   }
-  if(!isStandardSpecification(row.specification)){
+  if(!isStandardSpec(row.spec)){
     return ElMessage.warning('规格不符合标准');
   }
   if(!row.pricePerLength){
@@ -405,7 +406,7 @@ async function rawApplySubmit() {
     return ElMessage.warning('请选择仓库');
   }
   if(
-    !form.raw.goodsId || !form.raw.specification || !form.raw.num || !form.raw.unitId
+    !form.raw.goodsId || !form.raw.spec || !form.raw.num || !form.raw.unitId
   ) {
     return ElMessage.warning('原材料未填写完整');
   }

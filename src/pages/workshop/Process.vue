@@ -64,7 +64,7 @@
 import { reactive, ref } from 'vue';
 import {
   getSelfWorkshop,
-  useGetPocessListWithPagination,
+  useGetProcessListWithPagination,
   getOptions,
   getProcessDetail,
   toProcessing as toProcessingApi,
@@ -79,12 +79,13 @@ import PrintSetting from './PrintSetting.vue';
 import moment from 'moment';
 import { useUser } from '@/store';
 
+const canPrint = Boolean(LODOP);
 const workshopId = ref(null);
 const filters = reactive({
   name: ''
 });
 const pagination = usePagination();
-const getProcessList = useGetPocessListWithPagination(pagination);
+const getProcessList = useGetProcessListWithPagination(pagination);
 const list = ref([]);
 const dialogVisible = ref(false);
 const form = ref(null);
@@ -114,13 +115,13 @@ function add() {
   form.value = {
     name:         '',
     workshopId:   workshopId.value,
-    storehouseId: storehouses.value[0]?.value ?? null,
+    storehouseId: storehouses.value?.[0].value ?? null,
     status:       null,
     raw:          {
-      goodsId:       null,
-      specification: null,
-      unitId:        null,
-      num:           null
+      goodsId: null,
+      spec:    null,
+      unitId:  null,
+      num:     null
     },
     product: null,
     semis:   [],
@@ -141,7 +142,7 @@ async function init() {
     return;
   }
   workshopId.value = rep[0].id;
-  getList();
+  return getList();
 }
 async function toProcessing(row) {
   await toProcessingApi(row.id);
@@ -160,6 +161,9 @@ async function showDetail(id) {
   }
 }
 function doPrint(data) {
+  if(!LODOP) {
+    ElMessage.error('请先安装LODOP插件');
+  }
   LODOP.PRINT_INITA();
   LODOP.SET_PRINTER_INDEX(printSettings.value.printerIndex);
   LODOP.SET_PRINT_STYLE('FontSize', 16);
@@ -169,7 +173,7 @@ function doPrint(data) {
   LODOP.ADD_PRINT_TEXT(60, 120, 200, 20, '名称');
   LODOP.ADD_PRINT_TEXT(100, 120, 200, 20, data.raw.goodsName);
   LODOP.ADD_PRINT_TEXT(60, 220, 200, 20, '规格(MM)');
-  LODOP.ADD_PRINT_TEXT(100, 220, 200, 20, data.raw.specification);
+  LODOP.ADD_PRINT_TEXT(100, 220, 200, 20, data.raw.spec);
   LODOP.ADD_PRINT_TEXT(60, 340, 200, 20, '数量');
   LODOP.ADD_PRINT_TEXT(100, 340, 200, 20, data.raw.num);
   LODOP.ADD_PRINT_TEXT(60, 420, 200, 20, '单位');
@@ -189,7 +193,7 @@ async function submit(form) {
 function showUsedDetail() {
   usedForm.value = {
     workshopId:   workshopId.value,
-    storehouseId: storehouses.value[0]?.value ?? null,
+    storehouseId: storehouses.value?.[0].value ?? null,
     items:        []
   };
   usedDialogVisible.value = true;

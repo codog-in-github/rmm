@@ -25,6 +25,6 @@ export function isPromiseLike(val) {
   );
 }
 
-export function isStandardSpecification(specification) {
-  return /^\d+(?:\.\d+)?\*\d+(?:\.\d+)?$/.test(specification);
+export function isStandardSpec(spec) {
+  return /^\d+(?:\.\d+)?\*\d+(?:\.\d+)?$/.test(spec);
 }

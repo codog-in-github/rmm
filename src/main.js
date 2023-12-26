@@ -8,7 +8,7 @@ import * as icons from '@element-plus/icons-vue';
 import components from './components';
 import 'element-plus/dist/index.css';
 import 'uno.css';
-import { getLodop } from './helpers/lodop';
+import { runLodopScripts } from './helpers/lodop';
 
 envScripts[process.env.NODE_ENV].main();
 ElDialog.props.closeOnClickModal = false;
@@ -21,6 +21,6 @@ Object.keys(icons).forEach(name => {
 app.use(store);
 app.use(router);
 app.use(components);
-getLodop().then(() => {
+runLodopScripts().then(() => {
   app.mount('#app');
 });

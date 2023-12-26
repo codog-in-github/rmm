@@ -51,6 +51,13 @@ export default [
     label:     '成品率统计',
     path:      '/report/process',
     component: () => import('@/pages/report/Process.vue')
+  },
+  {
+    key:       'customer.list',
+    icon:      'Avatar',
+    label:     '客户管理',
+    path:      '/customer/list',
+    component: () => import('@/pages/customer/List.vue')
   }
 ];
 

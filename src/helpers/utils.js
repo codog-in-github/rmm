@@ -47,10 +47,10 @@ export function bitHas(num, bit) {
 
 /**
  * 规格长度换算比例
- * @param {string} specification
+ * @param {string} spec
  */
-export function conversionSpecification(specification) {
-  let [r, w] = specification.split('*');
+export function conversionSpec(spec) {
+  let [r, w] = spec.split('*');
   r = Number(r);
   w = Number(w);
   return (r - w) * w * 0.02796;
@@ -58,14 +58,14 @@ export function conversionSpecification(specification) {
 
 /**
  * 加载js文件
- * @param {string} url 
+ * @param {string} src
  * @returns Promise<void>
  */
-export function loadJs(url) {
+export function loadJs(src) {
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.type = 'text/javascript';
-    script.src = url;
+    script.src = src;
     script.onload = resolve;
     script.onerror = reject;
     document.head.appendChild(script);

@@ -16,19 +16,19 @@
                 v-model="row.goodsId" 
                 :options="options.raws"
                 :disabled="!canEditRaw"
-                @change="row.specification = null; row.unitId = null"
+                @change="row.spec = null; row.unitId = null"
               />
             </template>
           </ElTableColumn>
-          <ElTableColumn prop="specification" label="规格">
+          <ElTableColumn prop="spec" label="规格">
             <template v-slot="{ row }">
               <ElAutocomplete
-                v-model="row.specification"
+                v-model="row.spec"
                 :fetchSuggestions="querySearch(row.goodsId)"
                 :disabled="!canEditRaw"
               >
                 <template v-slot:suffix>
-                  <template v-if="isStandardSpecification(row.specification)">mm</template>
+                  <template v-if="isStandardSpec(row.spec)">mm</template>
                 </template>
               </ElAutocomplete>
             </template>
@@ -70,14 +70,14 @@
                 v-model="row.goodsId" 
                 :options="options.uses"
                 :disabled="!canEditRaw"
-                @change="row.specification = null; row.unitId = null"
+                @change="row.spec = null; row.unitId = null"
               />
             </template>
           </ElTableColumn>
-          <ElTableColumn prop="specification" label="规格">
+          <ElTableColumn prop="spec" label="规格">
             <template v-slot="{ row }">
               <ElAutocomplete
-                v-model="row.specification"
+                v-model="row.spec"
                 :fetchSuggestions="querySearch(row.goodsId)"
                 :disabled="!canEditRaw"
               />
@@ -120,19 +120,19 @@
                 v-model="row.goodsId"
                 :options="options.products"
                 :disabled="!canEditProduct"
-                @change="row.specification = null; row.unitId = null"
+                @change="row.spec = null; row.unitId = null"
               />
             </template>
           </ElTableColumn>
-          <ElTableColumn prop="specification" label="规格">
+          <ElTableColumn prop="spec" label="规格">
             <template v-slot="{ row }">
               <ElAutocomplete
-                v-model="row.specification"
+                v-model="row.spec"
                 :fetchSuggestions="querySearch(row.goodsId)"
                 :disabled="!canEditProduct"
               >
                 <template v-slot:suffix>
-                  <template v-if="isStandardSpecification(row.specification)">mm</template>
+                  <template v-if="isStandardSpec(row.spec)">mm</template>
                 </template>
               </ElAutocomplete>
             </template>
@@ -201,7 +201,7 @@
 <script setup>
 import { getNewProcessOptions, rawApply, finishProcess as finishProcessApi } from '@/api';
 import { PROCESS_STATUS_MAP, PROCESS_STATUS_PROCESS } from '@/constant';
-import { isStandardSpecification } from '@/helpers';
+import { isStandardSpec } from '@/helpers';
 import { ElMessage } from 'element-plus';
 import { cloneDeep } from 'lodash';
 import { computed, reactive, ref, watch } from 'vue';
@@ -234,26 +234,26 @@ watch(() => props.model, val => {
 });
 function emptyRaw() {
   return {
-    goodsId:       null,
-    specification: null,
-    num:           null,
-    unitId:        null
+    goodsId: null,
+    spec:    null,
+    num:     null,
+    unitId:  null
   };
 }
 function emptyUses() {
   return {
-    goodsId:       null,
-    specification: null,
-    num:           null,
-    unitId:        null
+    goodsId: null,
+    spec:    null,
+    num:     null,
+    unitId:  null
   };
 }
 function emptyProduct() {
   return {
-    goodsId:       null,
-    specification: null,
-    num:           null,
-    unitId:        null
+    goodsId: null,
+    spec:    null,
+    num:     null,
+    unitId:  null
   };
 }
 function handleAddRaw() {
@@ -286,11 +286,11 @@ function handleDeleteProduct(index) {
 const canEditRaw  = computed(() => localForm.value?.status === null);
 const canEditProduct = computed(() => localForm.value?.status === PROCESS_STATUS_PROCESS);
 const options = reactive({
-  raws:           [],
-  products:       [],
-  uses:           [],
-  units:          {},
-  specifications: {}
+  raws:     [],
+  products: [],
+  uses:     [],
+  units:    {},
+  specs:    {}
 });
 
 const units = computed(() => {
@@ -301,21 +301,23 @@ const units = computed(() => {
     return [];
   };
 });
-const specifications = computed(() => {
+const specs = computed(() => {
   return function(id) {
-    if(id && options.specifications[id]) {
-      return options.specifications[id];
+    if(id && options.specs[id]) {
+      return options.specs[id];
     }
     return [];
   };
 });
 async function init() {
+  console.log('init');
   const rep = await getNewProcessOptions();
+  console.log(rep);
   options.raws = rep.raws;
   options.products = rep.products;
   options.uses = rep.uses;
   options.units = rep.units;
-  options.specifications = rep.specifications;
+  options.specs = rep.specs;
 }
 init();
 
@@ -331,7 +333,7 @@ async function rawApplySubmit() {
   }
   if(
     !localForm.value.raws.every(raw => {
-      return raw.goodsId && raw.specification && raw.num && raw.unitId;
+      return raw.goodsId && raw.spec && raw.num && raw.unitId;
     })
   ) {
     return ElMessage.warning('原材料未填写完整');
@@ -343,7 +345,7 @@ async function rawApplySubmit() {
 
 
 function querySearch(id) {
-  const _options = specifications.value(id).map(item => ({ value: item.label }));
+  const _options = specs.value(id).map(item => ({ value: item.label }));
   return function(_, cb) {
     cb(_options);
   };
@@ -355,7 +357,7 @@ async function finishProcess() {
       return ElMessage.warning('请添加成品');
     }
     if(!localForm.value.products.every(product => {
-      return product.goodsId && product.specification && product.num && product.unitId;
+      return product.goodsId && product.spec && product.num && product.unitId;
     })) {
       return ElMessage.warning('成品未填写完整');
     }
@@ -368,10 +370,10 @@ async function finishProcess() {
       remark:   localForm.value.remark,
       products: localForm.value.products.map(product => {
         return {
-          goodsId:       product.goodsId,
-          specification: product.specification,
-          num:           product.num,
-          unitId:        product.unitId
+          goodsId: product.goodsId,
+          spec:    product.spec,
+          num:     product.num,
+          unitId:  product.unitId
         };
       })
     });
