@@ -81,11 +81,16 @@ export function decodeParams(data, next) {
   );
 }
 
-export function checkLoginStatus(reponse, next) {
-  if(reponse.data && reponse.data.code === 0) {
-    return next(reponse.data.data);
+export function checkLoginStatus(response, next) {
+  if(response.state < 200 || response.state >= 300) {
+    const msg = '请求错误';
+    ElMessage.error(msg);
+    throw Error(msg);
   }
-  const msg = reponse.data.message;
+  if(response.data && response.data.code === 0) {
+    return next(response.data.data);
+  }
+  const msg = response.data.message;
   ElMessage.error(msg);
   throw Error(msg);
 }

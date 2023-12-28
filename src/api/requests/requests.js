@@ -1,6 +1,4 @@
-import { requestWithPagination } from '@/helpers';
-import { request } from '@/api';
-import { makeRequest } from '@/api/helpers';
+import { makeRequest, makeUseRequestWidthPagination } from '@/api/helpers';
 
 /**
  * 用户登录
@@ -16,11 +14,12 @@ export const login = makeRequest('/login', 'username', 'password');
 export const logout = makeRequest('/logout');
 
 /**
- * 
  * @returns {Promise<Storehouse[]>}
  */
 export const getSelfStorehouse = makeRequest('/getSelfStorehouse');
+
 export const getSelfWorkshop = makeRequest('/getSelfWorkshop');
+
 /**
  * 
  * @param {number} storehouseId 
@@ -28,17 +27,12 @@ export const getSelfWorkshop = makeRequest('/getSelfWorkshop');
  */
 export const getStock = makeRequest('/getStock', 'id', 'filters');
 
-export function useGetStockRecordWithPagination(paginate) {
-  const _request = requestWithPagination(
-    request('/getStockRecord'), paginate
-  );
-  return function(id, filters) {
-    return _request.data({ id, filters }).send();
-  };
-}
+export const useGetStockRecord = makeUseRequestWidthPagination('/getStockRecord', 'id', 'filters');
 
 export const getStockRecordDetail = makeRequest('/getStockRecordDetail', 'id');
+
 export const getStockAddOptions = makeRequest('/getAddOptions');
+
 export const stockAdd = makeRequest('/stockAdd');
 
 export const stockRecordUndo = makeRequest('/stockRecordUndo', 'id', 'comment');
@@ -46,45 +40,30 @@ export const stockRecordUndo = makeRequest('/stockRecordUndo', 'id', 'comment');
 export const getOptions = makeRequest('/getOptions', 'names');
 
 export const getMapping = makeRequest('/getMapping', 'names');
-export function useGetProcessListWithPagination(pagination) {
-  const _ = requestWithPagination(request('/getProcessList'), pagination);
-  return function(id, filters) {
-    return _.data({ id, filters }).send();
-  };
-}
+
+export const useGetProcessList = makeUseRequestWidthPagination('/getProcessList', 'id', 'filters');
 
 export const getNewProcessOptions = makeRequest('/getNewProcessOptions');
 
 export const rawApply = makeRequest('/rawApply');
+
 export const usedApply = makeRequest('/usedApply');
+
 export const finishProcess = makeRequest('/finishProcess');
 
 export const getProcessDetail = makeRequest('/getProcessDetail', 'id');
 
-export function useGetApplyListWithPagination(paginate) {
-  const req = requestWithPagination(request('/getApplyList'), paginate);
-  return function(id) {
-    return req.data({ id }).send();
-  };
-}
+export const useGetApplyList = makeUseRequestWidthPagination('/getApplyList', 'id');
 
 export const getApplyDetail = makeRequest('/getApplyDetail', 'id');
 
 export const doApply = makeRequest('/doApply', 'id');
+
 export const toProcessing = makeRequest('/toProcessing','id');
 
-export function useReportProfitWithPagination(paginate) {
-  const req = requestWithPagination(request('/report/profit'), paginate);
-  return function() {
-    return req.send();
-  };
-}
-export function useReportProcessWithPagination(paginate) {
-  const req = requestWithPagination(request('/report/process'), paginate);
-  return function() {
-    return req.send();
-  };
-}
+export const useReportProfit = makeUseRequestWidthPagination('/report/profit');
+
+export const useReportProcess = makeUseRequestWidthPagination('/report/process');
 
 export const saveStep = makeRequest('/saveStep');
 

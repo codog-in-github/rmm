@@ -19,14 +19,14 @@
 </template>
 <script setup>
 import { formatDate, usePagination } from '@/helpers';
-import { getProcessDetail, useReportProcessWithPagination } from '@/api';
+import { getProcessDetail, useReportProcess } from '@/api';
 import { ref } from 'vue';
 import ProcessDialog from './ProcessDialog.vue';
 import { ElMessage } from 'element-plus';
 const detail = ref(null);
 const show = ref(false);
 const pagnation = usePagination();
-const api = useReportProcessWithPagination(pagnation);
+const api = useReportProcess(pagnation);
 const list = ref([]);
 async function getList() {
   const rep = await api();

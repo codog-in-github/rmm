@@ -71,7 +71,7 @@
 import { 
   getSelfStorehouse,
   getStockRecordDetail, 
-  useGetStockRecordWithPagination,
+  useGetStockRecord,
   stockRecordUndo
 } from '@/api';
 import { ElMessage, ElMessageBox } from 'element-plus';
@@ -92,7 +92,7 @@ const dialogData = ref(null);
 const pagination = usePagination();
 const goodsTypeList = map2array(CONSTANT.GOODS_TYPE_MAP);
 const stockChangeList = map2array(CONSTANT.STOCK_CHANGE_TYPE_MAP);
-const getStockRecord = useGetStockRecordWithPagination(pagination);
+const getStockRecord = useGetStockRecord(pagination);
 
 function getList() {
   return getStockRecord(storehouseId.value, filters)

@@ -1,7 +1,10 @@
 <template>
   <ElDialog v-model="visibleChanger" width="1000px">
     <ElForm :model="localForm" labelWidth="120px" v-if="localForm">
-      <ElFormItem label="加工状态">{{ localForm.status !== null ? PROCESS_STATUS_MAP[localForm.status] : '配料申请' }}</ElFormItem>
+      <ElFormItem label="加工状态">
+        <template v-if="localForm.status !== null">{{ PROCESS_STATUS_MAP[localForm.status] }}</template>
+        <template v-else>配料申请</template>
+      </ElFormItem>
       <ElFormItem label="名称">
         <ElInput v-model="localForm.name" :disabled="localForm.status !== null">
           <template v-if="localForm.status === null" v-slot:prepend>{{ moment().format('YYYYMMDD') }}-</template>
@@ -232,7 +235,6 @@ async function init() {
     goodsDefaultUnitMapping[id] = goods[id].baseUnitId;
   }
   unitConversionMapping.value = map;
-  console.log(rep);
   options.goods = rep.goods;
   options.units = rep.units;
   options.specs = rep.specs;

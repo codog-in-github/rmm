@@ -64,7 +64,7 @@
 import { reactive, ref } from 'vue';
 import {
   getSelfWorkshop,
-  useGetProcessListWithPagination,
+  useGetProcessList,
   getOptions,
   getProcessDetail,
   toProcessing as toProcessingApi,
@@ -85,7 +85,7 @@ const filters = reactive({
   name: ''
 });
 const pagination = usePagination();
-const getProcessList = useGetProcessListWithPagination(pagination);
+const getProcessList = useGetProcessList(pagination);
 const list = ref([]);
 const dialogVisible = ref(false);
 const form = ref(null);

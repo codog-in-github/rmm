@@ -26,7 +26,7 @@
 <script setup>
 import {
   getSelfStorehouse,
-  useGetApplyListWithPagination,
+  useGetApplyList,
   getApplyDetail,
   doApply
 } from '@/api';
@@ -37,7 +37,7 @@ import * as CONSTANT from '@/constant';
 import ApplyDetail from './ApplyDetail.vue';
 
 const pagnation = usePagination();
-const getApplyList =  useGetApplyListWithPagination(pagnation);
+const getApplyList =  useGetApplyList(pagnation);
 const storehouseId = ref(null);
 const list = ref([]);
 const detailVisible = ref(false);

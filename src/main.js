@@ -21,6 +21,10 @@ Object.keys(icons).forEach(name => {
 app.use(store);
 app.use(router);
 app.use(components);
-runLodopScripts().then(() => {
-  app.mount('#app');
-});
+runLodopScripts()
+  .catch(() => {
+    window.LODOP = null;
+  })
+  .finally(() => {
+    app.mount('#app');
+  });

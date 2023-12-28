@@ -17,12 +17,12 @@
 </template>
 <script setup>
 import { formatDate, usePagination } from '@/helpers';
-import { useReportProfitWithPagination } from '@/api';
+import { useReportProfit } from '@/api';
 import { PROFIT_TYPE_MAP } from '@/constant';
 import { ref } from 'vue';
 
 const pagnation = usePagination();
-const api = useReportProfitWithPagination(pagnation);
+const api = useReportProfit(pagnation);
 const list = ref([]);
 async function getList() {
   list.value = await api();
