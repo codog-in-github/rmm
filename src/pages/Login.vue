@@ -64,7 +64,7 @@ async function submit() {
     );
     router.push('/stock');
   } catch (error) {
-    // todo
+    //
   }
 }
 

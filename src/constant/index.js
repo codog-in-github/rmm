@@ -32,6 +32,9 @@ export const GOODS_PROCESS_TYPE_MAP = /** @type {const} */({
   [GOODS_PROCESS_TYPE_TRASH]:   '废料'
 });
 
+export const GOODS_PROCESS_TEMPLATE_TYPE_RAW = 1;
+export const GOODS_PROCESS_TEMPLATE_TYPE_HALF = 2;
+
 
 // 入库记录变更状态
 export const STOCK_CHANGE_TYPE_IN       = 1;

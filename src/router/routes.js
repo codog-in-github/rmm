@@ -58,6 +58,20 @@ export default [
     label:     '客户管理',
     path:      '/customer/list',
     component: () => import('@/pages/customer/List.vue')
+  },
+  {
+    key:       'template.list',
+    icon:      'Memo',
+    label:     '加工模板管理',
+    path:      '/template/list',
+    component: () => import('@/pages/template/List.vue')
+  },
+  {
+    key:       'order.list',
+    icon:      'Memo',
+    label:     '订单管理',
+    path:      '/order/list',
+    component: () => import('@/pages/order/List.vue')
   }
 ];
 

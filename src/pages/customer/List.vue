@@ -34,7 +34,12 @@ getList();
         <ElButton type="primary" icon="Plus" @click="showEdit = true">新增客户</ElButton>
       </template>
     </GlFilterBar>
-    <ElTable class="flex-1 m-t-2" height="100%" :data="list">
+    <ElTable
+      v-loading="pagination.paginate.loading"
+      class="flex-1 m-t-2"
+      height="100%"
+      :data="list"
+    >
       <ElTableColumn label="客户名称" prop="name" />
       <ElTableColumn label="客户代码" prop="code" />
       <ElTableColumn label="创建人" prop="showName" />

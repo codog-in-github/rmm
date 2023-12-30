@@ -187,11 +187,9 @@
 
 <script setup>
 import {
-  getNewProcessOptions,
   rawApply,
   finishProcess as finishProcessApi,
-  saveStep as saveStepApi,
-  getMapping
+  saveStep as saveStepApi
 } from '@/api';
 import { 
   PROCESS_STATUS_MAP,
@@ -205,8 +203,8 @@ import { conversionSpec, isStandardSpec } from '@/helpers';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import { computed, reactive, ref, watch } from 'vue';
-let goodsDefaultUnitMapping = {};
+import { computed, ref, watch } from 'vue';
+import {getOptions} from '@/helpers/process';
 const props = defineProps({
   visible: {
     type:    Boolean,
@@ -221,24 +219,6 @@ const props = defineProps({
   }
 });
 const emit = defineEmits(['update:visible', 'reload', 'print']);
-const unitConversionMapping = ref(null);
-async function init() {
-  const [rep, { unit , goods }] = await Promise.all([
-    getNewProcessOptions(),
-    getMapping('unit,goods')
-  ]);
-  const map = {};
-  for(const id in unit) {
-    map[id] = unit[id].conversion;
-  }
-  for(const id in goods) {
-    goodsDefaultUnitMapping[id] = goods[id].baseUnitId;
-  }
-  unitConversionMapping.value = map;
-  options.goods = rep.goods;
-  options.units = rep.units;
-  options.specs = rep.specs;
-}
 watch(() => props.model, val => {
   const form = cloneDeep(val);
   if(form.status === PROCESS_STATUS_PROCESS && !form.trash) {
@@ -249,6 +229,7 @@ watch(() => props.model, val => {
   }
   localForm.value = form;
 });
+const { units, goodsDefaultUnitMapping, goods, specs, unitConversionMapping } = getOptions();
 
 // ------------ 属性计算 start -------------
 const totalWeight = computed(() => {
@@ -302,35 +283,6 @@ function priceCalc(row) {
 }
 // ------------ 属性计算 end ------------
 // ------------ 选项 start -------------
-const options = reactive({
-  goods: {},
-  units: {},
-  specs: {}
-});
-const units = computed(() => {
-  return function(id) {
-    if(id && options.units[id]) {
-      return options.units[id];
-    }
-    return [];
-  };
-});
-const specs = computed(() => {
-  return function(id) {
-    if(id && options.specs[id]) {
-      return options.specs[id];
-    }
-    return [];
-  };
-});
-const goods = computed(() => {
-  return function(type) {
-    if(type && options.goods[type]) {
-      return options.goods[type];
-    }
-    return [];
-  };
-});
 function querySearch(id) {
   const _options = specs.value(id).map(item => ({ value: item.label }));
   return function(_, cb) {
@@ -342,7 +294,7 @@ function querySearch(id) {
 
 function rawChange(id, row) {
   row.spec = null;
-  row.unitId = goodsDefaultUnitMapping[id];
+  row.unitId = goodsDefaultUnitMapping.value[id];
 }
 
 function addStep(step) {
@@ -466,5 +418,4 @@ async function finishProcess() {
 }
 // ------------ 表单相关操作 end -------------
 
-init();
 </script>
