@@ -7,6 +7,9 @@ interface window {
         SET_PRINTER_INDEX: (index: number) => boolean
         SET_PRINT_STYLE: (strStyleName: StrStyleName, styleValue: string | number) => void
         ADD_PRINT_TEXT: (top: number, left: number, width: number, height: number, strText: string) => boolean
-        PRINT: () => string | null
+        PRINT: () => string | null,
+        GET_PRINTER_COUNT: () => number,
+        GET_PRINTER_NAME: (pinterIndex: number) => string
+        GET_PAGESIZES_LIST: (pinterIndex: number, separator: string) => string,
     };
 }

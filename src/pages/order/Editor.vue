@@ -137,7 +137,7 @@ const goodsOptions = computed(() => {
           </ElTableColumn>
           <ElTableColumn width="90px">
             <template v-slot="{ $index, row }">
-              <GlAsyncButton link type="primary" :click="() => showTemplate(row)">查看工序</GlAsyncButton>
+              <GlAsyncButton link type="primary" :click="() => showTemplate(row)">查看工艺</GlAsyncButton>
               <ElButton link type="danger" @click="delDetail($index)">删除</ElButton>
             </template>
           </ElTableColumn>

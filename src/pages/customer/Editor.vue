@@ -44,6 +44,11 @@ const rules = {
     message:  '请输入客户名称',
     trigger:  'blur'
   },
+  code: {
+    required: true,
+    message:  '请输入客户代码',
+    trigger:  'blur'
+  },
   tel: {
     pattern: /^\d+$/,
     message: '请输入正确的输入联系电话',
@@ -89,8 +94,8 @@ defineExpose({
       <ElFormItem label="客户名称" prop="name">
         <ElInput v-model="form.name" />
       </ElFormItem>
-      <ElFormItem v-if="form.id" label="客户代码" prop="tel">
-        <ElInput :modelValue="form.code" readonly />
+      <ElFormItem label="客户代码" prop="code">
+        <ElInput v-model="form.code" />
       </ElFormItem>
       <ElFormItem label="联系电话" prop="tel">
         <ElInput v-model="form.tel" />

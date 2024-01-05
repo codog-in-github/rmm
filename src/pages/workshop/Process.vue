@@ -42,7 +42,7 @@
         </ElTableColumn>
       </ElTable>
     </div>
-   
+
     <GlPagination class="m-t-2" :pagination="pagination" :requestHook="getList" />
     <Dialog
       v-model:visible="dialogVisible"
@@ -161,7 +161,7 @@ async function showDetail(id) {
   }
 }
 function doPrint(data) {
-  if(!LODOP) {
+  if(!canPrint) {
     ElMessage.error('请先安装LODOP插件');
   }
   LODOP.PRINT_INITA();

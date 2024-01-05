@@ -13,7 +13,6 @@
           v-if="props.type ==='select'"
           :placeholder="`请选择${props.label}`"
           v-model="localValue"
-          :options="props.options"
           v-bind="$attrs"
         />
         <ElDatePicker

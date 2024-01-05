@@ -1,5 +1,14 @@
 <template>
   <ElDialog title="打印设置" v-model="modelValue" width="400px">
+    <ElAlert
+      v-if="!canPrint"
+      type="warning"
+      :closable="false"
+      class="m-b-2"
+    >
+      <span>请先安装LODOP插件</span>
+      <ElLink target="_blank" type="primary" href="https://www.lodop.net/download.html">下载地址</ElLink>
+    </ElAlert>
     <ElForm labelWidth="80px">
       <ElFormItem label="打印机">
         <ElSelectV2
@@ -12,7 +21,7 @@
       <!-- <ElFormItem label="纸张大小">
         <ElSelectV2
           class="w-full"
-          v-model="value.paperSizeIndex" 
+          v-model="value.paperSizeIndex"
           :options="sizes"
         />
       </ElFormItem> -->
@@ -28,6 +37,7 @@
 import { computed, ref, watch } from 'vue';
 import { cloneDeep } from 'lodash';
 
+const canPrint = Boolean(LODOP);
 const props = defineProps({
   visible: {
     type:    Boolean,
@@ -56,12 +66,14 @@ watch(() => props.model, (val) => {
 
 const printers = ref((function(){
   const printers = [];
-  const printerCount = LODOP.GET_PRINTER_COUNT();
-  for(let i = 0; i < printerCount; i++){
-    printers.push({
-      label: LODOP.GET_PRINTER_NAME(i),
-      value: i
-    });
+  if(canPrint) {
+    const printerCount = LODOP.GET_PRINTER_COUNT();
+    for(let i = 0; i < printerCount; i++){
+      printers.push({
+        label: LODOP.GET_PRINTER_NAME(i),
+        value: i
+      });
+    }
   }
   return printers;
 })());
@@ -91,3 +103,11 @@ function submit() {
   modelValue.value = false;
 }
 </script>
+
+<style lang="scss" scoped>
+::v-deep .el-alert__description{
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+</style>

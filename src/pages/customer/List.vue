@@ -4,7 +4,9 @@ import {formatDate, usePagination} from '@/helpers';
 import {customerDel, useGetCustomers} from '@/api';
 import Edit from '@/pages/customer/Editor.vue';
 import {ElMessage, ElMessageBox} from 'element-plus';
-const model = reactive({});
+const filters = reactive({
+  name: ''
+});
 const pagination = usePagination();
 const getListApi = useGetCustomers(pagination);
 const showEdit = ref(false);
@@ -20,7 +22,7 @@ const del = async function(row) {
   getList();
 };
 const getList = function() {
-  getListApi(model).then(res => {
+  getListApi(filters).then(res => {
     list.value = res;
   });
 };
@@ -29,7 +31,8 @@ getList();
 
 <template>
   <div class="h-full flex flex-col">
-    <GlFilterBar :model="model" @search="getList">
+    <GlFilterBar :model="filters" @search="getList">
+      <GlFilterItem label="客户名称" prop="name" />
       <template v-slot:after>
         <ElButton type="primary" icon="Plus" @click="showEdit = true">新增客户</ElButton>
       </template>

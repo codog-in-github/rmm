@@ -8,7 +8,9 @@ import Editor from './Editor.vue';
 const pagination = usePagination();
 const listApi = useOrderList(pagination);
 const list = ref([]);
-const filters = reactive({});
+const filters = reactive({
+  date: []
+});
 const editor = ref(null);
 
 const add = function() {
@@ -27,6 +29,7 @@ getList();
 <template>
   <div class="flex flex-col">
     <GlFilterBar :model="filters" class="m-b-2" @search="getList">
+      <GlFilterItem label="订单日期" prop="date" type="daterange" />
       <template #after>
         <ElButton icon="Plus" type="primary" @click="add">新增订单</ElButton>
       </template>
