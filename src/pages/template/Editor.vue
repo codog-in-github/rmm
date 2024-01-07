@@ -23,6 +23,16 @@ const emptyForm = function() {
   };
 };
 
+const props = defineProps({
+  readonly: {
+    type:    Boolean,
+    default: false
+  },
+  hiddenCustomer: {
+    type:    Boolean,
+    default: false
+  }
+});
 
 const show = ref(false);
 const form = ref(emptyForm());
@@ -64,8 +74,14 @@ defineExpose({
       try{
         form.value = await templateDetailSearch.apply(void 0, arguments);
       } catch (e) {
+        if(props.readonly) {
+          return;
+        }
         await ElMessageBox.confirm('未找到该模板是否新建？');
         form.value = emptyForm();
+        form.value.goodsId = arguments[1];
+        form.value.customerId = arguments[0];
+        form.value.targetSpec = arguments[2];
       }
     } else if(arguments.length === 1) {
       form.value = await templateDetail(arguments[0]);
@@ -110,15 +126,21 @@ const goodsOptions = computed(() => {
       :rules="rules"
       labelWidth="100px"
     >
-      <ElFormItem label="客户" prop="customerId">
-        <ElSelectV2 v-model="form.customerId" placeholder="请选择客户" :options="customers" />
+      <ElFormItem label="客户" prop="customerId" v-if="!hiddenCustomer">
+        <ElSelectV2
+          :disabled="readonly"
+          v-model="form.customerId"
+          placeholder="请选择客户"
+          :options="customers"
+        />
       </ElFormItem>
       <ElFormItem label="管坯" prop="goodsId">
-        <ElSelectV2 v-model="form.goodsId" :options="goodsOptions" />
+        <ElSelectV2 :disabled="readonly" v-model="form.goodsId" :options="goodsOptions" />
       </ElFormItem>
       <ElFormItem label="目标规格" prop="targetSpec">
         <ElAutocomplete
           v-model="form.targetSpec"
+          :disabled="readonly"
           :fetchSuggestions="querySearch(form.goodsId)"
         >
           <template #append>MM</template>
@@ -127,16 +149,17 @@ const goodsOptions = computed(() => {
       <ElFormItem label="原料规格" prop="rawSpec">
         <ElAutocomplete
           v-model="form.rawSpec"
+          :disabled="readonly"
           :fetchSuggestions="querySearch(form.goodsId)"
         >
           <template #append>MM</template>
         </ElAutocomplete>
       </ElFormItem>
       <ElFormItem label="工艺说明" prop="comment">
-        <ElInput type="textarea" v-model="form.comment" />
+        <ElInput type="textarea" :disabled="readonly" v-model="form.comment" />
       </ElFormItem>
     </ElForm>
-    <template #footer>
+    <template v-if="!readonly" #footer>
       <ElButton @click="show = false">取消</ElButton>
       <ElButton type="primary" @click="submit">确定</ElButton>
     </template>

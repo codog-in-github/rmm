@@ -48,6 +48,7 @@ export const getNewProcessOptions = makeRequest('/getNewProcessOptions');
 export const rawApply = makeRequest('/rawApply');
 
 export const usedApply = makeRequest('/usedApply');
+export const orderToday = makeRequest('/orderToday');
 
 export const finishProcess = makeRequest('/finishProcess');
 
@@ -66,4 +67,6 @@ export const useReportProfit = makeUseRequestWidthPagination('/report/profit');
 export const useReportProcess = makeUseRequestWidthPagination('/report/process');
 
 export const saveStep = makeRequest('/saveStep');
+
+export const toStock = makeRequest('/toStock', 'id');
 

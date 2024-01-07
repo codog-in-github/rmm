@@ -5,6 +5,7 @@
       <template v-slot:after>
         <ElButton type="primary" @click="add" icon="plus">配料申请</ElButton>
         <ElButton type="primary" @click="showUsedDetail" icon="plus">耗材申请</ElButton>
+        <GlAsyncButton icon="Checked" type="primary" :click="showTodayOrder">今日订单</GlAsyncButton>
         <ElButton type="primary" @click="printSettingsShow = true" icon="tools">打印设置</ElButton>
       </template>
     </GlFilterBar>
@@ -57,6 +58,7 @@
       :storehouses="storehouses"
       @submit="submit"
     />
+    <OrderToday ref="orderTodayRef" />
     <PrintSetting v-model:visible="printSettingsShow" :model="printSettings" @submit="savePrintSettings" />
   </div>
 </template>
@@ -78,7 +80,8 @@ import UsedDialog from './UsedDialog.vue';
 import PrintSetting from './PrintSetting.vue';
 import moment from 'moment';
 import { useUser } from '@/store';
-
+import OrderToday from '@/pages/workshop/OrderToday.vue';
+const orderTodayRef = ref(null);
 const canPrint = Boolean(LODOP);
 const workshopId = ref(null);
 const filters = reactive({
@@ -123,12 +126,13 @@ function add() {
       unitId:  null,
       num:     null
     },
-    product: null,
-    semis:   [],
+    steps:   [],
     comment: ''
   };
 }
-
+function showTodayOrder() {
+  return orderTodayRef.value?.show();
+}
 async function getList() {
   list.value =  await getProcessList(workshopId.value, filters);
 }

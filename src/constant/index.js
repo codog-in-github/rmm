@@ -86,8 +86,10 @@ export const PROFIT_TYPE_MAP = /** @type {const} */({
   [PROFIT_TYPE_ADMIN_ADJUST]:         '管理员调整'
 });
 
-export const PROCESS_STEP_TYPE_LAGUAN  = 1;
-export const PROCESS_STEP_TYPE_JIAOZHI = 2;
+export const PROCESS_STEP_TYPE_LAGUAN      = 1;
+export const PROCESS_STEP_TYPE_JIAOZHI    = 2;
+export const PROCESS_STEP_STOCK_TYPE_NONE = 0;
+export const PROCESS_STEP_STOCK_TYPE_IN   = 1;
 export const PROCESS_STEP_MAP = /** @type {const} */({
   [PROCESS_STEP_TYPE_LAGUAN]:  '拉管',
   [PROCESS_STEP_TYPE_JIAOZHI]: '矫直'
