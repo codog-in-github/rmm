@@ -36,10 +36,10 @@
 <script setup>
 import { login } from '@/api';
 import { useUser } from '@/store';
-import { ElInput } from 'element-plus';
+import {ElInput, ElMessage} from 'element-plus';
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { addRouterForAuth } from '@/router';
+import {addRouterForAuth, clearRoutes, getAuthRouteKeys, getAuthRoutes} from '@/router';
 
 const user = useUser();
 const router = useRouter();
@@ -62,12 +62,19 @@ async function submit() {
     addRouterForAuth(
       rep.auths.map(item => item.key)
     );
-    router.push('/stock');
+    const routes = getAuthRouteKeys();
+    if(routes.length > 0) {
+      router.push({
+        name: routes[0]
+      });
+    } else {
+      ElMessage.error('您的账号暂无权限访问系统，请联系管理员');
+    }
   } catch (error) {
     //
   }
 }
-
+clearRoutes();
 </script>
 <style lang="scss">
 .bg {

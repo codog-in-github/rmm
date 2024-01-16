@@ -91,6 +91,7 @@
             <ElTableColumn label="加工费（元/M）">
               <template v-slot="{ row }">
                 <ElInputNumber
+                  v-if="row.stockStatus === PROCESS_STEP_STOCK_TYPE_NONE"
                   class="w-full"
                   :disabled="row.id"
                   v-model="row.pricePerLength"
@@ -100,10 +101,17 @@
             </ElTableColumn>
             <ElTableColumn label="合计（元）">
               <template v-slot="{ row }">
-                {{ priceCalc(row) }}
+                <span v-if="row.stockStatus === PROCESS_STEP_STOCK_TYPE_NONE">
+                  {{ priceCalc(row) }}
+                </span>
               </template>
             </ElTableColumn>
-            <ElTableColumn label="操作" width="80px" v-if="canEditProduct">
+            <ElTableColumn
+              label="操作"
+              width="100px"
+              align="right"
+              v-if="canEditProduct"
+            >
               <template v-slot="{ row, $index }">
                 <template v-if="row.id">
                   <template v-if="row.type === PROCESS_STEP_TYPE_LAGUAN">
@@ -119,8 +127,7 @@
                     </ElButton>
                     <GlAsyncButton
                       v-if="
-                        $index === localForm.steps.length - 1
-                          && row.stockStatus === PROCESS_STEP_STOCK_TYPE_NONE
+                        $index === canToStockIndex
                       "
                       type="primary"
                       :click="() => toStock(row)"
@@ -139,7 +146,7 @@
               </template>
             </ElTableColumn>
           </ElTable>
-          <div class="m-t-2 w-full text-right" v-if="localForm.status === PROCESS_STATUS_PROCESS">
+          <div class="m-t-2 p-r-12px w-full text-right" v-if="localForm.status === PROCESS_STATUS_PROCESS">
             <ElButton
               type="primary"
               @click="addStep()"
@@ -149,15 +156,17 @@
           </div>
         </ElFormItem>
       </template>
-      <ElFormItem v-if="localForm.trash" label="废料">
-        <ElInputNumber
-          class="m-r-2"
-          controlsPosition="right"
-          v-model="localForm.trashNum"
-          :min="0"
-          :max="trashTotalWeight"
-        />
-        KG
+      <ElFormItem label="废料">
+        <div class="flex gap2 items-center">
+          <ElInput
+            class="m-r-2"
+            :modelValue="trashTotalWeight"
+            disabled
+          >
+            <template #append>KG</template>
+          </ElInput>
+        </div>
+        <span class="color-gray">注：未入库的材料均会被视为废料</span>
       </ElFormItem>
       <ElFormItem label="备注">
         <ElInput
@@ -208,7 +217,7 @@ import { conversionSpec, isStandardSpec } from '@/helpers';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import { computed, ref, watch } from 'vue';
+import {computed, nextTick, ref, watch} from 'vue';
 import { getOptions } from '@/helpers/process';
 
 const props = defineProps({
@@ -266,8 +275,16 @@ function calMaxWeight(type, index) {
   }
 }
 const trashTotalWeight = computed(() => {
-  console.log('cal');
-  return calMaxWeight(PROCESS_STEP_TYPE_LAGUAN, localForm.value.steps.length);
+  if(!totalWeight.value) {
+    return 0;
+  }
+  return totalWeight.value
+        - localForm.value.steps.reduce((total, item) => {
+          if(item.type === PROCESS_STEP_TYPE_LAGUAN && item.stockStatus === PROCESS_STEP_STOCK_TYPE_IN) {
+            return total + item.num;
+          }
+          return total;
+        }, 0);
 });
 const localForm = ref(null);
 const visibleChanger = computed({
@@ -293,6 +310,29 @@ function priceCalc(row) {
     row.num / conversionSpec(row.spec) * row.pricePerLength
   ).toFixed(2).replace(/\.?0+$/, '');
 }
+
+const canToStockIndex = computed(function() {
+  for(let i = localForm.value.steps.length - 1; i >= 0 ; i--) {
+    const item = localForm.value.steps[i];
+    if(item.type === PROCESS_STEP_TYPE_LAGUAN && item.stockStatus === PROCESS_STEP_STOCK_TYPE_NONE) {
+      return i;
+    }
+  }
+  return -1;
+});
+
+const toStockMax = computed(function() {
+  if(canToStockIndex.value >= 0) {
+    let total = localForm.value.steps[canToStockIndex.value].num;
+    for(let i = canToStockIndex.value + 1; i < localForm.value.steps.length; i++) {
+      if(localForm.value.steps[i].type === PROCESS_STEP_TYPE_LAGUAN) {
+        total -= localForm.value.steps[i].num;
+      }
+    }
+    return total;
+  }
+  return 0;
+});
 // ------------ 属性计算 end ------------
 
 function spanMethod({ row, column, rowIndex }) {
@@ -362,9 +402,6 @@ async function saveStep(row, index) {
   params.sort = localForm.value.steps.length;
   try {
     const { id } = await saveStepApi(params);
-    if(trashTotalWeight.value) {
-      localForm.value.trash.num = trashTotalWeight.value;
-    }
     if(row.type === PROCESS_STEP_TYPE_JIAOZHI) {
       localForm.value.steps[index-1].cid = id;
     }
@@ -376,8 +413,18 @@ async function saveStep(row, index) {
 }
 
 async function toStock(row) {
-  await toStockApi(row.id);
-  row.stockStatus = PROCESS_STEP_STOCK_TYPE_IN;
+  if(toStockMax.value <= 0) {
+    return ElMessage.error('无剩余材料可入库');
+  }
+  let { value: num } = await ElMessageBox.prompt('请输入入库数量（KG）', '提示', {
+    inputPlaceholder: toStockMax.value
+  });
+  if(!num) {
+    num = toStockMax.value;
+  }
+  const rec = await toStockApi(row.id, num);
+  console.log(rec);
+  localForm.value.steps.push(rec);
   ElMessage.success('入库成功');
 }
 
@@ -425,18 +472,8 @@ async function finishProcess() {
   if(localForm.value.steps.length === 0) {
     return ElMessage.warning('请添加工序后提交');
   }
-  if(!localForm.value.trash.num) {
-    try {
-      await ElMessageBox.confirm('该加工未产生任何废料，是否继续提交？');
-    } catch (none) {
-      return;
-    }
-  }
   try {
-    await finishProcessApi({
-      id:       localForm.value.id,
-      trashNum: localForm.value.trashNum
-    });
+    await finishProcessApi(localForm.value.id);
     visibleChanger.value = false;
     emit('reload');
   } catch (none) {
@@ -461,7 +498,7 @@ async function finishProcess() {
   transform: rotate(-45deg);
   width: 8em;
 }
-::v-deep .el-table__cell{
+:deep(.el-table__cell){
   overflow: hidden;
 }
 </style>

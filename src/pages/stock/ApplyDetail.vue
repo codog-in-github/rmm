@@ -9,7 +9,7 @@
       </ElFormItem>
       <ElFormItem label="原材料" v-if="model.raws.length > 0">
         <ElTable :data="model.raws">
-          <ElTableColumn label="名称" prop="goodsName" />
+          <ElTableColumn label="名称" prop="goodsName"  width="100" />
           <ElTableColumn label="规格" prop="spec">
             <template v-slot="{row}">
               <template v-if="row.subSpec">【{{ row.subSpec }}】</template>
@@ -17,8 +17,8 @@
               <template v-if="isStandardSpec(row.spec)">(mm)</template>
             </template>
           </ElTableColumn>
-          <ElTableColumn label="数量" prop="num" />
-          <ElTableColumn label="单位" prop="unitName" />
+          <ElTableColumn label="数量" prop="num"  width="60" />
+          <ElTableColumn label="单位" prop="unitName"  width="60" />
         </ElTable>
       </ElFormItem>
       <ElFormItem label="耗材" v-if="model.uses.length > 0">

@@ -59,7 +59,7 @@
       @submit="submit"
     />
     <OrderToday ref="orderTodayRef" />
-    <PrintSetting v-model:visible="printSettingsShow" :model="printSettings" @submit="savePrintSettings" />
+    <GlPrintSetting v-model:visible="printSettingsShow" :model="printSettings" @submit="savePrintSettings" />
   </div>
 </template>
 <script setup>
@@ -77,7 +77,6 @@ import { usePagination } from '@/helpers';
 import { ElMessage } from 'element-plus';
 import Dialog from './Dialog.vue';
 import UsedDialog from './UsedDialog.vue';
-import PrintSetting from './PrintSetting.vue';
 import moment from 'moment';
 import { useUser } from '@/store';
 import OrderToday from '@/pages/workshop/OrderToday.vue';

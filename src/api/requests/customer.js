@@ -13,3 +13,4 @@ export const templateDetailSearch = makeRequest('/template/detail', 'customerId'
 export const useOrderList = makeUseRequestWidthPagination('/order/list', 'filters');
 export const orderSave = makeRequest('/order/save');
 export const orderDetail = makeRequest('/order/detail', 'id');
+export const printOrder = makeRequest('/order/print', 'date');

@@ -95,4 +95,8 @@ export function clearRoutes() {
   cacheRouteKeys = [];
 }
 
+export function  getAuthRouteKeys() {
+  return cacheRouteKeys;
+}
+
 export default router;

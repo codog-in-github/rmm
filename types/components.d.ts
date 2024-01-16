@@ -4,6 +4,7 @@ import GlFilterBar from '@/components/GlFilterBar.vue'
 import GlFilterItem from '@/components/GlFilterItem.vue'
 import GlPagination from '@/components/GlPagination.vue'
 import GlStockApplyStatusContent from '@/components/GlStockApplyStatusContent.vue'
+import GlPrintSetting from "../src/components/GlPrintSetting.vue";
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
@@ -13,5 +14,6 @@ declare module '@vue/runtime-core' {
     GlAsyncButton: typeof GlAsyncButton,
     GlPagination: typeof GlPagination,
     GlStockApplyStatusContent: typeof GlStockApplyStatusContent,
+    GlPrintSetting: typeof GlPrintSetting,
   }
 }

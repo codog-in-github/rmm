@@ -88,7 +88,7 @@ async function submit() {
   await orderSave(form.value);
   ElMessage.success('保存成功');
   show.value = false;
-  emit('success');
+  emit('success', form.value.date);
 }
 const goodsOptions = computed(() => {
   return goods.value(GOODS_TYPE_RAW);

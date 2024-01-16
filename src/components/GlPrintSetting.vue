@@ -105,7 +105,7 @@ function submit() {
 </script>
 
 <style lang="scss" scoped>
-::v-deep .el-alert__description{
+:deep(.el-alert__description){
   display: flex;
   align-items: center;
   gap: 0.5rem;

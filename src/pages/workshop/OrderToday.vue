@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { orderToday } from '@/api';
+import {orderToday} from '@/api';
 import TemplateEditor from '@/pages/template/Editor.vue';
 
 const templateEditorRef = ref(null);
