@@ -1,7 +1,17 @@
 import { camelCase, isArray, isObject } from 'lodash';
-export function map2array(map) {
+
+/**
+ *
+ * @param {Record<string, string>} map
+ * @param {number} exclude
+ * @returns {Array<{value: number, label: string}>}
+ */
+export function map2array(map, ...exclude) {
   const list = [];
   for(const [value, label] of Object.entries(map)) {
+    if(exclude.includes(Number(value))) {
+      continue;
+    }
     list.push({
       value: Number(value),
       label
@@ -48,6 +58,7 @@ export function bitHas(num, bit) {
 /**
  * 规格长度换算比例
  * @param {string} spec
+ * @returns {number}
  */
 export function conversionSpec(spec) {
   let [r, w] = spec.split('*');

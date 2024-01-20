@@ -32,8 +32,11 @@ export const useGetStockRecord = makeUseRequestWidthPagination('/getStockRecord'
 export const getStockRecordDetail = makeRequest('/getStockRecordDetail', 'id');
 
 export const getStockAddOptions = makeRequest('/getAddOptions');
+export const getStockReduceOptions = makeRequest('/getReduceOptions');
 
 export const stockAdd = makeRequest('/stockAdd');
+
+export const stockReduce = makeRequest('/stockReduce');
 
 export const stockRecordUndo = makeRequest('/stockRecordUndo', 'id', 'comment');
 
@@ -48,7 +51,7 @@ export const getNewProcessOptions = makeRequest('/getNewProcessOptions');
 export const rawApply = makeRequest('/rawApply');
 
 export const usedApply = makeRequest('/usedApply');
-export const orderToday = makeRequest('/orderToday');
+export const dateOrder = makeRequest('/dateOrder', 'date');
 
 export const finishProcess = makeRequest('/finishProcess', 'id');
 

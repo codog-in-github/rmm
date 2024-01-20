@@ -94,3 +94,6 @@ export const PROCESS_STEP_MAP = /** @type {const} */({
   [PROCESS_STEP_TYPE_LAGUAN]:  '拉管',
   [PROCESS_STEP_TYPE_JIAOZHI]: '矫直'
 });
+
+export const FUTURES_TYPE_NORMAL = 1;
+export const FUTURES_TYPE_SPOT = 2;

@@ -1,5 +1,5 @@
 <template>
-  <ElDialog v-model="visibleChanger" :title="props.readonly ? '详情' : '新增'" width="1000px">
+  <ElDialog v-model="visibleChanger" :title="props.readonly ? '详情' : '新增'" width="1200px">
     <template v-if="localValue">
       <ElForm
         labelWidth="6em"
@@ -7,7 +7,7 @@
         :disabled="props.readonly"
         size="small"
       >
-        <ElFormItem label="入库类型">
+        <ElFormItem label="出库类型">
           <ElSelectV2 v-model="localValue.goodsType" :options="goodsTypeList" @change="changeGoodsType" />
         </ElFormItem>
         <ElFormItem label="明细">
@@ -21,21 +21,18 @@
                 />
               </template>
             </ElTableColumn>
-            <ElTableColumn label="规格">
+            <ElTableColumn label="规格" width="220px">
               <template v-slot="{ row }">
-                <ElAutocomplete
+                <ElSelectV2
+                  filterable
                   v-model="row.spec"
-                  :fetchSuggestions="querySearch(row.goodsId)"
-                >
-                  <template v-slot:suffix>
-                    <template v-if="isStandardSpec(row.spec)">mm</template>
-                  </template>
-                </ElAutocomplete>
+                  :options="options.specs.value(row.goodsId)"
+                />
               </template>
             </ElTableColumn>
-            <ElTableColumn label="入库数量">
+            <ElTableColumn label="出库数量">
               <template v-slot="{ row }">
-                <ElInputNumber 
+                <ElInputNumber
                   controlsPosition="right"
                   v-model.lazy="row.num"
                   @change="numChange(row, $event)"
@@ -52,7 +49,7 @@
             </ElTableColumn>
             <ElTableColumn label="单价（元/单位）" prop="price">
               <template v-slot="{ row }">
-                <ElInputNumber 
+                <ElInputNumber
                   controlsPosition="right"
                   v-model.lazy="row.price"
                   :min="0"
@@ -108,60 +105,72 @@
 </template>
 
 <script setup>
-import { GOODS_TYPE_MAP } from '@/constant';
+import { STOCK_TYPE_MAP, STOCK_TYPE_PRODUCT } from '@/constant';
 import { map2array } from '@/helpers/utils';
 import { ElMessage } from 'element-plus';
-import { cloneDeep } from 'lodash';
 import { ref, watch, computed } from 'vue';
-import { getMapping, getStockAddOptions, stockAdd } from '@/api';
-import { isStandardSpec } from '@/helpers';
+import { getMapping, getStockReduceOptions, stockReduce } from '@/api';
+
 let goodsDefaultUnitMapping = {};
-const optionsById = ref({
-  goods: {},
-  specs: {},
-  units: {}
-});
+const optionsOrigin = ref({});
+
+function emptyData() {
+  return {
+    goodsType:    STOCK_TYPE_PRODUCT,
+    storehouseId: props.storehouseId,
+    details:      [
+      emptyRow()
+    ],
+    comment: ''
+  };
+}
 
 const options = {
   goods: computed(() => {
-    if(localValue.value?.goodsType && optionsById.value.goods[localValue.value.goodsType]) {
-      return optionsById.value.goods[localValue.value.goodsType];
+    if (localValue.value?.goodsType && optionsOrigin.value.stocks[localValue.value.goodsType]) {
+      const options = [];
+      for(const [id, rows] of Object.entries(optionsOrigin.value.stocks[localValue.value.goodsType])) {
+        options.push({
+          label: rows[0].goodsName,
+          value: Number(id)
+        });
+      }
+      return options;
     }
     return [];
   }),
   specs: computed(() => {
     return function(goodsId) {
-      if(goodsId && optionsById.value.specs[goodsId]) {
-        return optionsById.value.specs[goodsId];
+      if (goodsId && optionsOrigin.value.stocks[localValue.value.goodsType]?.[goodsId]) {
+        return optionsOrigin.value.stocks[localValue.value.goodsType]?.[goodsId].map(item => ({
+          label: item.spec,
+          value: item.id
+        }));
       }
       return [];
     };
   }),
   units: computed(() => {
     return function(goodsId) {
-      if(goodsId && optionsById.value.units[goodsId]) {
-        return optionsById.value.units[goodsId];
+      if (goodsId && optionsOrigin.value.units[goodsId]) {
+        return optionsOrigin.value.units[goodsId];
       }
       return [];
     };
   })
 };
-const goodsTypeList = map2array(GOODS_TYPE_MAP);
-const localValue = ref(null);
+const goodsTypeList = map2array(STOCK_TYPE_MAP);
 const props = defineProps({
   visible: {
     required: true,
     type:     Boolean
   },
-  model: {
+  storehouseId: {
     required: true,
-    type:     Object
-  },
-  readonly: {
-    type:    Boolean,
-    default: false
+    type:     Number
   }
 });
+const localValue = ref(emptyData());
 const emit = defineEmits(['update:visible', 'success']);
 
 const visibleChanger = computed({
@@ -186,7 +195,7 @@ function emptyRow() {
 }
 
 function changeGoodsType(goodsType) {
-  if(goodsType) {
+  if (goodsType) {
     localValue.value.details = [emptyRow()];
   } else {
     localValue.value.details = [];
@@ -194,7 +203,7 @@ function changeGoodsType(goodsType) {
 }
 
 function changeGoods(row, goodsId) {
-  if(goodsId) {
+  if (goodsId) {
     row.spec = null;
     row.unitId = goodsDefaultUnitMapping[goodsId] ?? null;
     row.price = null;
@@ -203,28 +212,29 @@ function changeGoods(row, goodsId) {
 }
 
 function numChange(row, num) {
-  if(num) {
-    if(row.price) {
+  if (num) {
+    if (row.price) {
       row.total = num * row.price;
-    } else if(row.total) {
+    } else if (row.total) {
       row.price = row.total / num;
     }
-  } 
+  }
 }
 
 function totalChange(row, total) {
-  if(total && row.num) {
+  if (total && row.num) {
     row.price = total / row.num;
   }
 }
 
 function priceChange(row, price) {
-  if(price && row.num) {
+  if (price && row.num) {
     row.total = price * row.num;
   }
 }
+
 function remove(index) {
-  if(localValue.value.details.length === 1) {
+  if (localValue.value.details.length === 1) {
     ElMessage.warning('至少保留一条明细');
     localValue.value.details = [emptyRow()];
   } else {
@@ -233,44 +243,39 @@ function remove(index) {
 }
 
 function add() {
-  if(!localValue.value.goodsType) {
+  if (!localValue.value.goodsType) {
     ElMessage.warning('请选择商品类型');
     return;
   }
-  if(localValue.value.details.length >= 10) {
+  if (localValue.value.details.length >= 10) {
     ElMessage.warning('最多添加10条明细');
     return;
   }
   localValue.value.details.push(emptyRow());
 }
 
-function querySearch(id) {
-  const _options = options.specs.value(id).map(item => ({ value: item.label }));
-  return function(_, cb) {
-    cb(_options);
-  };
-}
-
-watch(() => props.model, val => {
-  localValue.value = cloneDeep(val);
+watch(() => props.visible, val => {
+  if (val) {
+    localValue.value = emptyData();
+  }
 });
 
-getStockAddOptions().then(data => {
-  optionsById.value = data;
+getStockReduceOptions().then(data => {
+  optionsOrigin.value = data;
 });
 getMapping('goods').then(({ goods }) => {
-  for(const id in goods) {
-    if(goods[id].baseUnitId) {
+  for (const id in goods) {
+    if (goods[id].baseUnitId) {
       goodsDefaultUnitMapping[id] = goods[id].baseUnitId;
     }
   }
 });
 
 async function doAdd() {
-  await stockAdd(localValue.value);
+  const printerInfo = await stockReduce(localValue.value);
   ElMessage.success('保存成功');
   emit('update:visible', false);
-  emit('success');
+  emit('success', printerInfo);
 }
 
 </script>
@@ -278,7 +283,7 @@ async function doAdd() {
 <style lang="scss" scoped>
 .el-form-item,
 .el-input-number,
-.el-select-v2{
+.el-select-v2 {
   width: 100%;
 }
 

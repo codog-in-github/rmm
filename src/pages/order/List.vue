@@ -4,8 +4,6 @@ import {usePagination} from '@/helpers';
 import {printOrder, useOrderList} from '@/api';
 import Editor from './Editor.vue';
 import {ElMessageBox} from 'element-plus';
-import {useUser} from '@/store';
-import moment from 'moment/moment';
 
 const printSettingsShow = ref(false);
 let _printSettings = JSON.parse(
@@ -46,7 +44,6 @@ const getList = async function() {
 };
 async function doPrint(date) {
   const data = await printOrder(date);
-  console.log(data);
   LODOP.PRINT_INITA();
   LODOP.SET_PRINTER_INDEX(printSettings.value.printerIndex);
   LODOP.SET_PRINT_STYLE('FontSize', 16);
@@ -74,7 +71,7 @@ async function doPrint(date) {
 async function addSuccess(date) {
   if(canPrint) {
     try {
-      await ElMessageBox.confirm('原料申请成功，是否打印？');
+      await ElMessageBox.confirm('订单新增，是否打印？');
       doPrint(date);
     } catch (none) {
       //

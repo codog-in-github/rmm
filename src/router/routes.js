@@ -11,6 +11,13 @@ export default [
     component: () => import('@/pages/order/List.vue')
   },
   {
+    key:       'futures',
+    icon:      'PieChart',
+    label:     '期货管理',
+    path:      '/futures',
+    component: () => import('@/pages/futures/Index.vue')
+  },
+  {
     key:       'customer.list',
     icon:      'Avatar',
     label:     '客户管理',

@@ -1,8 +1,6 @@
 import { makeRequest, makeUseRequestWidthPagination } from '@/api/helpers';
 
 export const useGetCustomers = makeUseRequestWidthPagination('/customer/list', 'filters');
-
-
 export const customerSave = makeRequest('/customer/save');
 export const customerDel = makeRequest('/customer/del', 'id');
 
@@ -14,3 +12,7 @@ export const useOrderList = makeUseRequestWidthPagination('/order/list', 'filter
 export const orderSave = makeRequest('/order/save');
 export const orderDetail = makeRequest('/order/detail', 'id');
 export const printOrder = makeRequest('/order/print', 'date');
+
+export const useGetFutures = makeUseRequestWidthPagination('/futures/record', 'filters');
+export const futuresStock = makeRequest('/futures/stock', 'date');
+export const futuresAdd = makeRequest('/futures/add');

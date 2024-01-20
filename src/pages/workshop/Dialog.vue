@@ -156,17 +156,14 @@
           </div>
         </ElFormItem>
       </template>
-      <ElFormItem label="废料">
-        <div class="flex gap2 items-center">
-          <ElInput
-            class="m-r-2"
-            :modelValue="trashTotalWeight"
-            disabled
-          >
-            <template #append>KG</template>
-          </ElInput>
-        </div>
-        <span class="color-gray">注：未入库的材料均会被视为废料</span>
+      <ElFormItem label="废料"  v-if="localForm.status !== null">
+        <ElInput
+          class="m-r-2"
+          :modelValue="trashTotalWeight"
+          disabled
+        >
+          <template #append>KG</template>
+        </ElInput>
       </ElFormItem>
       <ElFormItem label="备注">
         <ElInput
