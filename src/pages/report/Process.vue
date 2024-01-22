@@ -5,7 +5,7 @@
       <ElTable :data="list" v-loading="pagnation.paginate.loading">
         <ElTableColumn label="加工名称" prop="name" />
         <ElTableColumn label="成品率" prop="rate" :formatter="(_, __, value) => (value * 100).toFixed(2)+'%'" />
-        <ElTableColumn label="时间" prop="createdAt" :formatter="formatDate" />
+        <ElTableColumn label="时间" prop="createdAt" :formatter="formatDatetime" />
         <!-- <ElTableColumn label="操作">
           <template v-slot="{ row }">
             <ElButton type="primary" link @click="showDetail(row.id)">详情</ElButton>
@@ -18,7 +18,7 @@
   </div>
 </template>
 <script setup>
-import { formatDate, usePagination } from '@/helpers';
+import { formatDatetime, usePagination } from '@/helpers';
 import { getProcessDetail, useReportProcess } from '@/api';
 import { ref } from 'vue';
 import ProcessDialog from './ProcessDialog.vue';

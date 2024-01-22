@@ -7,7 +7,7 @@
         :disabled="props.readonly"
         size="small"
       >
-        <ElFormItem label="入库类型">
+        <ElFormItem label="出入库类型">
           <ElSelectV2 v-model="localValue.goodsType" :options="goodsTypeList" @change="changeGoodsType" />
         </ElFormItem>
         <ElFormItem label="明细">
@@ -23,7 +23,16 @@
             </ElTableColumn>
             <ElTableColumn label="规格">
               <template v-slot="{ row }">
+                <ElInput
+                  v-if="localValue.type === STOCK_CHANGE_TYPE_OUT"
+                  :modelValue="(row.subSpec ? `【${row.subSpec}】` : '') + row.spec"
+                >
+                  <template v-slot:suffix>
+                    <template v-if="isStandardSpec(row.spec)">mm</template>
+                  </template>
+                </ElInput>
                 <ElAutocomplete
+                  v-else
                   v-model="row.spec"
                   :fetchSuggestions="querySearch(row.goodsId)"
                 >
@@ -33,7 +42,7 @@
                 </ElAutocomplete>
               </template>
             </ElTableColumn>
-            <ElTableColumn label="入库数量">
+            <ElTableColumn label="数量">
               <template v-slot="{ row }">
                 <ElInputNumber 
                   controlsPosition="right"
@@ -108,7 +117,7 @@
 </template>
 
 <script setup>
-import { GOODS_TYPE_MAP } from '@/constant';
+import {GOODS_TYPE_MAP, STOCK_CHANGE_TYPE_OUT} from '@/constant';
 import { map2array } from '@/helpers/utils';
 import { ElMessage } from 'element-plus';
 import { cloneDeep } from 'lodash';

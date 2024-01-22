@@ -9,14 +9,14 @@
           </template>
         </ElTableColumn>
         <ElTableColumn label="金额（元）" prop="value" :formatter="(_, __, value) => value?.toFixed(2)" />
-        <ElTableColumn label="时间" prop="createdAt" :formatter="formatDate" />
+        <ElTableColumn label="时间" prop="createdAt" :formatter="formatDatetime" />
       </ElTable>
     </div>
     <GlPagination class="m-t-2" :pagination="pagnation" :requestHook="getList" />
   </div>
 </template>
 <script setup>
-import { formatDate, usePagination } from '@/helpers';
+import { formatDatetime, usePagination } from '@/helpers';
 import { useReportProfit } from '@/api';
 import { PROFIT_TYPE_MAP } from '@/constant';
 import { ref } from 'vue';

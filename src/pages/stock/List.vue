@@ -44,7 +44,7 @@
 </template>
 
 <script setup>
-import {getSelfStorehouse, getStock, printOrder} from '@/api';
+import {getSelfStorehouse, getStock, printReduce} from '@/api';
 import {ElMessage, ElMessageBox} from 'element-plus';
 import { ref, reactive } from 'vue';
 import Dialog from './Dialog.vue';
@@ -115,11 +115,11 @@ function savePrintSettings(settings) {
 
 const printSettings = ref(_printSettings);
 const canPrint = Boolean(LODOP);
-async function reduceSuccess(data) {
+async function reduceSuccess(id) {
   if(canPrint) {
     try {
       await ElMessageBox.confirm('出库成功，是否打印？');
-      doPrint(data);
+      doPrint(id);
     } catch (none) {
       //
     }
@@ -127,7 +127,8 @@ async function reduceSuccess(data) {
   getList();
 }
 
-function doPrint(data) {
+async function doPrint(id) {
+  const data = await printReduce(id);
   LODOP.PRINT_INITA();
   LODOP.SET_PRINTER_INDEX(printSettings.value.printerIndex);
   LODOP.SET_PRINT_STYLE('FontSize', 16);

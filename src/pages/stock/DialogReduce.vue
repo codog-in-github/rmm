@@ -165,9 +165,15 @@ const props = defineProps({
     required: true,
     type:     Boolean
   },
+  model: {
+    type: Object
+  },
+  readonly: {
+    type:    Boolean,
+    default: false
+  },
   storehouseId: {
-    required: true,
-    type:     Number
+    type: Number
   }
 });
 const localValue = ref(emptyData());
@@ -256,7 +262,7 @@ function add() {
 
 watch(() => props.visible, val => {
   if (val) {
-    localValue.value = emptyData();
+    localValue.value = props.model || emptyData();
   }
 });
 
@@ -272,10 +278,10 @@ getMapping('goods').then(({ goods }) => {
 });
 
 async function doAdd() {
-  const printerInfo = await stockReduce(localValue.value);
+  const { id } = await stockReduce(localValue.value);
   ElMessage.success('保存成功');
   emit('update:visible', false);
-  emit('success', printerInfo);
+  emit('success', id);
 }
 
 </script>

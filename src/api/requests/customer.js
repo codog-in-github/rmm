@@ -16,3 +16,4 @@ export const printOrder = makeRequest('/order/print', 'date');
 export const useGetFutures = makeUseRequestWidthPagination('/futures/record', 'filters');
 export const futuresStock = makeRequest('/futures/stock', 'date');
 export const futuresAdd = makeRequest('/futures/add');
+export const futuresDel = makeRequest('/futures/del', 'id');

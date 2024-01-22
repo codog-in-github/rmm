@@ -1,6 +1,6 @@
 <script setup>
 import { reactive, ref } from 'vue';
-import {formatDate, usePagination} from '@/helpers';
+import {formatDatetime, usePagination} from '@/helpers';
 import {customerDel, useGetCustomers} from '@/api';
 import Edit from '@/pages/customer/Editor.vue';
 import {ElMessage, ElMessageBox} from 'element-plus';
@@ -46,7 +46,7 @@ getList();
       <ElTableColumn label="客户名称" prop="name" />
       <ElTableColumn label="客户代码" prop="code" />
       <ElTableColumn label="创建人" prop="showName" />
-      <ElTableColumn label="创建时间" prop="createdAt" :formatter="formatDate" />
+      <ElTableColumn label="创建时间" prop="createdAt" :formatter="formatDatetime" />
       <ElTableColumn label="操作">
         <template v-slot:default="{ row }">
           <ElButton type="primary" link @click="edit(row)">编辑</ElButton>

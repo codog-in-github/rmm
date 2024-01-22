@@ -2,13 +2,15 @@
 import {computed, ref, watch} from 'vue';
 import {FUTURES_TYPE_NORMAL, FUTURES_TYPE_SPOT} from '@/constant';
 import {futuresAdd} from '@/api';
+import moment from 'moment';
 const emptyForm = () => {
   return {
     type:         FUTURES_TYPE_NORMAL,
     businessType: 0,
     price:        null,
     num:          null,
-    total:        null
+    total:        null,
+    businessDate: moment().format('YYYY-MM-DD')
   };
 };
 const form = ref(emptyForm());
@@ -67,6 +69,9 @@ const rules = {
   ],
   total: [
     {required: true, message: '请输入总价', trigger: 'blur'}
+  ],
+  businessDate: [
+    {required: true, message: '请选择日期', trigger: 'blur'}
   ]
 };
 </script>
@@ -79,7 +84,7 @@ const rules = {
       labelWidth="80px"
       :rules="rules"
     >
-      <ElFormItem label="交易类型">
+      <ElFormItem label="类型">
         <ElRadioGroup v-model="form.type">
           <ElRadio :label="FUTURES_TYPE_NORMAL">期货</ElRadio>
           <ElRadio :label="FUTURES_TYPE_SPOT">现货</ElRadio>
@@ -102,13 +107,20 @@ const rules = {
           v-model="form.num"
           @change="calTotal"
         >
-          <template #append>KG</template>
+          <template #append>T</template>
         </ElInput>
       </ElFormItem>
       <ElFormItem label="总价" prop="total">
         <ElInput type="number"  v-model="form.total" @change="calPrice">
           <template #append>元</template>
         </ElInput>
+      </ElFormItem>
+      <ElFormItem label="交易日期" prop="businessDate">
+        <ElDatePicker
+          v-model="form.businessDate"
+          valueFormat="YYYY-MM-DD"
+          :clearable="false"
+        />
       </ElFormItem>
     </ElForm>
     <template #footer>

@@ -10,7 +10,7 @@
           </template>
         </ElTableColumn>
         <ElTableColumn label="申请车间" prop="workshopName" />
-        <ElTableColumn label="申请时间" prop="createdAt" :formatter="formatDate" />
+        <ElTableColumn label="申请时间" prop="createdAt" :formatter="formatDatetime" />
         <ElTableColumn label="申请人" prop="applyUserName" />
         <ElTableColumn label="操作">
           <template v-slot="{ row }">
@@ -30,7 +30,7 @@ import {
   getApplyDetail,
   doApply
 } from '@/api';
-import { usePagination, formatDate } from '@/helpers';
+import { usePagination, formatDatetime } from '@/helpers';
 import { ElMessage } from 'element-plus';
 import { ref } from 'vue';
 import * as CONSTANT from '@/constant';

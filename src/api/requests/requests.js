@@ -37,6 +37,7 @@ export const getStockReduceOptions = makeRequest('/getReduceOptions');
 export const stockAdd = makeRequest('/stockAdd');
 
 export const stockReduce = makeRequest('/stockReduce');
+export const printReduce = makeRequest('/printReduce', 'id');
 
 export const stockRecordUndo = makeRequest('/stockRecordUndo', 'id', 'comment');
 

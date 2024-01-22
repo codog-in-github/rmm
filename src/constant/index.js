@@ -97,3 +97,8 @@ export const PROCESS_STEP_MAP = /** @type {const} */({
 
 export const FUTURES_TYPE_NORMAL = 1;
 export const FUTURES_TYPE_SPOT = 2;
+
+export const FUTURES_TYPE_MAP = /** @type {const} */({
+  [FUTURES_TYPE_NORMAL]: '期货',
+  [FUTURES_TYPE_SPOT]:   '现货'
+});

@@ -43,16 +43,14 @@
           label="操作时间"
           prop="createdAt"
           width="180"
-          :formatter="formatDate"
+          :formatter="formatDatetime"
         />
         <ElTableColumn label="操作" width="180">
           <template v-slot="{ row }">
             <GlAsyncButton type="text" :click="() => showDetail(row)">详情</GlAsyncButton>
+            <GlAsyncButton v-if="CONSTANT.STOCK_CHANGE_TYPE_OUT === row.type" type="text" :click="() => doPrint(row.id)">打印出库单</GlAsyncButton>
             <GlAsyncButton
-              v-if="[
-                CONSTANT.STOCK_CHANGE_TYPE_IN,
-                CONSTANT.STOCK_CHANGE_TYPE_OUT
-              ].includes(row.type) && !row.undidAt"
+              v-if="CONSTANT.STOCK_CHANGE_TYPE_IN === row.type  && !row.undidAt"
               type="text"
               :click="() => undo(row.id)"
             >
@@ -68,17 +66,17 @@
 </template>
 
 <script setup>
-import { 
+import {
   getSelfStorehouse,
-  getStockRecordDetail, 
+  getStockRecordDetail,
   useGetStockRecord,
-  stockRecordUndo
+  stockRecordUndo, printReduce
 } from '@/api';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { ref, reactive } from 'vue';
 import Dialog from './Dialog.vue';
 import * as CONSTANT from '@/constant';
-import { usePagination, formatDate, map2array } from '@/helpers';
+import { usePagination, formatDatetime, map2array } from '@/helpers';
 
 const storehouseId = ref(null);
 const list = ref([]);
@@ -119,6 +117,51 @@ async function undo(id) {
   } catch (error) {
     //
   }
+}
+let _printSettings = JSON.parse(
+  localStorage.getItem('printSettings')
+);
+if(!_printSettings) {
+  _printSettings = {
+    printerIndex:   null,
+    paperSizeIndex: null
+  };
+}
+const printSettingsShow = ref(false);
+function savePrintSettings(settings) {
+  if(settings) {
+    localStorage.setItem('printSettings', JSON.stringify(settings));
+    printSettings.value = settings;
+  }
+}
+
+const printSettings = ref(_printSettings);
+async function doPrint(id) {
+  const data = await printReduce(id);
+  LODOP.PRINT_INITA();
+  LODOP.SET_PRINTER_INDEX(printSettings.value.printerIndex);
+  LODOP.SET_PRINT_STYLE('FontSize', 16);
+  LODOP.ADD_PRINT_TEXT(40, 20, 200, 20, '明细');
+  LODOP.ADD_PRINT_TEXT(40, 120, 200, 20, '名称');
+  LODOP.ADD_PRINT_TEXT(40, 220, 200, 20, '规格');
+  LODOP.ADD_PRINT_TEXT(40, 370, 200, 20, '单价（元）');
+  LODOP.ADD_PRINT_TEXT(40, 510, 200, 20, '数量');
+  LODOP.ADD_PRINT_TEXT(40, 620, 200, 20, '总价（元）');
+  for(let i = 0; i < data.details.length; i++) {
+    const item = data.details[i];
+    LODOP.ADD_PRINT_TEXT(70 + i * 30, 120, 200, 20, item.goodsName);
+    LODOP.ADD_PRINT_TEXT(70 + i * 30, 220, 200, 20, item.spec);
+    LODOP.ADD_PRINT_TEXT(70 + i * 30, 370, 200, 20, item.price);
+    LODOP.ADD_PRINT_TEXT(70 + i * 30, 510, 200, 20, item.num + ' ' + item.unit);
+    LODOP.ADD_PRINT_TEXT(70 + i * 30, 620, 200, 20, item.total);
+  }
+  LODOP.ADD_PRINT_TEXT(80 + data.details.length * 30, 20, 200, 20, '打印人');
+  LODOP.ADD_PRINT_TEXT(80 + data.details.length * 30, 120, 200, 20, data.user);
+  LODOP.ADD_PRINT_TEXT(120 + data.details.length * 30, 20, 200, 20, '打印时间');
+  LODOP.ADD_PRINT_TEXT(120 + data.details.length * 30, 120, 400, 20, data.time);
+  LODOP.ADD_PRINT_TEXT(160 + data.details.length * 30, 20, 200, 20, '备注');
+  LODOP.ADD_PRINT_TEXT(160 + data.details.length * 30, 120, 400, 20, data.comment);
+  LODOP.PREVIEW();
 }
 async function init() {
   pagination.paginate.loading = true;
