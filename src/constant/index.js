@@ -1,15 +1,10 @@
 // 库存类型
 export const GOODS_TYPE_RAW     = 1;
-export const GOODS_TYPE_PRODUCT = 2;
 export const GOODS_TYPE_USE     = 4;
-export const GOODS_TYPE_FUTURES = 8;
-export const GOODS_TYPE_SEMI    = 16;
-export const GOODS_TYPE_TRASH   = 32;
 
 export const GOODS_TYPE_MAP = /** @type {const} */({
-  [GOODS_TYPE_RAW]:     '材料',
-  [GOODS_TYPE_USE]:     '耗材',
-  [GOODS_TYPE_FUTURES]: '期货'
+  [GOODS_TYPE_RAW]: '材料',
+  [GOODS_TYPE_USE]: '耗材'
 });
 
 export const STOCK_TYPE_RAW     = 1;

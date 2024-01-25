@@ -85,6 +85,7 @@ function showTemplate(row) {
 }
 async function submit() {
   await elFormRef.value.validate();
+  console.log(form.value);
   await orderSave(form.value);
   ElMessage.success('保存成功');
   show.value = false;
@@ -108,7 +109,7 @@ const goodsOptions = computed(() => {
       labelWidth="100px"
     >
       <ElFormItem label="日期" prop="customerId">
-        <ElInput v-model="form.date" disabled />
+        <ElDatePicker valueFormat="YYYY-MM-DD" v-model="form.date" :clearable="false" />
       </ElFormItem>
       <ElFormItem label="订单商品" prop="details">
         <ElTable :data="form.details">
