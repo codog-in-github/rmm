@@ -70,6 +70,8 @@ export const useReportProfit = makeUseRequestWidthPagination('/report/profit');
 
 export const useReportProcess = makeUseRequestWidthPagination('/report/process');
 
+export const getStockChange = makeRequest('/report/stockChange');
+
 export const saveStep = makeRequest('/saveStep');
 
 export const toStock = makeRequest('/toStock', 'id', 'num');

@@ -13,6 +13,7 @@
           v-if="props.type ==='select'"
           :placeholder="`请选择${props.label}`"
           v-model="localValue"
+          @change="emit('change', $event)"
           v-bind="$attrs"
         />
         <ElDatePicker
@@ -47,7 +48,7 @@ const props = defineProps({
 });
 
 const model = inject('GlFilterBarModel');
-
+const emit = defineEmits(['change']);
 const localValue = computed({
   get() {
     return model[props.prop];

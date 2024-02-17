@@ -8,8 +8,8 @@ import {FUTURES_TYPE_MAP, FUTURES_TYPE_NORMAL, FUTURES_TYPE_SPOT} from '@/consta
 import {ElMessage, ElMessageBox} from 'element-plus';
 const filters = reactive({
   date: [
-    moment().startOf('month').format('YYYY-MM-DD'),
-    moment().endOf('month').format('YYYY-MM-DD')
+    moment().startOf('year').format('YYYY-MM-DD'),
+    moment().format('YYYY-MM-DD')
   ],
   type:         null,
   businessType: null

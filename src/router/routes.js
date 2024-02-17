@@ -47,7 +47,7 @@ export default [
   },
   {
     key:       'stockRecord',
-    icon:      'List',
+    icon:      'Memo',
     label:     '出入库记录',
     path:      '/stock/record',
     component: () => import('@/pages/stock/Record.vue')
@@ -75,10 +75,17 @@ export default [
   // },
   {
     key:       'report.process',
-    icon:      'PieChart',
+    icon:      'ScaleToOriginal',
     label:     '成品率统计',
     path:      '/report/process',
     component: () => import('@/pages/report/Process.vue')
+  },
+  {
+    key:       'report.stockChange',
+    icon:      'DataAnalysis',
+    label:     '出入库统计',
+    path:      '/report/stockChange',
+    component: () => import('@/pages/report/StockChange.vue')
   }
 ];
 

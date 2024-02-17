@@ -39,8 +39,8 @@ export const STOCK_CHANGE_TYPE_RETURN   = 4;
 export const STOCK_CHANGE_TYPE_ADJUST   = -1;
 export const STOCK_CHANGE_TYPE_UNDO     = -2;
 export const STOCK_CHANGE_TYPE_MAP = /** @type {const} */({
-  [STOCK_CHANGE_TYPE_IN]:       '入库',
-  [STOCK_CHANGE_TYPE_OUT]:      '出库',
+  [STOCK_CHANGE_TYPE_IN]:       '采购入库',
+  [STOCK_CHANGE_TYPE_OUT]:      '销售出库',
   [STOCK_CHANGE_TYPE_TRANSFER]: '加工配料',
   [STOCK_CHANGE_TYPE_RETURN]:   '加工入库',
   [STOCK_CHANGE_TYPE_UNDO]:     '撤销'
