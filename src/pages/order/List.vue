@@ -1,7 +1,7 @@
 <script setup>
 import {ref, reactive} from 'vue';
 import {usePagination} from '@/helpers';
-import {printOrder, useOrderList} from '@/api';
+import {ordelDel, printOrder, useOrderList} from '@/api';
 import Editor from './Editor.vue';
 import {ElMessageBox} from 'element-plus';
 
@@ -42,8 +42,8 @@ const edit = function(row) {
 const getList = async function() {
   list.value = await listApi(filters);
 };
-async function doPrint(date) {
-  const data = await printOrder(date);
+async function doPrint(id) {
+  const data = await printOrder(id);
   LODOP.PRINT_INITA();
   LODOP.SET_PRINTER_INDEX(printSettings.value.printerIndex);
   LODOP.SET_PRINT_STYLE('FontSize', 16);
@@ -54,25 +54,39 @@ async function doPrint(date) {
   LODOP.ADD_PRINT_TEXT(60, 220, 200, 20, '原料');
   LODOP.ADD_PRINT_TEXT(60, 340, 200, 20, '规格（MM）');
   LODOP.ADD_PRINT_TEXT(60, 480, 200, 20, '数量（KG）');
+  let offset = 0;
   for(let i = 0; i < data.details.length; i++) {
+    const lineTop = 100 + (i + offset) * 30;
     const item = data.details[i];
-    LODOP.ADD_PRINT_TEXT(100 + i * 30, 120, 200, 20, item.code);
-    LODOP.ADD_PRINT_TEXT(100 + i * 30, 220, 200, 20, item.goodsName);
-    LODOP.ADD_PRINT_TEXT(100 + i * 30, 340, 200, 20, item.spec);
-    LODOP.ADD_PRINT_TEXT(100 + i * 30, 480, 200, 20, item.num);
+    LODOP.ADD_PRINT_TEXT(lineTop, 120, 200, 20, item.code);
+    LODOP.ADD_PRINT_TEXT(lineTop, 220, 200, 20, item.goodsName);
+    LODOP.ADD_PRINT_TEXT(lineTop, 340, 200, 20, item.spec);
+    LODOP.ADD_PRINT_TEXT(lineTop, 480, 200, 20, item.num);
+    if(item.comment) {
+      offset += 1.5;
+      LODOP.SET_PRINT_STYLE('FontSize', 12);
+      LODOP.ADD_PRINT_TEXT(lineTop + 34, 120, 800, 20, '工艺说明： ' + item.comment);
+      LODOP.SET_PRINT_STYLE('FontSize', 16);
+    }
   }
-  LODOP.ADD_PRINT_TEXT(120 + data.details.length * 30, 20, 200, 20, '打印人');
-  LODOP.ADD_PRINT_TEXT(120 + data.details.length * 30, 120, 200, 20, data.user);
-  LODOP.ADD_PRINT_TEXT(160 + data.details.length * 30, 20, 200, 20, '打印时间');
-  LODOP.ADD_PRINT_TEXT(160 + data.details.length * 30, 120, 400, 20, data.printerTime);
+  LODOP.ADD_PRINT_TEXT(120 + (data.details.length + offset)* 30, 20, 200, 20, '打印人');
+  LODOP.ADD_PRINT_TEXT(120 + (data.details.length + offset)* 30, 120, 200, 20, data.user);
+  LODOP.ADD_PRINT_TEXT(160 + (data.details.length + offset)* 30, 20, 200, 20, '打印时间');
+  LODOP.ADD_PRINT_TEXT(160 + (data.details.length + offset)* 30, 120, 400, 20, data.printerTime);
   LODOP.PREVIEW();
 }
 
-async function addSuccess(date) {
+async function confirmDel(row) {
+  await ElMessageBox.confirm(`确认删除【${row.date}】订单？`);
+  await ordelDel(row.id);
+  getList();
+}
+
+async function addSuccess(id) {
   if(canPrint) {
     try {
       await ElMessageBox.confirm('订单新增，是否打印？');
-      doPrint(date);
+      doPrint(id);
     } catch (none) {
       //
     }
@@ -98,7 +112,8 @@ getList();
       <ElTableColumn label="操作">
         <template v-slot="{ row }">
           <GlAsyncButton link type="primary" :click="() => edit(row)">查看</GlAsyncButton>
-          <GlAsyncButton link type="primary" :click="() => doPrint(row.date)">打印</GlAsyncButton>
+          <GlAsyncButton link type="primary" :click="() => doPrint(row.id)">打印</GlAsyncButton>
+          <GlAsyncButton link type="primary" :click="() => confirmDel(row)">删除</GlAsyncButton>
         </template>
       </ElTableColumn>
     </ElTable>

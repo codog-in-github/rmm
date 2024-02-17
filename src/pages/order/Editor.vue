@@ -85,11 +85,10 @@ function showTemplate(row) {
 }
 async function submit() {
   await elFormRef.value.validate();
-  console.log(form.value);
-  await orderSave(form.value);
+  const { id } = await orderSave(form.value);
   ElMessage.success('保存成功');
   show.value = false;
-  emit('success', form.value.date);
+  emit('success', id);
 }
 const goodsOptions = computed(() => {
   return goods.value(GOODS_TYPE_RAW);
