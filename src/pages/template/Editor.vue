@@ -8,7 +8,7 @@ import {
   templateSave
 } from '@/api';
 import { GOODS_TYPE_RAW } from '@/constant';
-import { isStandardTempSpec } from '@/helpers';
+import {isStandardSpec} from '@/helpers';
 import { ElMessage, ElMessageBox } from 'element-plus';
 const { goods, specs } = getOptions();
 const elFormRef = ref(null);
@@ -42,7 +42,7 @@ const specValidator = function(name) {
     if(!value) {
       return cb(new Error(`${name}规格未填写`));
     }
-    if(!isStandardTempSpec(value)) {
+    if(!isStandardSpec(value)) {
       return cb(new Error(`${name}规格格式错误`));
     }
     cb();

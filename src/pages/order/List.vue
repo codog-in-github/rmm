@@ -4,7 +4,7 @@ import {usePagination} from '@/helpers';
 import {ordelDel, printOrder, useOrderList} from '@/api';
 import Editor from './Editor.vue';
 import {ElMessageBox} from 'element-plus';
-
+const isPrintTemplate = ref(true);
 const printSettingsShow = ref(false);
 let _printSettings = JSON.parse(
   localStorage.getItem('printSettings')
@@ -62,17 +62,27 @@ async function doPrint(id) {
     LODOP.ADD_PRINT_TEXT(lineTop, 220, 200, 20, item.goodsName);
     LODOP.ADD_PRINT_TEXT(lineTop, 340, 200, 20, item.spec);
     LODOP.ADD_PRINT_TEXT(lineTop, 480, 200, 20, item.num);
-    if(item.comment) {
+    if(isPrintTemplate.value && item.comment) {
       offset += 1.5;
       LODOP.SET_PRINT_STYLE('FontSize', 12);
       LODOP.ADD_PRINT_TEXT(lineTop + 34, 120, 800, 20, '工艺说明： ' + item.comment);
       LODOP.SET_PRINT_STYLE('FontSize', 16);
     }
   }
-  LODOP.ADD_PRINT_TEXT(120 + (data.details.length + offset)* 30, 20, 200, 20, '打印人');
-  LODOP.ADD_PRINT_TEXT(120 + (data.details.length + offset)* 30, 120, 200, 20, data.user);
-  LODOP.ADD_PRINT_TEXT(160 + (data.details.length + offset)* 30, 20, 200, 20, '打印时间');
-  LODOP.ADD_PRINT_TEXT(160 + (data.details.length + offset)* 30, 120, 400, 20, data.printerTime);
+  let lastTop = 120 + (data.details.length + offset)* 30;
+  if(data.orderComment) {
+    LODOP.ADD_PRINT_TEXT(lastTop, 20, 200, 20, '备注');
+    const comment = data.orderComment.split('\n');
+    for(let i = 0; i < comment.length; i++) {
+      LODOP.ADD_PRINT_TEXT(lastTop, 120, 800, 20, comment[i]);
+      lastTop += 30;
+    }
+    lastTop += 10;
+  }
+  LODOP.ADD_PRINT_TEXT(lastTop, 20, 200, 20, '打印人');
+  LODOP.ADD_PRINT_TEXT(lastTop, 120, 200, 20, data.user);
+  LODOP.ADD_PRINT_TEXT(lastTop + 40, 20, 200, 20, '打印时间');
+  LODOP.ADD_PRINT_TEXT(lastTop + 40, 120, 400, 20, data.printerTime);
   LODOP.PREVIEW();
 }
 
@@ -104,6 +114,10 @@ getList();
       <template #after>
         <ElButton icon="Plus" type="primary" @click="add">新增订单</ElButton>
         <ElButton icon="Setting" type="primary" @click="printSettingsShow = true">打印设置</ElButton>
+        <div class="print-switch">
+          <span class="title">工艺说明</span>
+          <ElSwitch v-model="isPrintTemplate" activeText="打印" inactiveText="不打印" />
+        </div>
       </template>
     </GlFilterBar>
     <ElTable :data="list" class="flex-1">
@@ -124,5 +138,21 @@ getList();
 </template>
 
 <style scoped lang="scss">
-
+.print-switch{
+  display: inline-block;
+  position: relative;
+  border: 1px solid var(--el-color-primary);
+  padding: 4px 10px;
+  margin: 10px;
+  border-radius: 0.5em;
+  .title{
+    font-size: 12px;
+    color: var(--el-color-primary);
+    position: absolute;
+    top: -0.7em;
+    left: 0.4em;
+    background: #fff;
+    padding: 0 0.4em;
+  }
+}
 </style>

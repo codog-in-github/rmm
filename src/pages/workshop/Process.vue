@@ -30,7 +30,21 @@
         </ElTableColumn>
         <ElTableColumn label="操作">
           <template v-slot="{ row }">
-            <GlAsyncButton type="primary" link :click="() => showDetail(row.id)">详情</GlAsyncButton>
+            <GlAsyncButton
+              type="primary"
+              link
+              :click="() => showDetail(row.id)"
+            >
+              详情
+            </GlAsyncButton>
+            <GlAsyncButton
+              v-if="user.can('process.list.delete')"
+              type="primary"
+              link
+              :click="() => confirmDel(row)"
+            >
+              删除
+            </GlAsyncButton>
             <ElButton
               type="primary"
               link
@@ -70,16 +84,17 @@ import {
   getOptions,
   getProcessDetail,
   toProcessing as toProcessingApi,
-  usedApply, dateOrder
+  usedApply, delProcess
 } from '@/api';
 import { PROCESS_STATUS_MAP, PROCESS_STATUS_PROCESS, PROCESS_STATUS_WAIT } from '@/constant';
 import { usePagination } from '@/helpers';
-import { ElMessage } from 'element-plus';
+import {ElMessage, ElMessageBox} from 'element-plus';
 import Dialog from './Dialog.vue';
 import UsedDialog from './UsedDialog.vue';
 import moment from 'moment';
 import { useUser } from '@/store';
 import DateOrder from '@/pages/workshop/DateOrder.vue';
+const user = useUser();
 const dateOrderRef = ref(null);
 const canPrint = Boolean(LODOP);
 const workshopId = ref(null);
@@ -111,7 +126,12 @@ function savePrintSettings(settings) {
     printSettings.value = settings;
   }
 }
-
+async function confirmDel(row) {
+  await ElMessageBox.confirm('确认删除吗？');
+  await delProcess(row.id);
+  ElMessage.success('删除成功');
+  getList();
+}
 function add() {
   dialogVisible.value = true;
   form.value = {
@@ -184,7 +204,7 @@ function doPrint(data) {
   LODOP.ADD_PRINT_TEXT(140, 20, 200, 20, '备注');
   LODOP.ADD_PRINT_TEXT(140, 120, 300, 500, data.comment);
   LODOP.ADD_PRINT_TEXT(260, 20, 200, 20, '打印人');
-  LODOP.ADD_PRINT_TEXT(260, 120, 200, 20, useUser().name);
+  LODOP.ADD_PRINT_TEXT(260, 120, 200, 20, user.name);
   LODOP.ADD_PRINT_TEXT(300, 20, 200, 20, '打印时间');
   LODOP.ADD_PRINT_TEXT(300, 120, 200, 20, moment().format('YYYY-MM-DD HH:mm'));
   LODOP.PRINT();

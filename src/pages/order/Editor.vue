@@ -15,6 +15,7 @@ const emit = defineEmits(['success']);
 const emptyForm = function() {
   return {
     date:    moment().format('YYYY-MM-DD'),
+    comment: '',
     details: []
   };
 };
@@ -100,7 +101,7 @@ const goodsOptions = computed(() => {
 </script>
 
 <template>
-  <ElDialog v-model="show" title="订单详情" width="800px">
+  <ElDialog v-model="show" title="订单详情" width="900px">
     <ElForm
       ref="elFormRef"
       :model="form"
@@ -114,25 +115,31 @@ const goodsOptions = computed(() => {
         <ElTable :data="form.details">
           <ElTableColumn label="客户名称">
             <template v-slot="{ row }">
-              <ElSelectV2 v-model="row.customerId" :options="customers" />
+              <ElSelectV2 v-model="row.customerId" :options="customers" class="w-full" />
             </template>
           </ElTableColumn>
-          <ElTableColumn label="原料名称">
+          <ElTableColumn label="原料名称" width="120px">
             <template v-slot="{ row }">
               <ElSelectV2 v-model="row.goodsId" :options="goodsOptions" />
             </template>
           </ElTableColumn>
-          <ElTableColumn label="规格(MM)">
+          <ElTableColumn label="规格(MM)" width="180px">
             <template v-slot="{ row }">
               <ElAutocomplete
+                class="w-full"
                 v-model="row.spec"
                 :fetchSuggestions="querySearch(row.goodsId)"
               />
             </template>
           </ElTableColumn>
-          <ElTableColumn label="数量（KG）">
+          <ElTableColumn label="数量（KG）" width="120px">
             <template v-slot="{ row }">
-              <ElInputNumber class="w-full" v-model="row.num" controlsPosition="right" />
+              <ElInput
+                type="number"
+                class="w-full"
+                v-model="row.num"
+                min="0"
+              />
             </template>
           </ElTableColumn>
           <ElTableColumn width="90px">
@@ -145,6 +152,9 @@ const goodsOptions = computed(() => {
         <div class="w-full text-right">
           <ElButton icon="Plus" type="primary" @click="addDetail">添加</ElButton>
         </div>
+      </ElFormItem>
+      <ElFormItem label="备注">
+        <ElInput v-model="form.comment" type="textarea" />
       </ElFormItem>
     </ElForm>
     <template #footer>

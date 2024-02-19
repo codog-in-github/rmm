@@ -55,6 +55,7 @@ export const usedApply = makeRequest('/usedApply');
 export const dateOrder = makeRequest('/dateOrder', 'date');
 
 export const finishProcess = makeRequest('/finishProcess', 'id');
+export const delProcess = makeRequest('/delProcess', 'id');
 
 export const getProcessDetail = makeRequest('/getProcessDetail', 'id');
 
