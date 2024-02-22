@@ -50,9 +50,10 @@ function showTemplate(row) {
       <ElTableColumn prop="goodsName" label="成品" />
       <ElTableColumn prop="spec" label="规格(MM)" />
       <ElTableColumn prop="num" label="数量(KG)" />
-      <ElTableColumn prop="id">
+      <ElTableColumn>
         <template v-slot="{ row }">
           <GlAsyncButton
+            v-if="row.templateId"
             type="primary"
             link
             :click="() => showTemplate(row)"

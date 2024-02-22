@@ -11,5 +11,6 @@ interface window {
         GET_PRINTER_COUNT: () => number,
         GET_PRINTER_NAME: (pinterIndex: number) => string
         GET_PAGESIZES_LIST: (pinterIndex: number, separator: string) => string,
+        NEWPAGE: () => void
     };
 }

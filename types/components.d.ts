@@ -4,7 +4,8 @@ import GlFilterBar from '@/components/GlFilterBar.vue'
 import GlFilterItem from '@/components/GlFilterItem.vue'
 import GlPagination from '@/components/GlPagination.vue'
 import GlStockApplyStatusContent from '@/components/GlStockApplyStatusContent.vue'
-import GlPrintSetting from "../src/components/GlPrintSetting.vue";
+import GlPrintSetting from "@/components/GlPrintSetting.vue";
+import GlBorderCard from "@/components/GlBorderCard.vue";
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
@@ -15,5 +16,6 @@ declare module '@vue/runtime-core' {
     GlPagination: typeof GlPagination,
     GlStockApplyStatusContent: typeof GlStockApplyStatusContent,
     GlPrintSetting: typeof GlPrintSetting,
+    GlBorderCard: typeof GlBorderCard,
   }
 }

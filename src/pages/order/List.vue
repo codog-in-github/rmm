@@ -3,9 +3,10 @@ import {ref, reactive} from 'vue';
 import {usePagination} from '@/helpers';
 import {ordelDel, printOrder, useOrderList} from '@/api';
 import Editor from './Editor.vue';
-import {ElMessageBox} from 'element-plus';
+import {ElMessage, ElMessageBox} from 'element-plus';
 const isPrintTemplate = ref(true);
 const printSettingsShow = ref(false);
+const selectedIds = ref([]);
 let _printSettings = JSON.parse(
   localStorage.getItem('printSettings')
 );
@@ -40,50 +41,73 @@ const edit = function(row) {
   return editor.value.show(row.id);
 };
 const getList = async function() {
+  selectedIds.value = [];
   list.value = await listApi(filters);
 };
-async function doPrint(id) {
-  const data = await printOrder(id);
+async function doPrint(id, _isPrintTemplate = isPrintTemplate.value) {
+  const dataList = await printOrder(id);
   LODOP.PRINT_INITA();
   LODOP.SET_PRINTER_INDEX(printSettings.value.printerIndex);
   LODOP.SET_PRINT_STYLE('FontSize', 16);
-  LODOP.ADD_PRINT_TEXT(20, 20, 200, 20, '日期');
-  LODOP.ADD_PRINT_TEXT(20, 120, 200, 20, data.orderDate);
-  LODOP.ADD_PRINT_TEXT(60, 20, 200, 20, '明细');
-  LODOP.ADD_PRINT_TEXT(60, 120, 200, 20, '客户代码');
-  LODOP.ADD_PRINT_TEXT(60, 220, 200, 20, '原料');
-  LODOP.ADD_PRINT_TEXT(60, 340, 200, 20, '规格（MM）');
-  LODOP.ADD_PRINT_TEXT(60, 480, 200, 20, '数量（KG）');
-  let offset = 0;
-  for(let i = 0; i < data.details.length; i++) {
-    const lineTop = 100 + (i + offset) * 30;
-    const item = data.details[i];
-    LODOP.ADD_PRINT_TEXT(lineTop, 120, 200, 20, item.code);
-    LODOP.ADD_PRINT_TEXT(lineTop, 220, 200, 20, item.goodsName);
-    LODOP.ADD_PRINT_TEXT(lineTop, 340, 200, 20, item.spec);
-    LODOP.ADD_PRINT_TEXT(lineTop, 480, 200, 20, item.num);
-    if(isPrintTemplate.value && item.comment) {
-      offset += 1.5;
-      LODOP.SET_PRINT_STYLE('FontSize', 12);
-      LODOP.ADD_PRINT_TEXT(lineTop + 34, 120, 800, 20, '工艺说明： ' + item.comment);
-      LODOP.SET_PRINT_STYLE('FontSize', 16);
+  for (let i = 0; i < dataList.length; i++) {
+    if(i > 0) {
+      LODOP.NEWPAGE();
     }
-  }
-  let lastTop = 120 + (data.details.length + offset)* 30;
-  if(data.orderComment) {
-    LODOP.ADD_PRINT_TEXT(lastTop, 20, 200, 20, '备注');
-    const comment = data.orderComment.split('\n');
-    for(let i = 0; i < comment.length; i++) {
-      LODOP.ADD_PRINT_TEXT(lastTop, 120, 800, 20, comment[i]);
-      lastTop += 30;
+    const data = dataList[i];
+    LODOP.ADD_PRINT_TEXT(20, 20, 200, 20, '日期');
+    LODOP.ADD_PRINT_TEXT(20, 120, 200, 20, data.orderDate);
+    LODOP.ADD_PRINT_TEXT(60, 20, 200, 20, '明细');
+    LODOP.ADD_PRINT_TEXT(60, 120, 200, 20, '客户代码');
+    LODOP.ADD_PRINT_TEXT(60, 220, 200, 20, '原料');
+    LODOP.ADD_PRINT_TEXT(60, 340, 200, 20, '规格（MM）');
+    LODOP.ADD_PRINT_TEXT(60, 480, 200, 20, '数量（KG）');
+    let offset = 0;
+    for(let i = 0; i < data.details.length; i++) {
+      const lineTop = 100 + (i + offset) * 30;
+      const item = data.details[i];
+      LODOP.ADD_PRINT_TEXT(lineTop, 120, 200, 20, item.code);
+      LODOP.ADD_PRINT_TEXT(lineTop, 220, 200, 20, item.goodsName);
+      LODOP.ADD_PRINT_TEXT(lineTop, 340, 200, 20, item.spec);
+      LODOP.ADD_PRINT_TEXT(lineTop, 480, 200, 20, item.num);
+      if(_isPrintTemplate && item.comment) {
+        offset += 1.5;
+        LODOP.SET_PRINT_STYLE('FontSize', 12);
+        LODOP.ADD_PRINT_TEXT(lineTop + 34, 120, 800, 20, '工艺说明： ' + item.comment);
+        LODOP.SET_PRINT_STYLE('FontSize', 16);
+      }
     }
-    lastTop += 10;
+    let lastTop = 120 + (data.details.length + offset)* 30;
+    if(data.orderComment) {
+      LODOP.ADD_PRINT_TEXT(lastTop, 20, 200, 20, '备注');
+      const comment = data.orderComment.split('\n');
+      for(let i = 0; i < comment.length; i++) {
+        LODOP.ADD_PRINT_TEXT(lastTop, 120, 800, 20, comment[i]);
+        lastTop += 30;
+      }
+      lastTop += 10;
+    }
+    LODOP.ADD_PRINT_TEXT(lastTop, 20, 200, 20, '打印人');
+    LODOP.ADD_PRINT_TEXT(lastTop, 120, 200, 20, data.user);
+    LODOP.ADD_PRINT_TEXT(lastTop + 40, 20, 200, 20, '打印时间');
+    LODOP.ADD_PRINT_TEXT(lastTop + 40, 120, 400, 20, data.printerTime);
   }
-  LODOP.ADD_PRINT_TEXT(lastTop, 20, 200, 20, '打印人');
-  LODOP.ADD_PRINT_TEXT(lastTop, 120, 200, 20, data.user);
-  LODOP.ADD_PRINT_TEXT(lastTop + 40, 20, 200, 20, '打印时间');
-  LODOP.ADD_PRINT_TEXT(lastTop + 40, 120, 400, 20, data.printerTime);
   LODOP.PREVIEW();
+}
+
+function printMultiple() {
+  if(selectedIds.value.length > 0) {
+    doPrint(selectedIds.value);
+  } else {
+    ElMessage.warning('请先选择订单');
+  }
+}
+
+function toggleSelected(id, isSelected) {
+  if(isSelected) {
+    selectedIds.value.push(id);
+  } else {
+    selectedIds.value = selectedIds.value.filter((item) => item !== id);
+  }
 }
 
 async function confirmDel(row) {
@@ -92,11 +116,11 @@ async function confirmDel(row) {
   getList();
 }
 
-async function addSuccess(id) {
+async function addSuccess(id, isPrintTemplate) {
   if(canPrint) {
     try {
       await ElMessageBox.confirm('订单新增，是否打印？');
-      doPrint(id);
+      doPrint(id, isPrintTemplate);
     } catch (none) {
       //
     }
@@ -114,14 +138,20 @@ getList();
       <template #after>
         <ElButton icon="Plus" type="primary" @click="add">新增订单</ElButton>
         <ElButton icon="Setting" type="primary" @click="printSettingsShow = true">打印设置</ElButton>
-        <div class="print-switch">
-          <span class="title">工艺说明</span>
-          <ElSwitch v-model="isPrintTemplate" activeText="打印" inactiveText="不打印" />
-        </div>
+        <ElButton icon="Printer" type="primary" @click="printMultiple">批量打印</ElButton>
+        <!--        <GlBorderCard title="工艺说明" class="m-b-2">-->
+        <!--          <ElSwitch v-model="isPrintTemplate" activeText="打印" inactiveText="不打印" />-->
+        <!--        </GlBorderCard>-->
       </template>
     </GlFilterBar>
     <ElTable :data="list" class="flex-1">
+      <ElTableColumn prop="date"  width="50px">
+        <template v-slot="{ row }">
+          <ElCheckbox :modelValue="selectedIds.includes(row.id)" @update:modelValue="(e) => toggleSelected(row.id, e)" />
+        </template>
+      </ElTableColumn>
       <ElTableColumn prop="date" label="订单日期" />
+      <ElTableColumn prop="customerName" label="客户名称" />
       <ElTableColumn prop="name" label="名称" />
       <ElTableColumn label="操作">
         <template v-slot="{ row }">
@@ -138,21 +168,4 @@ getList();
 </template>
 
 <style scoped lang="scss">
-.print-switch{
-  display: inline-block;
-  position: relative;
-  border: 1px solid var(--el-color-primary);
-  padding: 4px 10px;
-  margin: 10px;
-  border-radius: 0.5em;
-  .title{
-    font-size: 12px;
-    color: var(--el-color-primary);
-    position: absolute;
-    top: -0.7em;
-    left: 0.4em;
-    background: #fff;
-    padding: 0 0.4em;
-  }
-}
 </style>

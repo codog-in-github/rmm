@@ -10,6 +10,7 @@ import {ElMessage} from 'element-plus';
 const { goods, specs } = getOptions();
 const elFormRef = ref(null);
 const templateEditorRef = ref(null);
+const isPrintTemplate = ref(true);
 
 const emit = defineEmits(['success']);
 const emptyForm = function() {
@@ -89,7 +90,7 @@ async function submit() {
   const { id } = await orderSave(form.value);
   ElMessage.success('保存成功');
   show.value = false;
-  emit('success', id);
+  emit('success', id, isPrintTemplate.value);
 }
 const goodsOptions = computed(() => {
   return goods.value(GOODS_TYPE_RAW);
@@ -109,7 +110,12 @@ const goodsOptions = computed(() => {
       labelWidth="100px"
     >
       <ElFormItem label="日期" prop="customerId">
-        <ElDatePicker valueFormat="YYYY-MM-DD" v-model="form.date" :clearable="false" />
+        <div class="flex justify-between w-full p-r-2">
+          <ElDatePicker valueFormat="YYYY-MM-DD" v-model="form.date" :clearable="false" />
+          <GlBorderCard title="工艺说明" class="bottom-6">
+            <ElSwitch v-model="isPrintTemplate" activeText="打印" inactiveText="不打印" />
+          </GlBorderCard>
+        </div>
       </ElFormItem>
       <ElFormItem label="订单商品" prop="details">
         <ElTable :data="form.details">
