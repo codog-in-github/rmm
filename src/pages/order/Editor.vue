@@ -27,7 +27,8 @@ const emptyDetails = function() {
     goodsId:    null,
     spec:       '',
     subSpec:    '',
-    num:        null
+    num:        null,
+    comment:    ''
   };
 };
 
@@ -102,7 +103,7 @@ const goodsOptions = computed(() => {
 </script>
 
 <template>
-  <ElDialog v-model="show" title="订单详情" width="900px">
+  <ElDialog v-model="show" title="订单详情" width="1200px">
     <ElForm
       ref="elFormRef"
       :model="form"
@@ -148,6 +149,17 @@ const goodsOptions = computed(() => {
               />
             </template>
           </ElTableColumn>
+          <ElTableColumn label="备注">
+            <template v-slot="{ row }">
+              <ElInput
+                type="textarea"
+                class="w-full"
+                autosize
+                v-model="row.comment"
+                min="0"
+              />
+            </template>
+          </ElTableColumn>
           <ElTableColumn width="90px">
             <template v-slot="{ $index, row }">
               <GlAsyncButton link type="primary" :click="() => showTemplate(row)">查看工艺</GlAsyncButton>
@@ -158,9 +170,6 @@ const goodsOptions = computed(() => {
         <div class="w-full text-right">
           <ElButton icon="Plus" type="primary" @click="addDetail">添加</ElButton>
         </div>
-      </ElFormItem>
-      <ElFormItem label="备注">
-        <ElInput v-model="form.comment" type="textarea" />
       </ElFormItem>
     </ElForm>
     <template #footer>

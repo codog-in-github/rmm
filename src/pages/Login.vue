@@ -1,35 +1,29 @@
 <template>
   <div class="bg flex justify-center flex-items-center bg-primary">
-    <ElCard class="w-xl ">
-      <template #header>
-        <div class="text-center">登录</div>
-      </template>
-      <div class="p5" @keydown.enter="submit">
-        <ElForm
-          labelWidth="5rem"
-          :model="formData"
-          :rules="rules"
-          ref="formRef"
+    <div class="login-card" @keydown.enter="submit">
+      <div class="title">欢迎登陆</div>
+      <ElInput v-model="formData.username" placeholder="请输入您的账号" />
+      <ElInput
+        class="m-t-2"
+        type="password"
+        v-model="formData.password"
+        placeholder="请输入您的密码"
+      />
+      <div class="m-t-10">
+        <GlAsyncButton
+          class="block w-full"
+          type="primary"
+          :click="submit"
         >
-          <ElFormItem label="用户名" prop="username">
-            <ElInput v-model="formData.username" />
-          </ElFormItem>
-          <ElFormItem label="密码" class="m-t-10" prop="password">
-            <ElInput type="password" v-model="formData.password" />
-          </ElFormItem>
-        </ElForm>
-        <div class="m-t-10">
-          <GlAsyncButton
-            class="float-right"
-            type="primary"
-            :click="submit"
-          >
-            登录
-          </GlAsyncButton>
-          <div class="clear-both" />
-        </div>
+          登录
+        </GlAsyncButton>
+        <div class="clear-both" />
       </div>
-    </ElCard>
+      <div class="footer">
+        <img src="@/assets/logo.webp" class="m-r-2">
+        泓贝再生资源回收有限公司
+      </div>
+    </div>
   </div>
 </template>
 
@@ -43,20 +37,17 @@ import {addRouterForAuth, clearRoutes, getAuthRouteKeys, getAuthRoutes} from '@/
 
 const user = useUser();
 const router = useRouter();
-const formRef = ref();
 const formData = reactive({
   username: '',
   password: ''
 });
 
-const rules = {
-  username: { required: true, message: '请填写用户名' },
-  password: { required: true, message: '请填写密码' }
-};
-
 async function submit() {
   try {
-    await formRef.value.validate();
+    if(!formData.username || !formData.password) {
+      ElMessage.error('账号和密码不能为空');
+      return;
+    }
     const rep = await login(formData.username, formData.password);
     user.login(rep.user, rep.auths);
     addRouterForAuth(
@@ -76,11 +67,53 @@ async function submit() {
 }
 clearRoutes();
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .bg {
-  background-image: url('@/assets/login-bg.webp');
+  background-image: url('@/assets/bg.webp');
   background-size: cover;
   background-position: center;
-  background-blend-mode: multiply;
+}
+
+.login-card {
+  background-image: url('@/assets/login.png');
+  background-position: top right;
+  background-size: cover;
+  background-origin: border-box;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  border-radius: 0.5em;
+  width: 320px;
+  padding: 40px;
+  position: relative;
+  left: 20%;
+
+  .title{
+    color: #303030;
+    margin: 40px 0 80px;
+    font-size: 22px;
+  }
+}
+
+.footer{
+  color: #8e8e8e;
+  text-align: center;
+  margin-top: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+:deep(.el-input__wrapper){
+  background-color: #f3f5f9;
+  box-shadow: none;
+  color: #303030;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+:deep(input::-webkit-input-placeholder){
+  color: #9ea1a7;
+}
+
+.el-button.el-button--primary{
+  background-color: #4082f2;
 }
 </style>

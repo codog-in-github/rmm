@@ -46,6 +46,7 @@ const getList = async function() {
 };
 async function doPrint(id, _isPrintTemplate = isPrintTemplate.value) {
   const dataList = await printOrder(id);
+  console.log(dataList);
   LODOP.PRINT_INITA();
   LODOP.SET_PRINTER_INDEX(printSettings.value.printerIndex);
   LODOP.SET_PRINT_STYLE('FontSize', 16);
@@ -111,7 +112,7 @@ function toggleSelected(id, isSelected) {
 }
 
 async function confirmDel(row) {
-  await ElMessageBox.confirm(`确认删除【${row.date}】订单？`);
+  await ElMessageBox.confirm('确认删除该订单？');
   await ordelDel(row.id);
   getList();
 }
@@ -152,7 +153,11 @@ getList();
       </ElTableColumn>
       <ElTableColumn prop="date" label="订单日期" />
       <ElTableColumn prop="customerName" label="客户名称" />
-      <ElTableColumn prop="name" label="名称" />
+      <ElTableColumn label="名称">
+        <template v-slot="{ row }">
+          {{ row.name }} - {{ row.spec }} - {{ row.num }}KG
+        </template>
+      </ElTableColumn>
       <ElTableColumn label="操作">
         <template v-slot="{ row }">
           <GlAsyncButton link type="primary" :click="() => edit(row)">查看</GlAsyncButton>
