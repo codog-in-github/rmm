@@ -1,6 +1,9 @@
 import { reactive } from 'vue';
 
-export function usePagination() {
+export function usePagination(options = {}) {
+  const {
+    dataHook = () => {}
+  } = options;
   const paginate = reactive({
     page:     1,
     perPage:  10,
@@ -52,6 +55,7 @@ export function usePagination() {
         paginate.lastPage = response.perPage;
         paginate.page = response.page;
       }
+      dataHook(response);
       return next(response.data);
     }
   };
