@@ -3,14 +3,10 @@ import { reactive, ref } from 'vue';
 import {formatDate, formatDatetime, map2array, usePagination} from '@/helpers';
 import {futuresDel, useGetFutures} from '@/api';
 import Editor from './Editor.vue';
-import moment from 'moment';
 import {FUTURES_TYPE_MAP, FUTURES_TYPE_NORMAL, FUTURES_TYPE_SPOT} from '@/constant';
 import {ElMessage, ElMessageBox} from 'element-plus';
 const filters = reactive({
-  date: [
-    moment().startOf('year').format('YYYY-MM-DD'),
-    moment().format('YYYY-MM-DD')
-  ],
+  date:         [],
   type:         null,
   businessType: null
 });
@@ -30,7 +26,7 @@ const showEdit = ref(false);
 const list = ref([]);
 
 function spanMethod({ column, row }) {
-  if(['businessDate', 'type'].includes(column.property)) {
+  if(['businessDate', 'type', 'totalEarn', 'natureEarn', 'optEarn'].includes(column.property)) {
     return [row.rowSpan, 1];
   }
 }
@@ -45,6 +41,12 @@ const getList = function() {
     list.value = res;
   });
 };
+function clearFilters() {
+  filters.date = [];
+  filters.type = null;
+  filters.businessType = null;
+  getList();
+}
 getList();
 </script>
 
@@ -71,6 +73,7 @@ getList();
       />
       <GlFilterItem label="交易时间" type="daterange" prop="date" />
       <template v-slot:after>
+        <ElButton type="primary" icon="Refresh" @click="clearFilters">重置筛选</ElButton>
         <ElButton type="primary" icon="Plus" @click="showEdit = true">新增交易</ElButton>
       </template>
     </GlFilterBar>
@@ -78,13 +81,13 @@ getList();
       <div class="card">
         <div class="title">总收益</div>
         <div class="num">
-          {{ (stock[FUTURES_TYPE_NORMAL].earn + stock[FUTURES_TYPE_SPOT].earn)?.toFixed(2) }}<span class="sub">元</span>
+          {{ (stock[FUTURES_TYPE_NORMAL].totalEarn + stock[FUTURES_TYPE_SPOT].totalEarn)?.toFixed(2) }}<span class="sub">元</span>
         </div>
       </div>
       <div class="card">
         <div class="title">期货收益</div>
         <div class="num">
-          {{ stock[FUTURES_TYPE_NORMAL].earn?.toFixed(2) }}<span class="sub">元</span>
+          {{ stock[FUTURES_TYPE_NORMAL].totalEarn?.toFixed(2) }}<span class="sub">元</span>
         </div>
       </div>
       <div class="card">
@@ -96,7 +99,7 @@ getList();
       <div class="card">
         <div class="title">现货收益</div>
         <div class="num">
-          {{ stock[FUTURES_TYPE_SPOT].earn?.toFixed(2) }}<span class="sub">元</span>
+          {{ stock[FUTURES_TYPE_SPOT].totalEarn?.toFixed(2) }}<span class="sub">元</span>
         </div>
       </div>
       <div class="card">
@@ -157,15 +160,25 @@ getList();
           </template>
         </ElTableColumn>
         <ElTableColumn label="单价（元）" prop="price" />
-        <ElTableColumn label="盈利（元）" prop="earn" :formatter="(_, __, val) => val.toFixed(2)">
-          <template v-slot="{row}">
-            <span :class="{ 'color-success': row.earn < 0, 'color-danger': row.earn > 0 }">{{ row.earn.toFixed(2) }}</span>
-          </template>
-        </ElTableColumn>
         <ElTableColumn label="数量（T）" prop="num" :formatter="(_, __, val) => Math.abs(val)" />
         <ElTableColumn label="总价（元）" prop="total" :formatter="(_, __, val) => Math.abs(val)" />
         <ElTableColumn label="交易后库存(T)" prop="stock"  :formatter="(_, __, val) => val.toFixed(3)" />
-        <ElTableColumn label="交易后均价(元)" prop="avgPrice"  :formatter="(_, __, val) => val.toFixed(2)" />
+        <ElTableColumn label="交易后均价(元)" prop="totalAvgPrice"  :formatter="(_, __, val) => val.toFixed(3)" />
+        <ElTableColumn label="自然盈亏(元)" prop="natureEarn" :formatter="(_, __, val) => val.toFixed(2)">
+          <template v-slot="{row}">
+            <span  :class="{ 'color-success': row.natureEarn < 0, 'color-danger': row.natureEarn > 0 }">{{ row.natureEarn.toFixed(2) }}</span>
+          </template>
+        </ElTableColumn>
+        <ElTableColumn label="操作盈亏(元)" prop="optEarn" :formatter="(_, __, val) => val.toFixed(2)">
+          <template v-slot="{row}">
+            <span :class="{ 'color-success': row.optEarn < 0, 'color-danger': row.optEarn > 0 }">{{ row.optEarn.toFixed(2) }}</span>
+          </template>
+        </ElTableColumn>
+        <ElTableColumn label="合计盈利(元)" prop="totalEarn" :formatter="(_, __, val) => val.toFixed(2)">
+          <template v-slot="{row}">
+            <span :class="{ 'color-success': row.totalEarn < 0, 'color-danger': row.totalEarn > 0 }">{{ row.totalEarn.toFixed(2) }}</span>
+          </template>
+        </ElTableColumn>
         <ElTableColumn
           label="创建时间"
           prop="createdAt"
@@ -186,11 +199,10 @@ getList();
 
 <style scoped lang="scss">
 .card{
-  width: 180px;
   height: 100px;
   background: var(--el-color-primary-light-8);
   border-radius: 0.25rem;
-  padding-left: 1rem;
+  padding: 0 1rem;
   display: flex;
   gap: 0.125rem;
   flex-direction: column;

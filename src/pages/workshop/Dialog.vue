@@ -132,7 +132,7 @@
                       type="primary"
                       :click="() => toStock(row)"
                     >
-                      入库
+                      加工完成
                     </GlAsyncButton>
                   </template>
                 </template>
@@ -188,7 +188,7 @@
         v-else-if="canEditProduct"
         @click="finishProcess"
       >
-        加工完成
+        工序完毕
       </ElButton>
     </template>
   </ElDialog>
@@ -422,7 +422,7 @@ async function toStock(row) {
   const rec = await toStockApi(row.id, num);
   console.log(rec);
   localForm.value.steps.push(rec);
-  ElMessage.success('入库成功');
+  ElMessage.success('操作成功');
 }
 
 

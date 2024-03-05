@@ -1,7 +1,7 @@
 <script setup>
 import {computed, ref, watch} from 'vue';
 import {FUTURES_TYPE_NORMAL, FUTURES_TYPE_SPOT} from '@/constant';
-import {futuresAdd} from '@/api';
+import {futuresAdd, getDatePrice} from '@/api';
 import moment from 'moment';
 const emptyForm = () => {
   return {
@@ -52,9 +52,22 @@ async function submit() {
   emit('success');
 }
 
+async function setPrice() {
+  if(form.value.type && form.value.businessDate) {
+    const { price } = await getDatePrice(form.value.type, form.value.businessDate);
+    if(price) {
+      form.value.price = price;
+    } else {
+      form.value.price = null;
+    }
+    calTotal();
+  }
+}
+
 watch(() => props.show, () => {
   if(props.show) {
     form.value = emptyForm();
+    setPrice();
   }
 });
 
@@ -85,7 +98,7 @@ const rules = {
       :rules="rules"
     >
       <ElFormItem label="类型">
-        <ElRadioGroup v-model="form.type">
+        <ElRadioGroup v-model="form.type" @change="setPrice">
           <ElRadio :label="FUTURES_TYPE_NORMAL">期货</ElRadio>
           <ElRadio :label="FUTURES_TYPE_SPOT">现货</ElRadio>
         </ElRadioGroup>
@@ -120,6 +133,7 @@ const rules = {
           v-model="form.businessDate"
           valueFormat="YYYY-MM-DD"
           :clearable="false"
+          @change="setPrice"
         />
       </ElFormItem>
     </ElForm>

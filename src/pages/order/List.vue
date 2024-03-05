@@ -1,12 +1,18 @@
 <script setup>
 import {ref, reactive} from 'vue';
 import {usePagination} from '@/helpers';
-import {ordelDel, printOrder, useOrderList} from '@/api';
+import {getOptions, ordelDel, printOrder, useOrderList} from '@/api';
 import Editor from './Editor.vue';
 import {ElMessage, ElMessageBox} from 'element-plus';
 const isPrintTemplate = ref(true);
 const printSettingsShow = ref(false);
 const selectedIds = ref([]);
+const customerOptions = ref([]);
+
+async function getCustomerOptions() {
+  const { customer } = await getOptions('customer');
+  customerOptions.value = customer;
+}
 let _printSettings = JSON.parse(
   localStorage.getItem('printSettings')
 );
@@ -130,12 +136,25 @@ async function addSuccess(id, isPrintTemplate) {
 }
 
 getList();
+getCustomerOptions();
 </script>
 
 <template>
   <div class="flex flex-col">
     <GlFilterBar :model="filters" class="m-b-2" @search="getList">
-      <GlFilterItem label="订单日期" prop="date" type="daterange" />
+      <GlFilterItem
+        label="订单日期"
+        prop="date"
+        type="daterange"
+        clearable
+      />
+      <GlFilterItem
+        label="客户名称"
+        prop="customerId"
+        type="select"
+        :options="customerOptions"
+        clearable
+      />
       <template #after>
         <ElButton icon="Plus" type="primary" @click="add">新增订单</ElButton>
         <ElButton icon="Setting" type="primary" @click="printSettingsShow = true">打印设置</ElButton>

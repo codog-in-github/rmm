@@ -24,7 +24,7 @@ const emptyForm = function() {
 const emptyDetails = function() {
   return {
     customerId: null,
-    goodsId:    null,
+    goodsId:    2, // 紫铜管id
     spec:       '',
     subSpec:    '',
     num:        null,
@@ -41,7 +41,7 @@ const rules = {
       if(value?.length === 0) {
         return cb(new Error('请添加明细'));
       }
-      if(value.some(item => !item.goodsId ||!item.spec || !item.num)) {
+      if(value.some(item => !item.customerId || !item.goodsId ||!item.spec || !item.num)) {
         return cb(new Error('订单请填写完整'));
       }
       if(value.some(item => !isStandardSpec(item.spec))) {
@@ -73,8 +73,7 @@ function querySearch(id) {
 }
 
 function addDetail() {
-  const row = emptyDetails(GOODS_PROCESS_TEMPLATE_TYPE_HALF);
-  row.goodsId = form.value.goodsId;
+  const row = emptyDetails();
   form.value.details.push(row);
 }'';
 function delDetail(index) {
