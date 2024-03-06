@@ -33,7 +33,7 @@ function showTemplate(row) {
 </script>
 
 <template>
-  <ElDrawer v-model="show" size="600px">
+  <ElDrawer v-model="show" size="800px">
     <template #header>
       <div>
         <ElDatePicker
@@ -50,7 +50,7 @@ function showTemplate(row) {
       <ElTableColumn prop="goodsName" label="成品" />
       <ElTableColumn prop="spec" label="规格(MM)" />
       <ElTableColumn prop="num" label="数量(KG)" />
-      <ElTableColumn>
+      <ElTableColumn width="180px">
         <template v-slot="{ row }">
           <GlAsyncButton
             v-if="row.templateId"
@@ -60,6 +60,15 @@ function showTemplate(row) {
           >
             查看工艺
           </GlAsyncButton>
+          <ElPopover
+            v-if="row.comment"
+            :content="row.comment"
+            trigger="click"
+          >
+            <template #reference>
+              <ElButton link type="primary">查看备注</ElButton>
+            </template>
+          </ElPopover>
         </template>
       </ElTableColumn>
     </ElTable>

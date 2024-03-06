@@ -41,7 +41,7 @@ const rules = {
       if(value?.length === 0) {
         return cb(new Error('请添加明细'));
       }
-      if(value.some(item => !item.customerId || !item.goodsId ||!item.spec || !item.num)) {
+      if(value.some(item => !item.goodsId ||!item.spec || !item.num)) {
         return cb(new Error('订单请填写完整'));
       }
       if(value.some(item => !isStandardSpec(item.spec))) {
