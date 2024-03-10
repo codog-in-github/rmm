@@ -125,21 +125,22 @@ getList();
         >
           <template v-slot="{row}">
             <ElPopover
+              v-if="row.type === FUTURES_TYPE_SPOT"
               placement="right-start"
               :width="200"
               trigger="hover"
             >
               <div style="width: 240px">
-                <div>买入数量： {{ row.buyNum.toFixed(2) }} T</div>
-                <div>买入均价： {{ row.buyPrice.toFixed(2) }} 元</div>
-                <div>买入合计： {{ row.buyTotal.toFixed(2) }} 元</div>
+                <div>买入数量： {{ row.buyNum?.toFixed(2) }} T</div>
+                <div>买入均价： {{ row.buyPrice?.toFixed(2) }} 元</div>
+                <div>买入合计： {{ row.buyTotal?.toFixed(2) }} 元</div>
                 <ElDivider />
-                <div>卖出数量： {{ row.saleNum.toFixed(2) }} T</div>
-                <div>卖出均价： {{ row.salePrice.toFixed(2) }} 元</div>
-                <div>卖出合计： {{ row.saleTotal.toFixed(2) }} 元</div>
+                <div>卖出数量： {{ row.saleNum?.toFixed(2) }} T</div>
+                <div>卖出均价： {{ row.salePrice?.toFixed(2) }} 元</div>
+                <div>卖出合计： {{ row.saleTotal?.toFixed(2) }} 元</div>
                 <ElDivider />
-                <div>库存差量： {{ row.stockChange.toFixed(2) }} T</div>
-                <div>库存总量： {{ row.lastStock.toFixed(2) }} T</div>
+                <div>库存差量： {{ row.stockChange?.toFixed(2) }} T</div>
+                <div>库存总量： {{ row.lastStock?.toFixed(2) }} T</div>
               </div>
               <template #reference>
                 <div>{{ formatDate(null, null, row.businessDate) }}</div>
@@ -162,21 +163,21 @@ getList();
         <ElTableColumn label="单价（元）" prop="price" />
         <ElTableColumn label="数量（T）" prop="num" :formatter="(_, __, val) => Math.abs(val)" />
         <ElTableColumn label="总价（元）" prop="total" :formatter="(_, __, val) => Math.abs(val)" />
-        <ElTableColumn label="交易后库存(T)" prop="stock"  :formatter="(_, __, val) => val.toFixed(3)" />
-        <ElTableColumn label="交易后均价(元)" prop="totalAvgPrice"  :formatter="(_, __, val) => val.toFixed(3)" />
-        <ElTableColumn label="自然盈亏(元)" prop="natureEarn" :formatter="(_, __, val) => val.toFixed(2)">
+        <ElTableColumn label="交易后库存(T)" prop="stock"  :formatter="(_, __, val) => val?.toFixed(3)" />
+        <ElTableColumn label="交易后均价(元)" prop="totalAvgPrice"  :formatter="(_, __, val) => val?.toFixed(3)" />
+        <ElTableColumn label="自然盈亏(元)" prop="natureEarn" :formatter="(_, __, val) => val?.toFixed(2)">
           <template v-slot="{row}">
-            <span  :class="{ 'color-success': row.natureEarn < 0, 'color-danger': row.natureEarn > 0 }">{{ row.natureEarn.toFixed(2) }}</span>
+            <span  :class="{ 'color-success': row.natureEarn < 0, 'color-danger': row.natureEarn > 0 }">{{ row.natureEarn?.toFixed(2) }}</span>
           </template>
         </ElTableColumn>
-        <ElTableColumn label="操作盈亏(元)" prop="optEarn" :formatter="(_, __, val) => val.toFixed(2)">
+        <ElTableColumn label="操作盈亏(元)" prop="optEarn" :formatter="(_, __, val) => val?.toFixed(2)">
           <template v-slot="{row}">
-            <span :class="{ 'color-success': row.optEarn < 0, 'color-danger': row.optEarn > 0 }">{{ row.optEarn.toFixed(2) }}</span>
+            <span :class="{ 'color-success': row.optEarn < 0, 'color-danger': row.optEarn > 0 }">{{ row.optEarn?.toFixed(2) }}</span>
           </template>
         </ElTableColumn>
-        <ElTableColumn label="合计盈利(元)" prop="totalEarn" :formatter="(_, __, val) => val.toFixed(2)">
+        <ElTableColumn label="合计盈利(元)" prop="totalEarn" :formatter="(_, __, val) => val?.toFixed(2)">
           <template v-slot="{row}">
-            <span :class="{ 'color-success': row.totalEarn < 0, 'color-danger': row.totalEarn > 0 }">{{ row.totalEarn.toFixed(2) }}</span>
+            <span :class="{ 'color-success': row.totalEarn < 0, 'color-danger': row.totalEarn > 0 }">{{ row.totalEarn?.toFixed(2) }}</span>
           </template>
         </ElTableColumn>
         <ElTableColumn

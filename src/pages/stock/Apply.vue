@@ -24,15 +24,10 @@
   </div>
 </template>
 <script setup>
-import {
-  getSelfStorehouse,
-  useGetApplyList,
-  getApplyDetail,
-  doApply
-} from '@/api';
-import { usePagination, formatDatetime } from '@/helpers';
-import { ElMessage } from 'element-plus';
-import { ref } from 'vue';
+import {doApply, getApplyDetail, getSelfStorehouse, useGetApplyList} from '@/api';
+import {formatDatetime, usePagination} from '@/helpers';
+import {ElMessage} from 'element-plus';
+import {ref} from 'vue';
 import * as CONSTANT from '@/constant';
 import ApplyDetail from './ApplyDetail.vue';
 
@@ -44,8 +39,7 @@ const detailVisible = ref(false);
 const detailData = ref(null);
 
 async function getList() {
-  const rep = await getApplyList(storehouseId.value);
-  list.value = rep;
+  list.value = await getApplyList(storehouseId.value);
 }
 async function init() {
   pagnation.paginate.loading = true;
@@ -64,9 +58,9 @@ async function showDetail(id) {
   detailData.value = rep;
 }
 
-async function submitHandler(id) {
+async function submitHandler(id, realNums) {
   try {
-    await doApply(id);
+    await doApply(id, realNums);
     ElMessage.success('操作成功');
     const item = list.value.find(item => item.id === id);
     if(item.type === CONSTANT.STOCK_APPLY_TYPE_IN) {

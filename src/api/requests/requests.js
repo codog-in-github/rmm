@@ -63,7 +63,7 @@ export const useGetApplyList = makeUseRequestWidthPagination('/getApplyList', 'i
 
 export const getApplyDetail = makeRequest('/getApplyDetail', 'id');
 
-export const doApply = makeRequest('/doApply', 'id');
+export const doApply = makeRequest('/doApply', 'id', 'realNums');
 
 export const toProcessing = makeRequest('/toProcessing','id');
 

@@ -17,7 +17,22 @@
               <template v-if="isStandardSpec(row.spec)">(mm)</template>
             </template>
           </ElTableColumn>
-          <ElTableColumn label="数量" prop="num"  width="60" />
+          <template v-if="editable">
+            <ElTableColumn label="数量" prop="num"  width="120">
+              <template v-slot="{ row }">
+                <ElInput
+                  v-model.number="realNums[row.id]"
+                  type="number"
+                  min="0"
+                  :placeholder="row.num"
+                />
+              </template>
+            </ElTableColumn>
+          </template>
+          <template v-else>
+            <ElTableColumn label="实际数量" prop="num" width="120" />
+          </template>
+          <ElTableColumn label="申请数量" prop="applyNum" width="120" />
           <ElTableColumn label="单位" prop="unitName"  width="60" />
         </ElTable>
       </ElFormItem>
@@ -25,7 +40,22 @@
         <ElTable :data="model.uses">
           <ElTableColumn label="名称" prop="goodsName" />
           <ElTableColumn label="规格" prop="spec"  />
-          <ElTableColumn label="数量" prop="num" />
+          <template v-if="editable">
+            <ElTableColumn label="数量" prop="num"  width="120">
+              <template v-slot="{ row }">
+                <ElInput
+                  v-model.number="realNums[row.id]"
+                  type="number"
+                  min="0"
+                  :placeholder="row.num"
+                />
+              </template>
+            </ElTableColumn>
+          </template>
+          <template v-else>
+            <ElTableColumn label="实际数量" prop="num" width="120" />
+          </template>
+          <ElTableColumn label="申请数量" prop="applyNum" width="120" />
           <ElTableColumn label="单位" prop="unitName" />
         </ElTable>
       </ElFormItem>
@@ -38,7 +68,7 @@
     </ElForm>
     <template #footer>
       <ElButton @click="visibleChanger = false">关闭</ElButton>
-      <template v-if="model?.apply.status === STOCK_APPLY_STATUS_WAITING">
+      <template v-if="editable">
         <ElButton v-if="model.apply.type === STOCK_APPLY_TYPE_IN" type="primary" @click="submit">确认入库</ElButton>
         <ElButton v-else-if="model.apply.type === STOCK_APPLY_TYPE_OUT" type="primary" @click="submit">确认出库</ElButton>
       </template>
@@ -51,7 +81,7 @@ import {
   STOCK_APPLY_STATUS_WAITING, STOCK_APPLY_TYPE_IN, STOCK_APPLY_TYPE_OUT
 } from '@/constant';
 import moment from 'moment';
-import { computed } from 'vue';
+import {computed, ref, watch} from 'vue';
 import { isStandardSpec } from '@/helpers';
 
 const props = defineProps({
@@ -63,14 +93,25 @@ const props = defineProps({
     type: Object
   }
 });
+const realNums = ref({ _: false });
 const emit = defineEmits(['update:visible', 'submit']);
 const visibleChanger = computed({
   get: () => props.visible,
   set: val => emit('update:visible', val)
 });
 
+watch(() => props.visible, (val) => {
+  if(val) {
+    realNums.value = { _: false };
+  }
+});
+
+const editable = computed(() => {
+  return Boolean(props.model?.apply.status === STOCK_APPLY_STATUS_WAITING);
+});
+
 function submit() {
-  emit('submit', props.model.apply.id);
+  emit('submit', props.model.apply.id, realNums.value);
 }
 
 </script>
