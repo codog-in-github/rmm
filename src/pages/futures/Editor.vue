@@ -21,12 +21,12 @@ const props = defineProps({
 });
 function calTotal() {
   if(form.value.num && form.value.price) {
-    form.value.total = form.value.price * form.value.num;
+    form.value.total = (form.value.price * form.value.num).toString();
   }
 }
 function calPrice() {
   if(form.value.total && form.value.total) {
-    form.value.num = form.value.total / form.value.price;
+    form.value.num = (form.value.total / form.value.price).toString();
   }
 }
 const emit = defineEmits(['update:show', 'success']);
@@ -56,7 +56,7 @@ async function setPrice() {
   if(form.value.type && form.value.businessDate) {
     const { price } = await getDatePrice(form.value.type, form.value.businessDate);
     if(price) {
-      form.value.price = price;
+      form.value.price = price.toString();
     } else {
       form.value.price = null;
     }

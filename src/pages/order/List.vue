@@ -52,51 +52,49 @@ const getList = async function() {
 };
 async function doPrint(id, _isPrintTemplate = isPrintTemplate.value) {
   const dataList = await printOrder(id);
-  console.log(dataList);
   LODOP.PRINT_INITA();
+  LODOP.SET_PRINT_PAGESIZE(1, 0 ,0, 'A5');
   LODOP.SET_PRINTER_INDEX(printSettings.value.printerIndex);
   LODOP.SET_PRINT_STYLE('FontSize', 16);
   for (let i = 0; i < dataList.length; i++) {
     if(i > 0) {
       LODOP.NEWPAGE();
     }
+    let html = '<table cellpadding="2" cellspacing="1" border="1" width="100%">';
     const data = dataList[i];
-    LODOP.ADD_PRINT_TEXT(20, 20, 200, 20, '日期');
-    LODOP.ADD_PRINT_TEXT(20, 120, 200, 20, data.orderDate);
-    LODOP.ADD_PRINT_TEXT(60, 20, 200, 20, '明细');
-    LODOP.ADD_PRINT_TEXT(60, 120, 200, 20, '客户代码');
-    LODOP.ADD_PRINT_TEXT(60, 220, 200, 20, '原料');
-    LODOP.ADD_PRINT_TEXT(60, 340, 200, 20, '规格（MM）');
-    LODOP.ADD_PRINT_TEXT(60, 480, 200, 20, '数量（KG）');
-    let offset = 0;
+    html += `<tr><td>日期</td><td colspan="4">${data.orderDate}</td></tr>`;
+    html += '<tr>' +
+        '<td>明细</td>' +
+        '<td>客户代码</td>' +
+        '<td>原料</td>' +
+        '<td>规格（MM）</td>' +
+        '<td>数量（KG）</td>' +
+        '</tr>';
     for(let i = 0; i < data.details.length; i++) {
-      const lineTop = 100 + (i + offset) * 30;
       const item = data.details[i];
-      LODOP.ADD_PRINT_TEXT(lineTop, 120, 200, 20, item.code);
-      LODOP.ADD_PRINT_TEXT(lineTop, 220, 200, 20, item.goodsName);
-      LODOP.ADD_PRINT_TEXT(lineTop, 340, 200, 20, item.spec);
-      LODOP.ADD_PRINT_TEXT(lineTop, 480, 200, 20, item.num);
+      html += '<tr>';
+      html += '<td></td>';
+      html += `<td>${item.code}</td>`;
+      html += `<td>${item.goodsName}</td>`;
+      html += `<td>${item.spec}</td>`;
+      html += `<td>${item.num}</td>`;
+      html += '</tr>';
       if(_isPrintTemplate && item.comment) {
-        offset += 1.5;
-        LODOP.SET_PRINT_STYLE('FontSize', 12);
-        LODOP.ADD_PRINT_TEXT(lineTop + 34, 120, 800, 20, '工艺说明： ' + item.comment);
-        LODOP.SET_PRINT_STYLE('FontSize', 16);
+        const item = data.details[i];
+        html += '<tr>';
+        html += '<td></td>';
+        html += '<td>工艺说明：</td>';
+        html += `<td colspan="3">${item.comment}</td>`;
+        html += '</tr>';
       }
     }
-    let lastTop = 120 + (data.details.length + offset)* 30;
     if(data.orderComment) {
-      LODOP.ADD_PRINT_TEXT(lastTop, 20, 200, 20, '备注');
-      const comment = data.orderComment.split('\n');
-      for(let i = 0; i < comment.length; i++) {
-        LODOP.ADD_PRINT_TEXT(lastTop, 120, 800, 20, comment[i]);
-        lastTop += 30;
-      }
-      lastTop += 10;
+      html += `<tr><td>备注</td><td colspan="4">${data.orderComment.replaceAll('\n', '<br/>')}</td></tr>`;
     }
-    LODOP.ADD_PRINT_TEXT(lastTop, 20, 200, 20, '打印人');
-    LODOP.ADD_PRINT_TEXT(lastTop, 120, 200, 20, data.user);
-    LODOP.ADD_PRINT_TEXT(lastTop + 40, 20, 200, 20, '打印时间');
-    LODOP.ADD_PRINT_TEXT(lastTop + 40, 120, 400, 20, data.printerTime);
+    html += `<tr><td>打印人</td><td colspan="4">${data.user}</td></tr>`;
+    html += `<tr><td>打印时间</td><td colspan="4">${data.printerTime}</td></tr>`;
+    html += '</table>';
+    LODOP.ADD_PRINT_HTM(10, 10, 500, 500, html);
   }
   LODOP.PREVIEW();
 }
