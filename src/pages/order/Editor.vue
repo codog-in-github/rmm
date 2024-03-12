@@ -7,7 +7,7 @@ import {isStandardSpec} from '@/helpers';
 import moment from 'moment';
 import TemplateEditor from '@/pages/template/Editor.vue';
 import {ElMessage} from 'element-plus';
-const { goods, specs } = getOptions();
+const { goods, specs, update } = getOptions();
 const elFormRef = ref(null);
 const templateEditorRef = ref(null);
 const isPrintTemplate = ref(true);
@@ -89,6 +89,7 @@ async function submit() {
   await elFormRef.value.validate();
   const { id } = await orderSave(form.value);
   ElMessage.success('保存成功');
+  update();
   show.value = false;
   emit('success', id, isPrintTemplate.value);
 }
