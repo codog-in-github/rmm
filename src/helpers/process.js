@@ -33,32 +33,35 @@ export function getOptions() {
   });
   const unitConversionMapping = ref({});
   const goodsDefaultUnitMapping = ref({});
-  Promise.all([
-    getNewProcessOptions(),
-    getMapping('unit,goods')
-  ]).then(res => {
-    const [rep, { unit , goods }] = res;
-    let map = {};
-    for(const id in unit) {
-      map[id] = unit[id].conversion;
-    }
-    unitConversionMapping.value = map;
-    map = {};
-    for(const id in goods) {
-      map[id] = goods[id].baseUnitId;
-    }
-    goodsDefaultUnitMapping.value = map;
-    options.goods = rep.goods;
-    options.units = rep.units;
-    options.specs = rep.specs;
-
-  });
+  function update() {
+    Promise.all([
+      getNewProcessOptions(),
+      getMapping('unit,goods')
+    ]).then(res => {
+      const [rep, { unit , goods }] = res;
+      let map = {};
+      for(const id in unit) {
+        map[id] = unit[id].conversion;
+      }
+      unitConversionMapping.value = map;
+      map = {};
+      for(const id in goods) {
+        map[id] = goods[id].baseUnitId;
+      }
+      goodsDefaultUnitMapping.value = map;
+      options.goods = rep.goods;
+      options.units = rep.units;
+      options.specs = rep.specs;
+    });
+  }
+  update();
   return {
     units,
     specs,
     goods,
     goodsDefaultUnitMapping,
-    unitConversionMapping
+    unitConversionMapping,
+    update
   };
 }
 
