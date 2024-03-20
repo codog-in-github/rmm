@@ -179,7 +179,7 @@ getCustomerOptions();
         <template v-slot="{ row }">
           <GlAsyncButton link type="primary" :click="() => edit(row)">查看</GlAsyncButton>
           <GlAsyncButton link type="primary" :click="() => doPrint(row.id)">打印</GlAsyncButton>
-          <GlAsyncButton link type="primary" :click="() => confirmDel(row)">删除</GlAsyncButton>
+          <GlAsyncButton link type="danger" :click="() => confirmDel(row)">删除</GlAsyncButton>
         </template>
       </ElTableColumn>
     </ElTable>

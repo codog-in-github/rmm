@@ -31,9 +31,9 @@
 import { login } from '@/api';
 import { useUser } from '@/store';
 import {ElInput, ElMessage} from 'element-plus';
-import { reactive, ref } from 'vue';
+import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import {addRouterForAuth, clearRoutes, getAuthRouteKeys, getAuthRoutes} from '@/router';
+import {addRouterForAuth, clearRoutes, getAuthRouteKeys} from '@/router';
 
 const user = useUser();
 const router = useRouter();

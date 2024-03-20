@@ -214,7 +214,7 @@ import { conversionSpec, isStandardSpec } from '@/helpers';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import {computed, nextTick, ref, watch} from 'vue';
+import {computed, ref, watch} from 'vue';
 import { getOptions } from '@/helpers/process';
 
 const props = defineProps({
@@ -420,7 +420,6 @@ async function toStock(row) {
     num = toStockMax.value;
   }
   const rec = await toStockApi(row.id, num);
-  console.log(rec);
   localForm.value.steps.push(rec);
   ElMessage.success('操作成功');
 }

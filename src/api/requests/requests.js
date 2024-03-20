@@ -36,6 +36,8 @@ export const getStockReduceOptions = makeRequest('/getReduceOptions');
 
 export const stockAdd = makeRequest('/stockAdd');
 
+export const getItemStock = makeRequest('/getItemStock','id');
+
 export const stockReduce = makeRequest('/stockReduce');
 export const printReduce = makeRequest('/printReduce', 'id');
 
@@ -50,7 +52,6 @@ export const useGetProcessList = makeUseRequestWidthPagination('/getProcessList'
 export const getNewProcessOptions = makeRequest('/getNewProcessOptions');
 
 export const rawApply = makeRequest('/rawApply');
-
 export const usedApply = makeRequest('/usedApply');
 export const dateOrder = makeRequest('/dateOrder', 'date');
 

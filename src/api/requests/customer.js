@@ -6,6 +6,7 @@ export const customerDel = makeRequest('/customer/del', 'id');
 
 export const useTemplateList = makeUseRequestWidthPagination('/template/list', 'filters');
 export const templateSave = makeRequest('/template/save');
+export const templateDel = makeRequest('/template/del', 'id');
 export const templateDetail = makeRequest('/template/detail', 'id');
 export const templateDetailSearch = makeRequest('/template/detail', 'customerId', 'goodsId', 'spec');
 export const useOrderList = makeUseRequestWidthPagination('/order/list', 'filters');

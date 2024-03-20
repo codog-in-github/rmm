@@ -1,9 +1,12 @@
 <script setup>
 import {ref, reactive} from 'vue';
 import {usePagination} from '@/helpers';
-import {getOptions, useTemplateList} from '@/api';
+import {getOptions, templateDel, useTemplateList} from '@/api';
 import Editor from './Editor.vue';
+import {ElMessageBox} from 'element-plus';
+import {useUser} from '@/store';
 
+const user = useUser();
 const customers = ref([]);
 const pagination = usePagination();
 const listApi = useTemplateList(pagination);
@@ -22,6 +25,13 @@ const edit = function(row) {
 const getList = async function() {
   list.value = await listApi(filters);
 };
+
+const confirmDel = async function(row) {
+  await ElMessageBox.confirm('确定删除该模板？');
+  await templateDel(row.id);
+  getList();
+};
+
 getOptions('customer').then(res => {
   customers.value = res.customer;
 });
@@ -50,6 +60,14 @@ getList();
       <ElTableColumn label="查看工艺">
         <template v-slot="{ row }">
           <GlAsyncButton link type="primary" :click="() => edit(row)">查看</GlAsyncButton>
+          <GlAsyncButton
+            link
+            type="danger"
+            v-if="user.can('template.delete')"
+            :click="() => confirmDel(row)"
+          >
+            删除
+          </GlAsyncButton>
         </template>
       </ElTableColumn>
     </ElTable>

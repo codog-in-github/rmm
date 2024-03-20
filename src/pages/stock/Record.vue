@@ -127,13 +127,6 @@ if(!_printSettings) {
     paperSizeIndex: null
   };
 }
-const printSettingsShow = ref(false);
-function savePrintSettings(settings) {
-  if(settings) {
-    localStorage.setItem('printSettings', JSON.stringify(settings));
-    printSettings.value = settings;
-  }
-}
 
 const printSettings = ref(_printSettings);
 async function doPrint(id) {

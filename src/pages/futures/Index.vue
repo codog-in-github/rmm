@@ -188,7 +188,7 @@ getList();
         />
         <ElTableColumn label="操作">
           <template v-slot="{row}">
-            <GlAsyncButton type="primary" link :click="() => delClick(row)">删除</GlAsyncButton>
+            <GlAsyncButton type="danger" link :click="() => delClick(row)">删除</GlAsyncButton>
           </template>
         </ElTableColumn>
       </ElTable>

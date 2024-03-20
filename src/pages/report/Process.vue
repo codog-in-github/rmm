@@ -19,10 +19,9 @@
 </template>
 <script setup>
 import { formatDatetime, usePagination } from '@/helpers';
-import { getProcessDetail, useReportProcess } from '@/api';
+import { useReportProcess } from '@/api';
 import { ref } from 'vue';
 import ProcessDialog from './ProcessDialog.vue';
-import { ElMessage } from 'element-plus';
 const detail = ref(null);
 const show = ref(false);
 const pagnation = usePagination();
@@ -31,18 +30,6 @@ const list = ref([]);
 async function getList() {
   const rep = await api();
   list.value = rep; 
-}
-
-async function showDetail(id) {
-  if(id) {
-    const rep = await getProcessDetail(id);
-    if(rep) {
-      show.value = true;
-      detail.value = rep;
-    } else {
-      ElMessage.error('未找到该加工');
-    }
-  }
 }
 
 getList();

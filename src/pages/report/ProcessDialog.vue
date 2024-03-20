@@ -310,9 +310,7 @@ const specs = computed(() => {
   };
 });
 async function init() {
-  console.log('init');
   const rep = await getNewProcessOptions();
-  console.log(rep);
   options.raws = rep.raws;
   options.products = rep.products;
   options.uses = rep.uses;

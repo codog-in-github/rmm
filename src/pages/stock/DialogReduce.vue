@@ -27,6 +27,7 @@
                   filterable
                   v-model="row.spec"
                   :options="options.specs.value(row.goodsId)"
+                  @change="setMaxTotal(row)"
                 />
               </template>
             </ElTableColumn>
@@ -109,7 +110,7 @@ import { STOCK_TYPE_MAP, STOCK_TYPE_PRODUCT } from '@/constant';
 import { map2array } from '@/helpers/utils';
 import { ElMessage } from 'element-plus';
 import { ref, watch, computed } from 'vue';
-import { getMapping, getStockReduceOptions, stockReduce } from '@/api';
+import {getItemStock, getMapping, getStockReduceOptions, stockReduce} from '@/api';
 
 let goodsDefaultUnitMapping = {};
 const optionsOrigin = ref({});
@@ -199,7 +200,11 @@ function emptyRow() {
     total:     null
   };
 }
-
+async function setMaxTotal(row) {
+  const rep = await getItemStock(row.spec);
+  row.num = rep.num;
+  row.unitId = rep.unitId;
+}
 function changeGoodsType(goodsType) {
   if (goodsType) {
     localValue.value.details = [emptyRow()];
@@ -263,6 +268,7 @@ function add() {
 watch(() => props.visible, val => {
   if (val) {
     localValue.value = props.model || emptyData();
+    localValue.value.details[0].goodsId = 2;
   }
 });
 

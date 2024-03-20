@@ -2,7 +2,7 @@
 import {computed, nextTick, ref} from 'vue';
 import { getOptions } from '@/helpers/process';
 import {getOptions as getOptionsHelpers, orderDetail, orderSave } from '@/api';
-import {GOODS_PROCESS_TEMPLATE_TYPE_HALF, GOODS_TYPE_RAW} from '@/constant';
+import {GOODS_TYPE_RAW} from '@/constant';
 import {isStandardSpec} from '@/helpers';
 import moment from 'moment';
 import TemplateEditor from '@/pages/template/Editor.vue';
