@@ -53,7 +53,7 @@ export const getNewProcessOptions = makeRequest('/getNewProcessOptions');
 
 export const rawApply = makeRequest('/rawApply');
 export const usedApply = makeRequest('/usedApply');
-export const dateOrder = makeRequest('/dateOrder', 'date');
+export const dateOrder = makeRequest('/dateOrder', 'date', 'status');
 
 export const finishProcess = makeRequest('/finishProcess', 'id');
 export const delProcess = makeRequest('/delProcess', 'id');

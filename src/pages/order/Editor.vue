@@ -2,15 +2,34 @@
 import {computed, nextTick, ref} from 'vue';
 import { getOptions } from '@/helpers/process';
 import {getOptions as getOptionsHelpers, orderDetail, orderSave } from '@/api';
+import CustomerEditor from '@/pages/customer/Editor.vue';
 import {GOODS_TYPE_RAW} from '@/constant';
 import {isStandardSpec} from '@/helpers';
 import moment from 'moment';
 import TemplateEditor from '@/pages/template/Editor.vue';
 import {ElMessage} from 'element-plus';
+
 const { goods, specs, update } = getOptions();
 const elFormRef = ref(null);
 const templateEditorRef = ref(null);
 const isPrintTemplate = ref(true);
+const customerAddData = ref({
+  index: null,
+  show:  false
+});
+
+function onCustomerAdd(customer) {
+  customers.value.push({
+    label: customer.name,
+    value: customer.id
+  });
+  form.value.details[customerAddData.value.index].customerId = customer.id;
+}
+
+function customerAdd(index) {
+  customerAddData.value.index = index;
+  customerAddData.value.show = true;
+}
 
 const emit = defineEmits(['success']);
 const emptyForm = function() {
@@ -75,7 +94,7 @@ function querySearch(id) {
 function addDetail() {
   const row = emptyDetails();
   form.value.details.push(row);
-}'';
+}
 function delDetail(index) {
   form.value.details.splice(index, 1);
 }
@@ -85,6 +104,7 @@ function showTemplate(row) {
   }
   return templateEditorRef.value.show(row.customerId, row.goodsId, row.spec);
 }
+
 async function submit() {
   await elFormRef.value.validate();
   const { id } = await orderSave(form.value);
@@ -121,8 +141,16 @@ const goodsOptions = computed(() => {
       <ElFormItem label="订单商品" prop="details">
         <ElTable :data="form.details">
           <ElTableColumn label="客户名称">
-            <template v-slot="{ row }">
-              <ElSelectV2 v-model="row.customerId" :options="customers" class="w-full" />
+            <template v-slot="{ row, $index }">
+              <div class="flex gap-2">
+                <ElSelectV2
+                  v-model="row.customerId"
+                  :options="customers"
+                  class="w-full"
+                  filterable
+                />
+                <ElLink type="primary" :underline="false" @click="customerAdd($index)"><ElIcon><Plus /></ElIcon></ElLink>
+              </div>
             </template>
           </ElTableColumn>
           <ElTableColumn label="原料名称" width="120px">
@@ -177,6 +205,7 @@ const goodsOptions = computed(() => {
       <ElButton type="primary" @click="submit">确定</ElButton>
     </template>
     <TemplateEditor ref="templateEditorRef" />
+    <CustomerEditor v-model:show="customerAddData.show" @success="onCustomerAdd" />
   </ElDialog>
 </template>
 

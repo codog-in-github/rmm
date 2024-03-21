@@ -38,6 +38,14 @@
             <span v-else class="color-info">未知</span>
           </template>
         </ElTableColumn>
+        <ElTableColumn label="订单" prop="orders" width="280px">
+          <template v-slot="{ row }">
+            <template v-if="row.orders && row.orders.length > 0">
+              <ElTag v-for="(o, i) in row.orders" :key="i">{{ o.date.replace(/-/g,'/') }} - {{ o.code }} - {{ o.spec }} - {{ o.num }}KG</ElTag>
+            </template>
+            <template v-else>-</template>
+          </template>
+        </ElTableColumn>
         <ElTableColumn label="操作人" prop="showName" />
         <ElTableColumn
           label="操作时间"

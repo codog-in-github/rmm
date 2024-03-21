@@ -93,6 +93,9 @@
             </ElButton>
           </div>
         </ElFormItem>
+        <ElFormItem label="完成订单">
+          <OrderSelect v-model="localValue.orders"  ref="orderSelectRef" />
+        </ElFormItem>
         <ElFormItem label="备注">
           <ElInput type="textarea" v-model="localValue.comment"  />
         </ElFormItem>
@@ -109,12 +112,13 @@
 import { STOCK_TYPE_MAP, STOCK_TYPE_PRODUCT } from '@/constant';
 import { map2array } from '@/helpers/utils';
 import { ElMessage } from 'element-plus';
-import { ref, watch, computed } from 'vue';
+import {ref, watch, computed, nextTick} from 'vue';
 import {getItemStock, getMapping, getStockReduceOptions, stockReduce} from '@/api';
+import OrderSelect from '@/pages/stock/OrderSelect.vue';
 
 let goodsDefaultUnitMapping = {};
 const optionsOrigin = ref({});
-
+const orderSelectRef = ref(null);
 function emptyData() {
   return {
     goodsType:    STOCK_TYPE_PRODUCT,
@@ -122,6 +126,7 @@ function emptyData() {
     details:      [
       emptyRow()
     ],
+    orders:  [],
     comment: ''
   };
 }
@@ -269,6 +274,9 @@ watch(() => props.visible, val => {
   if (val) {
     localValue.value = props.model || emptyData();
     localValue.value.details[0].goodsId = 2;
+    nextTick(() => {
+      orderSelectRef.value.setText('');
+    });
   }
 });
 

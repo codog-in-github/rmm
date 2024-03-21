@@ -97,3 +97,8 @@ export const FUTURES_TYPE_MAP = /** @type {const} */({
   [FUTURES_TYPE_NORMAL]: '期货',
   [FUTURES_TYPE_SPOT]:   '现货'
 });
+
+export const ORDER_STATUS_WAIT = 1;
+export const ORDER_STATUS_PASS = 2;
+export const ORDER_STATUS_FINISH = 3;
+

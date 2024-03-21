@@ -59,14 +59,17 @@ const addClick = debounce(async function() {
   loading.value = true;
   try{
     await elForm.value.validate();
-    await customerSave(form.value);
+    const { id } = await customerSave(form.value);
     if(form.value.id) {
       ElMessage.success('修改成功');
     } else {
       ElMessage.success('添加成功');
     }
     modelShow.value = false;
-    emit('success');
+    emit('success', {
+      ...form.value,
+      id
+    });
   } finally {
     loading.value = false;
   }
