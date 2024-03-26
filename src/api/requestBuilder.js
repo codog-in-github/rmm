@@ -33,10 +33,10 @@ class Request {
 
   post(url, data) {
     this.method = 'post';
-    if(data != void 0) {
+    if(data !== void 0) {
       this._data = data;
     }
-    if(url != void 0) {
+    if(url !== void 0) {
       this.targetUrl = url;
     }
     return this;
@@ -60,7 +60,6 @@ class Request {
     request._data = cloneDeep(this._data);
     request.requestMiddleware = [...this.requestMiddleware];
     request.responseMiddleware = [...this.responseMiddleware];
-    return; 
   }
 
   addRequestMiddleware() {
@@ -79,8 +78,9 @@ class Request {
   /**
    * 添加中间件
    * @access protected
-   * @param {'requestMiddleware' | 'responseMiddleware'} type 
-   * @param  {...Function} middlewares 
+   * @param {'requestMiddleware' | 'responseMiddleware'} key
+   * @param  {Function} middleware
+   * @param  {number} [index]
    * @returns {Request}
    */
   addMiddleware(key, middleware, index) {

@@ -3,8 +3,8 @@ import {computed, nextTick, ref} from 'vue';
 import { getOptions } from '@/helpers/process';
 import {getOptions as getOptionsHelpers, orderDetail, orderSave } from '@/api';
 import CustomerEditor from '@/pages/customer/Editor.vue';
-import {GOODS_TYPE_RAW} from '@/constant';
-import {isStandardSpec} from '@/helpers';
+import {GOODS_TYPE_RAW, ORDER_UNIT_GEN, ORDER_UNIT_MAP} from '@/constant';
+import {isStandardSpec, map2array} from '@/helpers';
 import moment from 'moment';
 import TemplateEditor from '@/pages/template/Editor.vue';
 import {ElMessage} from 'element-plus';
@@ -13,10 +13,12 @@ const { goods, specs, update } = getOptions();
 const elFormRef = ref(null);
 const templateEditorRef = ref(null);
 const isPrintTemplate = ref(true);
+const units = map2array(ORDER_UNIT_MAP);
 const customerAddData = ref({
   index: null,
   show:  false
 });
+
 
 function onCustomerAdd(customer) {
   customers.value.push({
@@ -47,6 +49,7 @@ const emptyDetails = function() {
     spec:       '',
     subSpec:    '',
     num:        null,
+    unit:       ORDER_UNIT_GEN,
     comment:    ''
   };
 };
@@ -60,7 +63,7 @@ const rules = {
       if(value?.length === 0) {
         return cb(new Error('请添加明细'));
       }
-      if(value.some(item => !item.goodsId ||!item.spec || !item.num)) {
+      if(value.some(item => !item.goodsId ||!item.spec || !item.num || !item.unit)) {
         return cb(new Error('订单请填写完整'));
       }
       if(value.some(item => !isStandardSpec(item.spec))) {
@@ -167,13 +170,22 @@ const goodsOptions = computed(() => {
               />
             </template>
           </ElTableColumn>
-          <ElTableColumn label="数量（KG）" width="120px">
+          <ElTableColumn label="数量" width="120px">
             <template v-slot="{ row }">
               <ElInput
                 type="number"
                 class="w-full"
                 v-model="row.num"
                 min="0"
+              />
+            </template>
+          </ElTableColumn>
+          <ElTableColumn label="单位" width="120px">
+            <template v-slot="{ row }">
+              <ElSelectV2
+                class="w-full"
+                v-model="row.unit"
+                :options="units"
               />
             </template>
           </ElTableColumn>

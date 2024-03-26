@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import {dateOrder} from '@/api';
 import TemplateEditor from '@/pages/template/Editor.vue';
 import moment from 'moment';
+import {ORDER_STATUS_PASS, ORDER_STATUS_WAIT, ORDER_UNIT_MAP} from '@/constant';
 const date = ref(moment().format('YYYY-MM-DD'));
 const templateEditorRef = ref(null);
 const show = ref(false);
@@ -11,7 +12,7 @@ const list = ref([]);
 async function reload() {
   try{
     loading.value = true;
-    list.value = await dateOrder(date.value);
+    list.value = await dateOrder(date.value, [ORDER_STATUS_WAIT, ORDER_STATUS_PASS]);
   } finally {
     loading.value = false;
   }
@@ -49,7 +50,11 @@ function showTemplate(row) {
       <ElTableColumn prop="code" label="客户代码" />
       <ElTableColumn prop="goodsName" label="成品" />
       <ElTableColumn prop="spec" label="规格(MM)" />
-      <ElTableColumn prop="num" label="数量(KG)" />
+      <ElTableColumn prop="num" label="数量">
+        <template v-slot="{ row }">
+          {{ row.num }} ({{ ORDER_UNIT_MAP[row.unit] }})
+        </template>
+      </ElTableColumn>
       <ElTableColumn width="180px">
         <template v-slot="{ row }">
           <GlAsyncButton

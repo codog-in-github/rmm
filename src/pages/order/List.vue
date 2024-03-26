@@ -4,6 +4,7 @@ import {usePagination} from '@/helpers';
 import {getOptions, ordelDel, printOrder, useOrderList} from '@/api';
 import Editor from './Editor.vue';
 import {ElMessage, ElMessageBox} from 'element-plus';
+import {ORDER_STATUS_WAIT, ORDER_UNIT_MAP} from '@/constant';
 const isPrintTemplate = ref(true);
 const printSettingsShow = ref(false);
 const selectedIds = ref([]);
@@ -55,7 +56,6 @@ async function doPrint(id, _isPrintTemplate = isPrintTemplate.value) {
   LODOP.PRINT_INITA();
   LODOP.SET_PRINT_PAGESIZE(1, 0 ,0, 'A5');
   LODOP.SET_PRINTER_INDEX(printSettings.value.printerIndex);
-  LODOP.SET_PRINT_STYLE('FontSize', 16);
   for (let i = 0; i < dataList.length; i++) {
     if(i > 0) {
       LODOP.NEWPAGE();
@@ -68,7 +68,7 @@ async function doPrint(id, _isPrintTemplate = isPrintTemplate.value) {
         '<td>客户代码</td>' +
         '<td>原料</td>' +
         '<td>规格（MM）</td>' +
-        '<td>数量（KG）</td>' +
+        '<td>数量</td>' +
         '</tr>';
     for(let i = 0; i < data.details.length; i++) {
       const item = data.details[i];
@@ -77,7 +77,7 @@ async function doPrint(id, _isPrintTemplate = isPrintTemplate.value) {
       html += `<td>${item.code ?? '-'}</td>`;
       html += `<td>${item.goodsName}</td>`;
       html += `<td>${item.spec}</td>`;
-      html += `<td>${item.num}</td>`;
+      html += `<td>${item.num}(${ORDER_UNIT_MAP[item.unit]})</td>`;
       html += '</tr>';
       if(_isPrintTemplate && item.comment) {
         const item = data.details[i];
@@ -172,7 +172,13 @@ getCustomerOptions();
       <ElTableColumn prop="customerName" label="客户名称" />
       <ElTableColumn label="名称">
         <template v-slot="{ row }">
-          {{ row.name }} - {{ row.spec }} - {{ row.num }}KG
+          {{ row.name }} - {{ row.spec }} - {{ row.num }} {{ ORDER_UNIT_MAP[row.unit] }}
+        </template>
+      </ElTableColumn>
+      <ElTableColumn label="状态" prop="status">
+        <template v-slot="{ row }">
+          <ElTag v-if="row.status === ORDER_STATUS_WAIT">处理中</ElTag>
+          <ElTag v-else type="success">已完成</ElTag>
         </template>
       </ElTableColumn>
       <ElTableColumn label="操作">

@@ -85,6 +85,7 @@ import { ref, reactive } from 'vue';
 import Dialog from './Dialog.vue';
 import * as CONSTANT from '@/constant';
 import { usePagination, formatDatetime, map2array } from '@/helpers';
+import {getMoneyUppercase} from '@/api/helpers';
 
 const storehouseId = ref(null);
 const list = ref([]);
@@ -140,28 +141,50 @@ const printSettings = ref(_printSettings);
 async function doPrint(id) {
   const data = await printReduce(id);
   LODOP.PRINT_INITA();
+  LODOP.SET_PRINT_PAGESIZE(1, 0 ,0, 'A5');
   LODOP.SET_PRINTER_INDEX(printSettings.value.printerIndex);
-  LODOP.SET_PRINT_STYLE('FontSize', 16);
-  LODOP.ADD_PRINT_TEXT(40, 20, 200, 20, '明细');
-  LODOP.ADD_PRINT_TEXT(40, 120, 200, 20, '名称');
-  LODOP.ADD_PRINT_TEXT(40, 220, 200, 20, '规格');
-  LODOP.ADD_PRINT_TEXT(40, 370, 200, 20, '单价（元）');
-  LODOP.ADD_PRINT_TEXT(40, 510, 200, 20, '数量');
-  LODOP.ADD_PRINT_TEXT(40, 620, 200, 20, '总价（元）');
+  let html = '<div>';
+  html += '<div style="text-align: center;font-size: 18px; font-weight: bold">慈溪市金铭金属制品有限公司</div>';
+  html += '<div style="text-align: center;position: relative; margin-top: 0.5em; font-weight: bold">送货单' +
+      '<div style="position:absolute; right: 8em;top: 0;">No.</div>' +
+      '</div>';
+  html += '<div style="position: relative; margin-top: 0.5em">收货单位：' + data.customerName +
+      '<div style="position:absolute; right: 0;top: 0">' + data.date + '</div>' +
+      '</div>';
+  html += '<table style="margin-top: 0.5em" cellpadding="2" cellspacing="1" border="1" width="100%">';
+  html += '<tr>';
+  html += '<td colspan="2">产品及规格</td>';
+  html += '<td>单位</td>';
+  html += '<td>数量</td>';
+  html += '<td>单价（元）</td>';
+  html += '<td>金额（元）</td>';
+  html += '<td>备注</td>';
+  html += '</tr>';
+  let amount = 0;
   for(let i = 0; i < data.details.length; i++) {
     const item = data.details[i];
-    LODOP.ADD_PRINT_TEXT(70 + i * 30, 120, 200, 20, item.goodsName);
-    LODOP.ADD_PRINT_TEXT(70 + i * 30, 220, 200, 20, item.spec);
-    LODOP.ADD_PRINT_TEXT(70 + i * 30, 370, 200, 20, item.price);
-    LODOP.ADD_PRINT_TEXT(70 + i * 30, 510, 200, 20, item.num + ' ' + item.unit);
-    LODOP.ADD_PRINT_TEXT(70 + i * 30, 620, 200, 20, item.total);
+    html += '<tr>';
+    html += `<td colspan="2">${item.goodsName} ${item.spec} </td>`;
+    html += `<td>${item.unit}</td>`;
+    html += `<td>${item.num}</td>`;
+    html += `<td>${item.price}</td>`;
+    html += `<td>${item.total}</td>`;
+    html += '<td></td>';
+    html += '</tr>';
+    amount += item.total;
   }
-  LODOP.ADD_PRINT_TEXT(80 + data.details.length * 30, 20, 200, 20, '打印人');
-  LODOP.ADD_PRINT_TEXT(80 + data.details.length * 30, 120, 200, 20, data.user);
-  LODOP.ADD_PRINT_TEXT(120 + data.details.length * 30, 20, 200, 20, '打印时间');
-  LODOP.ADD_PRINT_TEXT(120 + data.details.length * 30, 120, 400, 20, data.time);
-  LODOP.ADD_PRINT_TEXT(160 + data.details.length * 30, 20, 200, 20, '备注');
-  LODOP.ADD_PRINT_TEXT(160 + data.details.length * 30, 120, 400, 20, data.comment);
+  html += '<tr>';
+  html += '<td>合计金额</td>';
+  html += `<td colspan="5">${getMoneyUppercase(amount, 1)}</td>`;
+  html += `<td>${amount}</td>`;
+  html += '</tr>';
+  html += '</table>';
+  html+= '<div style="position: relative; margin-top: 0.5em;">' +
+      '签收人：' +
+      '<div style="position: absolute; right: 8em; top: 0">开单人：</div>' +
+      '</div>';
+  html += '</div>';
+  LODOP.ADD_PRINT_HTM(10, 10, 500, 500, html);
   LODOP.PREVIEW();
 }
 async function init() {

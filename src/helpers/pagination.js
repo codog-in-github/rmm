@@ -29,6 +29,7 @@ export function usePagination(options = {}) {
       callHook(hook);
     },
     moveByPage(page, hook) {
+      console.log('moveByPage', page, paginate);
       if (page > 0 && page <= paginate.lastPage) {
         paginate.page = page;
         callHook(hook);
@@ -52,7 +53,7 @@ export function usePagination(options = {}) {
       if (response) {
         paginate.perPage = response.perPage;
         paginate.total = response.total;
-        paginate.lastPage = response.perPage;
+        paginate.lastPage = response.lastPage;
         paginate.page = response.page;
       }
       dataHook(response);

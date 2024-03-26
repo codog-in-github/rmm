@@ -3,7 +3,10 @@ import { ref } from 'vue';
 import {dateOrder} from '@/api';
 import moment from 'moment';
 import {ORDER_STATUS_PASS, ORDER_STATUS_WAIT} from '@/constant';
-const date = ref(moment().format('YYYY-MM-DD'));
+const date = ref([
+  moment().add(-1, 'year').format('YYYY-MM-DD'),
+  moment().format('YYYY-MM-DD')
+]);
 const show = ref(false);
 const loading = ref(false);
 const list = ref([]);
@@ -26,7 +29,7 @@ const nameMap = ref({});
 function change(checked, row) {
   const newValue = checked ? [...props.modelValue, row.id] : props.modelValue.filter(id => id !== row.id);
   nameMap.value[row.id] = [
-    date.value.replace(/-/g,'/'),
+    row.date.replace(/-/g,'/'),
     row.code,
     row.goodsName,
     row.spec,
@@ -72,6 +75,7 @@ reload();
       <ElDatePicker
         v-model="date"
         valueFormat="YYYY-MM-DD"
+        type="daterange"
         :clearable="false"
         :disabledDate="disabledDate"
         @change="reload"
@@ -95,6 +99,7 @@ reload();
             <ElCheckbox :modelValue="modelValue.includes(row.id)" @update:modelValue="change($event, row)" />
           </template>
         </ElTableColumn>
+        <ElTableColumn prop="date" label="客户代码" />
         <ElTableColumn prop="code" label="客户代码" />
         <ElTableColumn prop="goodsName" label="成品" />
         <ElTableColumn prop="spec" label="规格(MM)" />

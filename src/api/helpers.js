@@ -50,3 +50,27 @@ export function makeUseRequestWidthPagination(url, ...keys) {
   };
 }
 
+/**
+ * @description 获取金额大写
+ * @param {number | string} money
+ * @param toFix {number}
+ * @return {string}
+ */
+export function getMoneyUppercase(money, toFix = 2) {
+  const num = [
+    '零', '壹', '贰', '叁', '肆',
+    '伍', '陆', '柒', '捌', '玖'
+  ];
+  const r = [
+    '分', '角', '元',
+    '拾', '佰', '仟', '万',
+    '拾', '佰', '仟', '亿'
+  ];
+  const moneyStr = Number(money).toFixed(toFix).replace('.', '');
+  let res = '';
+  for(let i = 0; i < r.length - toFix && moneyStr.length - i > 0; i++) {
+    res += num[moneyStr[i]] + r[moneyStr.length - i];
+  }
+  return res;
+}
+
