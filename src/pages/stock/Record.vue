@@ -25,10 +25,10 @@
         border
         height="100%"
       >
-        <ElTableColumn label="库存类型" prop="goodsType">
+        <ElTableColumn label="库存类型" prop="goodsType" width="120px">
           <template v-slot="{ row }">{{ CONSTANT.GOODS_TYPE_MAP[row['goodsType']] }}</template>
         </ElTableColumn>
-        <ElTableColumn label="类型" prop="type">
+        <ElTableColumn label="类型" prop="type" width="120px">
           <template v-slot="{ row }">
             <span v-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_IN" class="color-success">入库</span>
             <span v-else-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_OUT" class="color-danger">出库</span>
@@ -36,6 +36,14 @@
             <span v-else-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_TRANSFER" class="color-danger">加工配料</span>
             <span v-else-if="row['type'] === CONSTANT.STOCK_CHANGE_TYPE_UNDO" class="color-warning">撤销</span>
             <span v-else class="color-info">未知</span>
+          </template>
+        </ElTableColumn>
+        <ElTableColumn label="内容">
+          <template v-slot="{ row }">
+            {{ row.goodsName }}【{{ row.spec }}】
+            <template v-if="row.count > 1">
+              等 {{ row.count }} 件
+            </template>
           </template>
         </ElTableColumn>
         <ElTableColumn label="订单" prop="orders" width="280px">
@@ -46,7 +54,7 @@
             <template v-else>-</template>
           </template>
         </ElTableColumn>
-        <ElTableColumn label="操作人" prop="showName" />
+        <ElTableColumn label="操作人" prop="showName" width="120px" />
         <ElTableColumn
           label="操作时间"
           prop="createdAt"

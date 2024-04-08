@@ -276,6 +276,14 @@ getMapping('goods').then(({ goods }) => {
 });
 
 async function doAdd() {
+  if(!localValue.value.details || localValue.value.details.length === 0) {
+    ElMessage.warning('请添加明细');
+    return;
+  }
+  if(localValue.value.details.some(item => !item.goodsId || !item.spec || !item.num || !item.unitId || !item.price || !item.total)) {
+    ElMessage.warning('请填写完整明细');
+    return;
+  }
   await stockAdd(localValue.value);
   ElMessage.success('保存成功');
   emit('update:visible', false);

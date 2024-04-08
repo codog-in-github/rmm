@@ -3,16 +3,18 @@ import { ref } from 'vue';
 import {dateOrder} from '@/api';
 import TemplateEditor from '@/pages/template/Editor.vue';
 import moment from 'moment';
-import {ORDER_STATUS_PASS, ORDER_STATUS_WAIT, ORDER_UNIT_MAP} from '@/constant';
+import {ORDER_STATUS_FINISH, ORDER_STATUS_WAIT, ORDER_UNIT_MAP} from '@/constant';
 const date = ref(moment().format('YYYY-MM-DD'));
 const templateEditorRef = ref(null);
 const show = ref(false);
 const loading = ref(false);
 const list = ref([]);
+
+const emit = defineEmits(['showNewProcess']);
 async function reload() {
   try{
     loading.value = true;
-    list.value = await dateOrder(date.value, [ORDER_STATUS_WAIT, ORDER_STATUS_PASS]);
+    list.value = await dateOrder(date.value);
   } finally {
     loading.value = false;
   }
@@ -55,8 +57,17 @@ function showTemplate(row) {
           {{ row.num }} ({{ ORDER_UNIT_MAP[row.unit] }})
         </template>
       </ElTableColumn>
-      <ElTableColumn width="180px">
+      <ElTableColumn width="220px">
         <template v-slot="{ row }">
+          <ElButton v-if="row.status === ORDER_STATUS_FINISH" link type="success">已完成</ElButton>
+          <ElButton
+            v-else-if="row.status === ORDER_STATUS_WAIT"
+            link
+            type="primary"
+            @click="emit('showNewProcess');show = false"
+          >
+            配料申请
+          </ElButton>
           <GlAsyncButton
             v-if="row.templateId"
             type="primary"

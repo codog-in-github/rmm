@@ -72,7 +72,7 @@
       :storehouses="storehouses"
       @submit="submit"
     />
-    <DateOrder ref="dateOrderRef" />
+    <DateOrder ref="dateOrderRef" @showNewProcess="add" />
     <GlPrintSetting v-model:visible="printSettingsShow" :model="printSettings" @submit="savePrintSettings" />
   </div>
 </template>
@@ -93,7 +93,7 @@ import Dialog from './Dialog.vue';
 import UsedDialog from './UsedDialog.vue';
 import moment from 'moment';
 import { useUser } from '@/store';
-import DateOrder from '@/pages/workshop/DateOrder.vue';
+import DateOrder from './DateOrder.vue';
 const user = useUser();
 const dateOrderRef = ref(null);
 const canPrint = Boolean(LODOP);
@@ -207,7 +207,7 @@ function doPrint(data) {
   LODOP.ADD_PRINT_TEXT(260, 120, 200, 20, user.name);
   LODOP.ADD_PRINT_TEXT(300, 20, 200, 20, '打印时间');
   LODOP.ADD_PRINT_TEXT(300, 120, 200, 20, moment().format('YYYY-MM-DD HH:mm'));
-  LODOP.PRINT();
+  LODOP.PREVIEW();
 }
 async function submit(form) {
   await usedApply(form);

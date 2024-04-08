@@ -7,6 +7,8 @@ export const GOODS_TYPE_MAP = ({
   [GOODS_TYPE_USE]: '耗材'
 });
 
+export const GOOD_SPECIFICATION_TRASH =  '废';
+
 export const STOCK_TYPE_RAW     = 1;
 export const STOCK_TYPE_PRODUCT = 2;
 export const STOCK_TYPE_TRASH   = 3;

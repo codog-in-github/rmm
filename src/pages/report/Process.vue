@@ -4,13 +4,9 @@
     <div class="flex-auto">
       <ElTable :data="list" v-loading="pagnation.paginate.loading">
         <ElTableColumn label="加工名称" prop="name" />
-        <ElTableColumn label="成品率" prop="rate" :formatter="(_, __, value) => (value * 100).toFixed(2)+'%'" />
+        <ElTableColumn label="理论成品率" prop="rate" :formatter="(_, __, value) => (value * 100).toFixed(2)+'%'" />
+        <ElTableColumn label="实际成品率" prop="realRate" :formatter="(_, __, value) => value ?  ((value * 100).toFixed(2)+'%') : '-'" />
         <ElTableColumn label="时间" prop="createdAt" :formatter="formatDatetime" />
-        <!-- <ElTableColumn label="操作">
-          <template v-slot="{ row }">
-            <ElButton type="primary" link @click="showDetail(row.id)">详情</ElButton>
-          </template>
-        </ElTableColumn> -->
       </ElTable>
     </div>
     <GlPagination :pagination="pagnation" :requestHook="getList" />

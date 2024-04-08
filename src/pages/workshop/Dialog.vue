@@ -156,7 +156,7 @@
           </div>
         </ElFormItem>
       </template>
-      <ElFormItem label="废料"  v-if="localForm.status !== null">
+      <ElFormItem label="废料"  v-if="localForm.status === PROCESS_STATUS_FINISH">
         <ElInput
           class="m-r-2"
           :modelValue="trashTotalWeight"
@@ -208,7 +208,7 @@ import {
   PROCESS_STEP_TYPE_JIAOZHI,
   PROCESS_STEP_TYPE_LAGUAN,
   PROCESS_STEP_MAP,
-  PROCESS_STEP_STOCK_TYPE_NONE, PROCESS_STEP_STOCK_TYPE_IN
+  PROCESS_STEP_STOCK_TYPE_NONE, PROCESS_STEP_STOCK_TYPE_IN, PROCESS_STATUS_FINISH
 } from '@/constant';
 import { conversionSpec, isStandardSpec } from '@/helpers';
 import { ElMessage, ElMessageBox } from 'element-plus';

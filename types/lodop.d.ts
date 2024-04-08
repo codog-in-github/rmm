@@ -13,6 +13,7 @@ interface window {
         GET_PAGESIZES_LIST: (pinterIndex: number, separator: string) => string,
         NEWPAGE: () => void,
         SET_PRINT_PAGESIZE: (intOrient: 0|1|2|3, PageWidth?: number, PageHeight?: number, strPageName?: string) =>  void,
-        ADD_PRINT_HTM: (top: number, left: number, width: number, height: number, strHTML: string) => void
+        ADD_PRINT_HTM: (top: number, left: number, width: number, height: number, strHTML: string) => void,
+        PREVIEW: () => void
     };
 }

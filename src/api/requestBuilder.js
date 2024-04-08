@@ -51,6 +51,10 @@ class Request {
     return this;
   }
 
+  /**
+   * 克隆请求
+   * @returns {Request}
+   */
   clone() {
     const request = new Request();
     request.baseURL = this.baseURL;
@@ -60,6 +64,7 @@ class Request {
     request._data = cloneDeep(this._data);
     request.requestMiddleware = [...this.requestMiddleware];
     request.responseMiddleware = [...this.responseMiddleware];
+    return request;
   }
 
   addRequestMiddleware() {
