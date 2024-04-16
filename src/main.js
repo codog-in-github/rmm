@@ -11,7 +11,7 @@ import 'uno.css';
 import { runLodopScripts } from './helpers/lodop';
 
 envScripts[process.env.NODE_ENV].main();
-ElDialog.props.closeOnClickModal = false;
+ElDialog.props.closeOnClickModal.default = false;
 
 const app = createApp(App);
 app.use(ElementPlus);

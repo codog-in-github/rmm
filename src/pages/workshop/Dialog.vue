@@ -78,12 +78,19 @@
             <ElTableColumn label="数量（KG）">
               <template v-slot="{ row, $index }">
                 <ElInputNumber
+                  v-if="row.stockStatus === PROCESS_STEP_STOCK_TYPE_IN || row.type === PROCESS_STEP_TYPE_JIAOZHI"
                   class="w-full"
                   controlsPosition="right"
                   v-model="row.num"
                   :min="0"
                   :max="calMaxWeight(row.type, $index)"
                   :disabled="row.id"
+                />
+                <NumInput
+                  v-else
+                  v-model="row.num"
+                  :disabled="row.id"
+                  :total="calMaxWeight(row.type, $index)"
                 />
               </template>
             </ElTableColumn>
@@ -216,6 +223,7 @@ import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import {computed, ref, watch} from 'vue';
 import { getOptions } from '@/helpers/process';
+import NumInput from './NumInput.vue';
 
 const props = defineProps({
   visible: {
@@ -252,7 +260,7 @@ const totalWeight = computed(() => {
 });
 function calMaxWeight(type, index) {
   if(type === PROCESS_STEP_TYPE_JIAOZHI) {
-    return localForm.value.steps[index -1].num;
+    return localForm.value.steps[index - 1].num;
   } else {
     let reduce = 0;
     let last = totalWeight.value;
@@ -370,7 +378,7 @@ function addStep(id = 0, index = localForm.value.steps.length) {
     type,
     goodsId:        form.raw.goodsId,
     spec:           id ? localForm.value.steps[index].spec : null,
-    num:            calMaxWeight(type, index + 1),
+    num:            calMaxWeight(type, index),
     length:         null,
     pricePerLength: null,
     stockStatus:    PROCESS_STEP_STOCK_TYPE_NONE

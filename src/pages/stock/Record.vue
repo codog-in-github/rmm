@@ -94,6 +94,7 @@ import Dialog from './Dialog.vue';
 import * as CONSTANT from '@/constant';
 import { usePagination, formatDatetime, map2array } from '@/helpers';
 import {getMoneyUppercase} from '@/api/helpers';
+import {useUser} from '@/store';
 
 const storehouseId = ref(null);
 const list = ref([]);
@@ -153,15 +154,17 @@ async function doPrint(id) {
   LODOP.SET_PRINTER_INDEX(printSettings.value.printerIndex);
   let html = '<div>';
   html += '<div style="text-align: center;font-size: 18px; font-weight: bold">慈溪市金铭金属制品有限公司</div>';
-  html += '<div style="text-align: center;position: relative; margin-top: 0.5em; font-weight: bold">送货单' +
-      '<div style="position:absolute; right: 8em;top: 0;">No.</div>' +
+  html += '<div style="text-align: center;position: relative; margin-top: 0.5em; font-weight: bold">物资出库（送货单）' +
+      '<div style="position:absolute; right: 8em;top: 0;">单号.</div>' +
       '</div>';
-  html += '<div style="position: relative; margin-top: 0.5em">收货单位：' + data.customerName +
+  html += '<div style="position: relative; margin-top: 0.5em">单据类型：销售发货'+
       '<div style="position:absolute; right: 0;top: 0">' + data.date + '</div>' +
       '</div>';
+  html += '<div style="position: relative; margin-top: 0.5em">接收单位：' + data.customerName + '</div>';
   html += '<table style="margin-top: 0.5em" cellpadding="2" cellspacing="1" border="1" width="100%">';
   html += '<tr>';
-  html += '<td colspan="2">产品及规格</td>';
+  html += '<td>品名</td>';
+  html += '<td>规格</td>';
   html += '<td>单位</td>';
   html += '<td>数量</td>';
   html += '<td>单价（元）</td>';
@@ -172,7 +175,8 @@ async function doPrint(id) {
   for(let i = 0; i < data.details.length; i++) {
     const item = data.details[i];
     html += '<tr>';
-    html += `<td colspan="2">${item.goodsName} ${item.spec} </td>`;
+    html += `<td>${item.goodsName}</td>`;
+    html += `<td>${item.spec}</td>`;
     html += `<td>${item.unit}</td>`;
     html += `<td>${item.num}</td>`;
     html += `<td>${item.price}</td>`;
@@ -182,16 +186,31 @@ async function doPrint(id) {
     amount += item.total;
   }
   html += '<tr>';
-  html += '<td>合计金额</td>';
-  html += `<td colspan="5">${getMoneyUppercase(amount, 1)}</td>`;
+  html += '<td>合计</td>';
+  html += '<td></td>';
+  html += '<td></td>';
+  html += '<td></td>';
+  html += '<td></td>';
   html += `<td>${amount}</td>`;
-  html += '</tr>';
+  html += '<td></td>';
   html += '</table>';
-  html+= '<div style="position: relative; margin-top: 0.5em;">' +
-      '签收人：' +
-      '<div style="position: absolute; right: 8em; top: 0">开单人：</div>' +
-      '</div>';
   html += '</div>';
+  html+= '<table style="width: 100%; font-size: 12px; margin-top: 10px">';
+  html+= '<tr>';
+  html+= '<td width="12.5%">发货人：</td>';
+  html+= '<td width="12.5%"></td>';
+  html+= '<td width="12.5%">操作员：</td>';
+  html+= `<td width="12.5%">${useUser().name}</td>`;
+  html+= '<td width="12.5%">送货人：</td>';
+  html+= '<td width="12.5%"></td>';
+  html+= '<td width="12.5%">签收人：</td>';
+  html+= '<td width="12.5%"></td>';
+  html+= '</tr>';
+  html += '</table>';
+  html += '<div style="text-align: right">到货日期' +
+      '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
+      '年&nbsp;&nbsp;&nbsp;&nbsp;月&nbsp;&nbsp;&nbsp;&nbsp;日</div>';
+  html += '<div>注：红联请买受人盖章（或签字）后带回给出卖人</div>';
   LODOP.ADD_PRINT_HTM(10, 10, 500, 500, html);
   LODOP.PREVIEW();
 }

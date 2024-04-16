@@ -11,6 +11,9 @@ module.exports = defineConfig({
       '/api': {
         target: process.env.PROXY,
       }
+    },
+    client: {
+      overlay: false
     }
   },
   chainWebpack: config => {
