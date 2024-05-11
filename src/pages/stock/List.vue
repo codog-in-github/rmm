@@ -9,6 +9,7 @@
       />
       <template v-slot:after>
         <ElButton @click="add" type="primary" icon="plus">新增入库</ElButton>
+        <ElButton @click="addProduct" type="primary" icon="plus">成品入库</ElButton>
         <ElButton @click="showDialogReduce = true" type="primary" icon="plus">新增出库</ElButton>
         <ElButton icon="Setting" type="primary" @click="printSettingsShow = true">打印设置</ElButton>
       </template>
@@ -38,6 +39,7 @@
       </ElTable>
     </div>
     <Dialog v-model:visible="showDialog" :model="dialogData" @success="getList" />
+    <DialogProduct v-model:visible="showDialogProduct" :model="productDialogData" @success="getList" />
     <DialogReduce @success="reduceSuccess" :storehouseId="storehouseId" v-model:visible="showDialogReduce" />
     <GlPrintSetting v-model:visible="printSettingsShow" :model="printSettings" @submit="savePrintSettings" />
   </div>
@@ -51,8 +53,8 @@ import Dialog from './Dialog.vue';
 import { GOODS_PROCESS_TYPE_MAP, GOODS_TYPE_MAP, GOODS_TYPE_RAW, STOCK_TYPE_MAP } from '@/constant';
 import { isStandardSpec, map2array } from '@/helpers';
 import DialogReduce from '@/pages/stock/DialogReduce.vue';
-import {getMoneyUppercase} from '@/api/helpers';
 import {useUser} from '@/store';
+import DialogProduct from '@/pages/stock/DialogProduct.vue';
 
 const goodsOptions = map2array(STOCK_TYPE_MAP);
 const storehouseId = ref(null);
@@ -62,8 +64,10 @@ const filters = reactive({
 });
 const loading = ref(false);
 const showDialog = ref(false);
+const showDialogProduct = ref(false);
 const showDialogReduce = ref(false);
 const dialogData = ref(null);
+const productDialogData = ref(null);
 function add() {
   dialogData.value = {
     storehouseId: storehouseId.value,
@@ -71,6 +75,15 @@ function add() {
     comment:      ''
   };
   showDialog.value  = true;
+}
+function addProduct() {
+  productDialogData.value = {
+    storehouseId: storehouseId.value,
+    goodsType:    GOODS_TYPE_RAW,
+    details:      [],
+    comment:      ''
+  };
+  showDialogProduct.value  = true;
 }
 function specContent(row, _, value) {
   let content = '';
@@ -135,9 +148,9 @@ async function doPrint(id) {
   LODOP.SET_PRINT_PAGESIZE(1, 0 ,0, 'A5');
   LODOP.SET_PRINTER_INDEX(printSettings.value.printerIndex);
   let html = '<div>';
-  html += '<div style="text-align: center;font-size: 18px; font-weight: bold">慈溪市金铭金属制品有限公司</div>';
+  html += '<div style="text-align: center;font-size: 18px; font-weight: bold">' + data.title + '</div>';
   html += '<div style="text-align: center;position: relative; margin-top: 0.5em; font-weight: bold">物资出库（送货单）' +
-      '<div style="position:absolute; right: 8em;top: 0;">单号.</div>' +
+      '<div style="position:absolute; right: 0;top: 0;">单号.'+ data.id.toString().padStart(8, '0') +  '</div>' +
       '</div>';
   html += '<div style="position: relative; margin-top: 0.5em">单据类型：销售发货'+
       '<div style="position:absolute; right: 0;top: 0">' + data.date + '</div>' +

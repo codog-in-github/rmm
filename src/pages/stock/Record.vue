@@ -64,7 +64,7 @@
         <ElTableColumn label="操作" width="180">
           <template v-slot="{ row }">
             <GlAsyncButton type="text" :click="() => showDetail(row)">详情</GlAsyncButton>
-            <GlAsyncButton v-if="CONSTANT.STOCK_CHANGE_TYPE_OUT === row.type" type="text" :click="() => doPrint(row.id)">打印出库单</GlAsyncButton>
+            <GlAsyncButton v-if="row.tableStockOutId" type="text" :click="() => doPrint(row.tableStockOutId)">打印出库单</GlAsyncButton>
             <GlAsyncButton
               v-if="CONSTANT.STOCK_CHANGE_TYPE_IN === row.type  && !row.undidAt"
               type="text"
@@ -153,9 +153,9 @@ async function doPrint(id) {
   LODOP.SET_PRINT_PAGESIZE(1, 0 ,0, 'A5');
   LODOP.SET_PRINTER_INDEX(printSettings.value.printerIndex);
   let html = '<div>';
-  html += '<div style="text-align: center;font-size: 18px; font-weight: bold">慈溪市金铭金属制品有限公司</div>';
+  html += '<div style="text-align: center;font-size: 18px; font-weight: bold">' + data.title + '</div>';
   html += '<div style="text-align: center;position: relative; margin-top: 0.5em; font-weight: bold">物资出库（送货单）' +
-      '<div style="position:absolute; right: 8em;top: 0;">单号.</div>' +
+      '<div style="position:absolute; right: 0; top: 0;">单号.'+ data.id.toString().padStart(8, '0') +  '</div>' +
       '</div>';
   html += '<div style="position: relative; margin-top: 0.5em">单据类型：销售发货'+
       '<div style="position:absolute; right: 0;top: 0">' + data.date + '</div>' +

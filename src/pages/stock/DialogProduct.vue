@@ -1,5 +1,5 @@
 <template>
-  <ElDialog v-model="visibleChanger" :title="props.readonly ? '详情' : '新增'" width="1200px">
+  <ElDialog v-model="visibleChanger" :title="props.readonly ? '详情' : '新增'" width="1000px">
     <template v-if="localValue">
       <ElForm
         labelWidth="6em"
@@ -7,9 +7,7 @@
         :disabled="props.readonly"
         size="small"
       >
-        <ElFormItem label="出库类型">
-          <ElSelectV2 v-model="localValue.goodsType" :options="goodsTypeList" @change="changeGoodsType" />
-        </ElFormItem>
+        <ElFormItem label="入库类型">成品</ElFormItem>
         <ElFormItem label="明细">
           <ElTable :data="localValue.details" border>
             <ElTableColumn label="名称">
@@ -21,19 +19,35 @@
                 />
               </template>
             </ElTableColumn>
-            <ElTableColumn label="规格" width="220px">
+            <ElTableColumn label="规格">
               <template v-slot="{ row }">
-                <ElSelectV2
-                  filterable
+                <ElInput
+                  v-if="localValue.type === STOCK_CHANGE_TYPE_OUT"
+                  :modelValue="(row.subSpec ? `【${row.subSpec}】` : '') + row.spec"
+                >
+                  <template v-slot:suffix>
+                    <template v-if="isStandardSpec(row.spec)">mm</template>
+                  </template>
+                </ElInput>
+                <ElAutocomplete
+                  v-else
                   v-model="row.spec"
-                  :options="options.specs.value(row.goodsId)"
-                  @change="setMaxTotal(row)"
-                />
+                  :fetchSuggestions="querySearch(row.goodsId)"
+                >
+                  <template v-slot:suffix>
+                    <template v-if="isStandardSpec(row.spec)">mm</template>
+                  </template>
+                </ElAutocomplete>
               </template>
             </ElTableColumn>
-            <ElTableColumn label="出库数量">
+            <ElTableColumn label="矫直" width="50px" align="center">
               <template v-slot="{ row }">
-                <ElInputNumber
+                <ElCheckbox :modelValue="row.subSpec === GOODS_SUB_SPECIFICATION_JIAOZHI" @change="changeJiaozhi(row, $event)" />
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="数量">
+              <template v-slot="{ row }">
+                <ElInputNumber 
                   controlsPosition="right"
                   v-model.lazy="row.num"
                   @change="numChange(row, $event)"
@@ -50,7 +64,7 @@
             </ElTableColumn>
             <ElTableColumn label="单价（元/单位）" prop="price">
               <template v-slot="{ row }">
-                <ElInputNumber
+                <ElInputNumber 
                   controlsPosition="right"
                   v-model.lazy="row.price"
                   :min="0"
@@ -87,20 +101,10 @@
               icon="plus"
               @click="add"
               v-show="!props.readonly"
-              :disabled="!localValue.goodsType"
             >
               添加
             </ElButton>
           </div>
-        </ElFormItem>
-        <ElFormItem label="完成订单">
-          <OrderSelect v-model="localValue.orders"  ref="orderSelectRef" />
-        </ElFormItem>
-        <ElFormItem label="抬头">
-          <ElAutocomplete class="w-full" v-model="localValue.fromName" :fetchSuggestions="getTitle" />
-        </ElFormItem>
-        <ElFormItem label="接收单位">
-          <ElInput v-model="localValue.toName"  />
         </ElFormItem>
         <ElFormItem label="备注">
           <ElInput type="textarea" v-model="localValue.comment"  />
@@ -115,90 +119,65 @@
 </template>
 
 <script setup>
-import { STOCK_TYPE_MAP, STOCK_TYPE_PRODUCT } from '@/constant';
+import {
+  GOODS_PROCESS_TYPE_PRODUCT,
+  GOODS_SUB_SPECIFICATION_JIAOZHI,
+  GOODS_TYPE_MAP,
+  STOCK_CHANGE_TYPE_OUT
+} from '@/constant';
 import { map2array } from '@/helpers/utils';
 import { ElMessage } from 'element-plus';
-import {ref, watch, computed, nextTick} from 'vue';
-import {getItemStock, getMapping, getStockReduceOptions, stockReduce} from '@/api';
-import OrderSelect from '@/pages/stock/OrderSelect.vue';
-
+import { cloneDeep } from 'lodash';
+import { ref, watch, computed } from 'vue';
+import { getMapping, getStockAddOptions, stockAdd } from '@/api';
+import { isStandardSpec } from '@/helpers';
 let goodsDefaultUnitMapping = {};
-const optionsOrigin = ref({});
-const orderSelectRef = ref(null);
-function emptyData() {
-  return {
-    goodsType:    STOCK_TYPE_PRODUCT,
-    storehouseId: props.storehouseId,
-    details:      [
-      emptyRow()
-    ],
-    orders:   [],
-    comment:  '',
-    fromName: '',
-    toName:   ''
-  };
-}
-
-function getTitle(_, cb) {
-  cb([{
-    value: '慈溪市金铭金属制品有限公司'
-  }, {
-    value: '宁波泓宝铜业有限公司'
-  }]);
-}
+const optionsById = ref({
+  goods: {},
+  specs: {},
+  units: {}
+});
 
 const options = {
   goods: computed(() => {
-    if (localValue.value?.goodsType && optionsOrigin.value.stocks[localValue.value.goodsType]) {
-      const options = [];
-      for(const [id, rows] of Object.entries(optionsOrigin.value.stocks[localValue.value.goodsType])) {
-        options.push({
-          label: rows[0].goodsName,
-          value: Number(id)
-        });
-      }
-      return options;
+    if(localValue.value?.goodsType && optionsById.value.goods[localValue.value.goodsType]) {
+      return optionsById.value.goods[localValue.value.goodsType];
     }
     return [];
   }),
   specs: computed(() => {
     return function(goodsId) {
-      if (goodsId && optionsOrigin.value.stocks[localValue.value.goodsType]?.[goodsId]) {
-        return optionsOrigin.value.stocks[localValue.value.goodsType]?.[goodsId].map(item => ({
-          label: item.spec,
-          value: item.id
-        }));
+      if(goodsId && optionsById.value.specs[goodsId]) {
+        return optionsById.value.specs[goodsId];
       }
       return [];
     };
   }),
   units: computed(() => {
     return function(goodsId) {
-      if (goodsId && optionsOrigin.value.units[goodsId]) {
-        return optionsOrigin.value.units[goodsId];
+      if(goodsId && optionsById.value.units[goodsId]) {
+        return optionsById.value.units[goodsId];
       }
       return [];
     };
   })
 };
-const goodsTypeList = map2array(STOCK_TYPE_MAP);
+const goodsTypeList = map2array(GOODS_TYPE_MAP);
+const localValue = ref(null);
 const props = defineProps({
   visible: {
     required: true,
     type:     Boolean
   },
   model: {
-    type: Object
+    required: true,
+    type:     Object
   },
   readonly: {
     type:    Boolean,
     default: false
-  },
-  storehouseId: {
-    type: Number
   }
 });
-const localValue = ref(emptyData());
 const emit = defineEmits(['update:visible', 'success']);
 
 const visibleChanger = computed({
@@ -209,25 +188,29 @@ const visibleChanger = computed({
     emit('update:visible', val);
   }
 });
-
+function changeJiaozhi(row, val) {
+  if(val) {
+    row.subSpec = GOODS_SUB_SPECIFICATION_JIAOZHI;
+  } else {
+    row.subSpec = '';
+  }
+}
 function emptyRow() {
   return {
-    goodsId:   null,
-    goodsType: null,
-    spec:      '',
-    num:       null,
-    unitId:    null,
-    price:     null,
-    total:     null
+    goodsId:     null,
+    goodsType:   null,
+    processType: GOODS_PROCESS_TYPE_PRODUCT,
+    spec:        '',
+    subSpec:     '',
+    num:         null,
+    unitId:      null,
+    price:       null,
+    total:       null
   };
 }
-async function setMaxTotal(row) {
-  const rep = await getItemStock(row.spec);
-  row.num = rep.num;
-  row.unitId = rep.unitId;
-}
+
 function changeGoodsType(goodsType) {
-  if (goodsType) {
+  if(goodsType) {
     localValue.value.details = [emptyRow()];
   } else {
     localValue.value.details = [];
@@ -235,7 +218,7 @@ function changeGoodsType(goodsType) {
 }
 
 function changeGoods(row, goodsId) {
-  if (goodsId) {
+  if(goodsId) {
     row.spec = null;
     row.unitId = goodsDefaultUnitMapping[goodsId] ?? null;
     row.price = null;
@@ -244,29 +227,28 @@ function changeGoods(row, goodsId) {
 }
 
 function numChange(row, num) {
-  if (num) {
-    if (row.price) {
+  if(num) {
+    if(row.price) {
       row.total = num * row.price;
-    } else if (row.total) {
+    } else if(row.total) {
       row.price = row.total / num;
     }
-  }
+  } 
 }
 
 function totalChange(row, total) {
-  if (total && row.num) {
+  if(total && row.num) {
     row.price = total / row.num;
   }
 }
 
 function priceChange(row, price) {
-  if (price && row.num) {
+  if(price && row.num) {
     row.total = price * row.num;
   }
 }
-
 function remove(index) {
-  if (localValue.value.details.length === 1) {
+  if(localValue.value.details.length === 1) {
     ElMessage.warning('至少保留一条明细');
     localValue.value.details = [emptyRow()];
   } else {
@@ -275,40 +257,37 @@ function remove(index) {
 }
 
 function add() {
-  if (!localValue.value.goodsType) {
-    ElMessage.warning('请选择商品类型');
-    return;
-  }
-  if (localValue.value.details.length >= 10) {
+  if(localValue.value.details.length >= 10) {
     ElMessage.warning('最多添加10条明细');
     return;
   }
   localValue.value.details.push(emptyRow());
 }
 
-watch(() => props.visible, val => {
-  if (val) {
-    localValue.value = props.model || emptyData();
-    localValue.value.details[0].goodsId = 2;
-    nextTick(() => {
-      orderSelectRef.value.setText('');
-    });
-  }
+function querySearch(id) {
+  const _options = options.specs.value(id).map(item => ({ value: item.label }));
+  return function(_, cb) {
+    cb(_options);
+  };
+}
+
+watch(() => props.model, val => {
+  localValue.value = cloneDeep(val);
 });
 
-getStockReduceOptions().then(data => {
-  optionsOrigin.value = data;
+getStockAddOptions().then(data => {
+  optionsById.value = data;
 });
 getMapping('goods').then(({ goods }) => {
-  for (const id in goods) {
-    if (goods[id].baseUnitId) {
+  for(const id in goods) {
+    if(goods[id].baseUnitId) {
       goodsDefaultUnitMapping[id] = goods[id].baseUnitId;
     }
   }
 });
 
 async function doAdd() {
-  if(!localValue.value.details.length) {
+  if(!localValue.value.details || localValue.value.details.length === 0) {
     ElMessage.warning('请添加明细');
     return;
   }
@@ -316,10 +295,10 @@ async function doAdd() {
     ElMessage.warning('请填写完整明细');
     return;
   }
-  const { id } = await stockReduce(localValue.value);
+  await stockAdd(localValue.value);
   ElMessage.success('保存成功');
   emit('update:visible', false);
-  emit('success', id);
+  emit('success');
 }
 
 </script>
@@ -327,7 +306,7 @@ async function doAdd() {
 <style lang="scss" scoped>
 .el-form-item,
 .el-input-number,
-.el-select-v2 {
+.el-select-v2{
   width: 100%;
 }
 

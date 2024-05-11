@@ -3,7 +3,7 @@ import {computed, nextTick, ref} from 'vue';
 import { getOptions } from '@/helpers/process';
 import {getOptions as getOptionsHelpers, orderDetail, orderSave } from '@/api';
 import CustomerEditor from '@/pages/customer/Editor.vue';
-import {GOODS_TYPE_RAW, ORDER_UNIT_GEN, ORDER_UNIT_MAP} from '@/constant';
+import {GOODS_TYPE_RAW, ORDER_UNIT_GEN, ORDER_UNIT_KG, ORDER_UNIT_MAP} from '@/constant';
 import {isStandardSpec, map2array} from '@/helpers';
 import moment from 'moment';
 import TemplateEditor from '@/pages/template/Editor.vue';
@@ -49,7 +49,7 @@ const emptyDetails = function() {
     spec:       '',
     subSpec:    '',
     num:        null,
-    unit:       ORDER_UNIT_GEN,
+    unit:       ORDER_UNIT_KG,
     comment:    ''
   };
 };
