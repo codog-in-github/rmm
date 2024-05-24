@@ -14,6 +14,7 @@ interface window {
         NEWPAGE: () => void,
         SET_PRINT_PAGESIZE: (intOrient: 0|1|2|3, PageWidth?: number, PageHeight?: number, strPageName?: string) =>  void,
         ADD_PRINT_HTM: (top: number, left: number, width: number, height: number, strHTML: string) => void,
-        PREVIEW: () => void
+        PREVIEW: (destView?: string, iWidth?: number, iHigh?: number, iOption?:Object) => void,
+        NEWPAGEA: () => void
     };
 }
