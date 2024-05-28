@@ -125,22 +125,30 @@ getList();
         >
           <template v-slot="{row}">
             <ElPopover
-              v-if="row.type === FUTURES_TYPE_SPOT"
               placement="right-start"
               :width="200"
               trigger="hover"
             >
-              <div style="width: 240px">
-                <div>买入数量： {{ row.buyNum?.toFixed(2) }} T</div>
-                <div>买入均价： {{ row.buyPrice?.toFixed(2) }} 元</div>
-                <div>买入合计： {{ row.buyTotal?.toFixed(2) }} 元</div>
+              <div style="width: 240px" v-if="stock?.earnTotal[row.type]">
+                <div>买入</div>
+                <div>总数量： {{ stock.earnTotal[row.type].buy.num.toFixed(2) }} T</div>
+                <div>总金额： {{ stock.earnTotal[row.type].buy.total.toFixed(2) }} 元</div>
+                <div>均价： {{ stock.earnTotal[row.type].buy.avg.toFixed(2) }} 元</div>
                 <ElDivider />
-                <div>卖出数量： {{ row.saleNum?.toFixed(2) }} T</div>
-                <div>卖出均价： {{ row.salePrice?.toFixed(2) }} 元</div>
-                <div>卖出合计： {{ row.saleTotal?.toFixed(2) }} 元</div>
+                <div>卖出</div>
+                <div>总数量： {{ (-stock.earnTotal[row.type].sale.num).toFixed(2) }} T</div>
+                <div>总金额： {{ (-stock.earnTotal[row.type].sale.total).toFixed(2) }} 元</div>
+                <div>均价： {{ stock.earnTotal[row.type].sale.avg.toFixed(2) }} 元</div>
                 <ElDivider />
-                <div>库存差量： {{ row.stockChange?.toFixed(2) }} T</div>
-                <div>库存总量： {{ row.lastStock?.toFixed(2) }} T</div>
+                <div>利润计算</div>
+                <div>卖出总数量： {{ stock.earnTotal[row.type].earn.saleNum.toFixed(2) }} T</div>
+                <div>卖出均价： {{ stock.earnTotal[row.type].earn.saleAvg.toFixed(2) }} 元</div>
+                <div>买入总数量： {{ stock.earnTotal[row.type].earn.buyNum.toFixed(2) }} T</div>
+                <div>买入均价： {{ stock.earnTotal[row.type].earn.buyAvg.toFixed(2) }} 元</div>
+                <div v-if="stock.earnTotal[row.type].earn.addPrice">
+                  补足单价： {{ stock.earnTotal[row.type].earn.addPrice.toFixed(2) }} 元
+                </div>
+                <div>利润： {{ stock.earnTotal[row.type].earn.total.toFixed(2) }} 元</div>
               </div>
               <template #reference>
                 <div>{{ formatDate(null, null, row.businessDate) }}</div>

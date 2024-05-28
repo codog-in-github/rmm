@@ -17,6 +17,13 @@ export default [
     path:      '/futures',
     component: () => import('@/pages/futures/Index.vue')
   },
+  // {
+  //   key:       'futuresV2',
+  //   icon:      'PieChart',
+  //   label:     '期货管理（新）',
+  //   path:      '/futuresV2',
+  //   component: () => import('@/pages/futures/IndexV2.vue')
+  // },
   {
     key:       'customer.list',
     icon:      'Avatar',

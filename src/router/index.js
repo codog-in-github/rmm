@@ -1,6 +1,6 @@
-import { createRouter, createWebHashHistory } from 'vue-router';
+import {createRouter, createWebHashHistory} from 'vue-router';
 import routes from './routes';
-import { onBeforeUnload } from '@/helpers';
+import {onBeforeUnload} from '@/helpers';
 
 /**
  * 缓存路由key 用于刷新时恢复路由表
@@ -25,8 +25,8 @@ onBeforeUnload(() => {
 
 /**
  * 根据key返回所有路由
- * @param {string[]} keys 
- * @returns 
+ * @param {string[]} keys
+ * @returns
  */
 function restoreRoutes(keys) {
   const routeMap = {};
@@ -35,24 +35,25 @@ function restoreRoutes(keys) {
   });
   return keys.map(key => {
     const matchedRoute = routeMap[key];
+    if (!matchedRoute) return false;
     return {
       name:      key,
       path:      matchedRoute?.path,
       component: matchedRoute?.component
     };
-  });
+  }).filter(item => item);
 }
 
 const router = createRouter({
   history: createWebHashHistory(),
-  routes:  [{ 
-    path:     '/', 
-    redirect: '/login' 
-  }, { 
-    path:      '/login', 
-    component: () => import('@/pages/Login.vue') 
-  }, { 
-    name:      'container', 
+  routes:  [{
+    path:     '/',
+    redirect: '/login'
+  }, {
+    path:      '/login',
+    component: () => import('@/pages/Login.vue')
+  }, {
+    name:      'container',
     path:      '/container',
     children:  restoreRoutes(cacheRouteKeys),
     component: () => import('@/components/GlContainer.vue')
@@ -61,7 +62,7 @@ const router = createRouter({
 
 /**
  * 根据权限名动态添加路由
- * @param {string[]} authsKeys 
+ * @param {string[]} authsKeys
  */
 export function addRouterForAuth(authsKeys) {
   const routeMap = {};
