@@ -4,21 +4,12 @@ import {computed, reactive, ref} from 'vue';
 export function getOptions() {
   const options = reactive({
     goods: [],
-    units: [],
-    specs: []
+    units: []
   });
   const units = computed(() => {
     return function(id) {
       if(id && options.units[id]) {
         return options.units[id];
-      }
-      return [];
-    };
-  });
-  const specs = computed(() => {
-    return function(id) {
-      if(id && options.specs[id]) {
-        return options.specs[id];
       }
       return [];
     };
@@ -57,7 +48,6 @@ export function getOptions() {
   update();
   return {
     units,
-    specs,
     goods,
     goodsDefaultUnitMapping,
     unitConversionMapping,

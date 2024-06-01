@@ -34,7 +34,7 @@
                 <ElAutocomplete
                   v-else
                   v-model="row.spec"
-                  :fetchSuggestions="querySearch(row.goodsId)"
+                  :fetchSuggestions="useQuerySearch(row.goodsId)"
                 >
                   <template v-slot:suffix>
                     <template v-if="isStandardSpec(row.spec)">mm</template>
@@ -44,7 +44,7 @@
             </ElTableColumn>
             <ElTableColumn label="数量">
               <template v-slot="{ row }">
-                <ElInputNumber 
+                <ElInputNumber
                   controlsPosition="right"
                   v-model.lazy="row.num"
                   @change="numChange(row, $event)"
@@ -61,7 +61,7 @@
             </ElTableColumn>
             <ElTableColumn label="单价（元/单位）" prop="price">
               <template v-slot="{ row }">
-                <ElInputNumber 
+                <ElInputNumber
                   controlsPosition="right"
                   v-model.lazy="row.price"
                   :min="0"
@@ -122,12 +122,12 @@ import { map2array } from '@/helpers/utils';
 import { ElMessage } from 'element-plus';
 import { cloneDeep } from 'lodash';
 import { ref, watch, computed } from 'vue';
-import { getMapping, getStockAddOptions, stockAdd } from '@/api';
+import {getMapping, getSpecOptions, getStockAddOptions, stockAdd} from '@/api';
 import { isStandardSpec } from '@/helpers';
+import { GOODS_SPEC_SCENES_STOREHOUSE } from '@/constant';
 let goodsDefaultUnitMapping = {};
 const optionsById = ref({
   goods: {},
-  specs: {},
   units: {}
 });
 
@@ -137,14 +137,6 @@ const options = {
       return optionsById.value.goods[localValue.value.goodsType];
     }
     return [];
-  }),
-  specs: computed(() => {
-    return function(goodsId) {
-      if(goodsId && optionsById.value.specs[goodsId]) {
-        return optionsById.value.specs[goodsId];
-      }
-      return [];
-    };
   }),
   units: computed(() => {
     return function(goodsId) {
@@ -218,7 +210,7 @@ function numChange(row, num) {
     } else if(row.total) {
       row.price = row.total / num;
     }
-  } 
+  }
 }
 
 function totalChange(row, total) {
@@ -253,10 +245,28 @@ function add() {
   localValue.value.details.push(emptyRow());
 }
 
-function querySearch(id) {
-  const _options = options.specs.value(id).map(item => ({ value: item.label }));
-  return function(_, cb) {
-    cb(_options);
+function useQuerySearch(goodsId) {
+  if(!goodsId) {
+    return function querySearch(_, cb) {
+      cb([]);
+    };
+  }
+  return async function querySearch(_, cb) {
+    const rep = await getSpecOptions({
+      goodsId,
+      scenes: GOODS_SPEC_SCENES_STOREHOUSE
+    });
+    if(rep) {
+      cb(
+        rep.map(item => {
+          return {
+            value: item.value
+          };
+        })
+      );
+    } else {
+      cb([]);
+    }
   };
 }
 
@@ -267,6 +277,7 @@ watch(() => props.model, val => {
 getStockAddOptions().then(data => {
   optionsById.value = data;
 });
+
 getMapping('goods').then(({ goods }) => {
   for(const id in goods) {
     if(goods[id].baseUnitId) {

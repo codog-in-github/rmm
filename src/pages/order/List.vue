@@ -5,11 +5,12 @@ import {getOptions, ordelDel, printOrder, useOrderList} from '@/api';
 import Editor from './Editor.vue';
 import {ElMessage, ElMessageBox} from 'element-plus';
 import {ORDER_STATUS_WAIT, ORDER_UNIT_MAP} from '@/constant';
+import TemplateDialog from './TemplateDialog.vue';
 const isPrintTemplate = ref(true);
 const printSettingsShow = ref(false);
 const selectedIds = ref([]);
 const customerOptions = ref([]);
-
+const templateDialogRef = ref(null);
 async function getCustomerOptions() {
   const { customer } = await getOptions('customer');
   customerOptions.value = customer;
@@ -133,6 +134,10 @@ async function addSuccess(id, isPrintTemplate) {
   getList();
 }
 
+function showTemplate(val) {
+  templateDialogRef.value.show(val.customerId);
+}
+
 getList();
 getCustomerOptions();
 </script>
@@ -169,7 +174,16 @@ getCustomerOptions();
         </template>
       </ElTableColumn>
       <ElTableColumn prop="date" label="订单日期" />
-      <ElTableColumn prop="customerName" label="客户名称" />
+      <ElTableColumn prop="customerName" label="客户名称">
+        <template v-slot="{ row }">
+          <template v-if="row.customerName">
+            <ElButton type="primary" @click="showTemplate(row)" link>{{ row.customerName }}</ElButton>
+          </template>
+          <template v-else>
+            无
+          </template>
+        </template>
+      </ElTableColumn>
       <ElTableColumn label="名称">
         <template v-slot="{ row }">
           {{ row.name }} - {{ row.spec }} - {{ row.num }} {{ ORDER_UNIT_MAP[row.unit] }}
@@ -189,6 +203,7 @@ getCustomerOptions();
         </template>
       </ElTableColumn>
     </ElTable>
+    <TemplateDialog ref="templateDialogRef" />
     <GlPagination class="m-t-2" :pagination="pagination" :requestHook="getList" />
     <Editor ref="editor" @success="addSuccess" />
     <GlPrintSetting v-model:visible="printSettingsShow" :model="printSettings" @submit="savePrintSettings" />

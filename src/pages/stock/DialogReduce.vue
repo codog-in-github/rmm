@@ -40,6 +40,15 @@
                 />
               </template>
             </ElTableColumn>
+            <ElTableColumn label="实际数量">
+              <template v-slot="{ row }">
+                <ElInputNumber
+                  controlsPosition="right"
+                  v-model.lazy="row.realNum"
+                  @change="numChange(row, $event)"
+                />
+              </template>
+            </ElTableColumn>
             <ElTableColumn label="单位" porp="unitId">
               <template v-slot="{ row }">
                 <ElSelectV2
@@ -216,6 +225,7 @@ function emptyRow() {
     goodsType: null,
     spec:      '',
     num:       null,
+    realNum:   null,
     unitId:    null,
     price:     null,
     total:     null

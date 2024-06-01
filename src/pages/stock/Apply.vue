@@ -14,7 +14,15 @@
         <ElTableColumn label="申请人" prop="applyUserName" />
         <ElTableColumn label="操作">
           <template v-slot="{ row }">
-            <ElButton type="text" @click="showDetail(row.id)">详情</ElButton>
+            <ElButton type="primary" link @click="showDetail(row.id)">详情</ElButton>
+            <ElButton
+              type="danger"
+              link
+              v-if="user.isRoot"
+              @click="del(row.id)"
+            >
+              删除
+            </ElButton>
           </template>
         </ElTableColumn>
       </ElTable>
@@ -24,12 +32,14 @@
   </div>
 </template>
 <script setup>
-import {doApply, getApplyDetail, getSelfStorehouse, useGetApplyList} from '@/api';
+import {delApply, doApply, getApplyDetail, getSelfStorehouse, useGetApplyList} from '@/api';
 import {formatDatetime, usePagination} from '@/helpers';
-import {ElMessage} from 'element-plus';
+import {ElMessage, ElMessageBox} from 'element-plus';
 import {ref} from 'vue';
 import * as CONSTANT from '@/constant';
 import ApplyDetail from './ApplyDetail.vue';
+import { useUser } from '@/store';
+
 
 const pagnation = usePagination();
 const getApplyList =  useGetApplyList(pagnation);
@@ -37,7 +47,14 @@ const storehouseId = ref(null);
 const list = ref([]);
 const detailVisible = ref(false);
 const detailData = ref(null);
+const user = useUser();
 
+async function del(id) {
+  await ElMessageBox.confirm('确定删除吗？');
+  await delApply(id);
+  ElMessage.success('删除成功');
+  getList();
+}
 async function getList() {
   list.value = await getApplyList(storehouseId.value);
 }

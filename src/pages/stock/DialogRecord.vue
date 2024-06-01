@@ -1,5 +1,5 @@
 <template>
-  <ElDialog v-model="visibleChanger" :title="props.readonly ? '详情' : '新增'" width="1000px">
+  <ElDialog v-model="visibleChanger" title="详情" width="1000px">
     <template v-if="localValue">
       <ElForm
         labelWidth="6em"
@@ -7,7 +7,9 @@
         :disabled="props.readonly"
         size="small"
       >
-        <ElFormItem label="入库类型">成品</ElFormItem>
+        <ElFormItem label="出入库类型">
+          <ElSelectV2 v-model="localValue.goodsType" :options="goodsTypeList" @change="changeGoodsType" />
+        </ElFormItem>
         <ElFormItem label="明细">
           <ElTable :data="localValue.details" border>
             <ElTableColumn label="名称">
@@ -40,16 +42,20 @@
                 </ElAutocomplete>
               </template>
             </ElTableColumn>
-            <ElTableColumn label="矫直" width="50px" align="center">
-              <template v-slot="{ row }">
-                <ElCheckbox :modelValue="row.subSpec === GOODS_SUB_SPEC_JIAOZHI" @change="changeJiaozhi(row, $event)" />
-              </template>
-            </ElTableColumn>
             <ElTableColumn label="数量">
               <template v-slot="{ row }">
-                <ElInputNumber
+                <ElInput
                   controlsPosition="right"
                   v-model.lazy="row.num"
+                  @change="numChange(row, $event)"
+                />
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="实际数量">
+              <template v-slot="{ row }">
+                <ElInput
+                  controlsPosition="right"
+                  :modelValue="row.realNum || '-'"
                 />
               </template>
             </ElTableColumn>
@@ -61,16 +67,23 @@
                 />
               </template>
             </ElTableColumn>
-            <ElTableColumn label="操作" v-if="!props.readonly">
-              <template v-slot="{ $index }">
-                <ElButton
-                  size="small"
-                  type="text"
-                  icon="delete"
-                  @click="remove($index)"
-                >
-                  删除
-                </ElButton>
+            <ElTableColumn label="单价（元/单位）" prop="price">
+              <template v-slot="{ row }">
+                <ElInputNumber
+                  controlsPosition="right"
+                  v-model.lazy="row.price"
+                  :min="0"
+                  @change="priceChange(row, $event)"
+                />
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="总价（元）" prop="total">
+              <template v-slot="{ row }">
+                <ElInputNumber
+                  controlsPosition="right"
+                  v-model.lazy="row.total"
+                  @change="totalChange(row, $event)"
+                />
               </template>
             </ElTableColumn>
           </ElTable>
@@ -81,6 +94,7 @@
               icon="plus"
               @click="add"
               v-show="!props.readonly"
+              :disabled="!localValue.goodsType"
             >
               添加
             </ElButton>
@@ -99,23 +113,17 @@
 </template>
 
 <script setup>
-import {
-  GOODS_PROCESS_TYPE_PRODUCT,
-  GOODS_SPEC_SCENES_STOREHOUSE,
-  GOODS_SUB_SPEC_JIAOZHI,
-  GOODS_TYPE_MAP,
-  STOCK_CHANGE_TYPE_OUT
-} from '@/constant';
+import {GOODS_TYPE_MAP, STOCK_CHANGE_TYPE_OUT} from '@/constant';
 import { map2array } from '@/helpers/utils';
 import { ElMessage } from 'element-plus';
 import { cloneDeep } from 'lodash';
 import { ref, watch, computed } from 'vue';
-import { getMapping, getSpecOptions, getStockAddOptions, stockAdd } from '@/api';
+import {getMapping, getSpecOptions, getStockAddOptions, stockAdd} from '@/api';
 import { isStandardSpec } from '@/helpers';
+import { GOODS_SPEC_SCENES_STOREHOUSE } from '@/constant';
 let goodsDefaultUnitMapping = {};
 const optionsById = ref({
   goods: {},
-  specs: {},
   units: {}
 });
 
@@ -135,6 +143,7 @@ const options = {
     };
   })
 };
+const goodsTypeList = map2array(GOODS_TYPE_MAP);
 const localValue = ref(null);
 const props = defineProps({
   visible: {
@@ -160,25 +169,25 @@ const visibleChanger = computed({
     emit('update:visible', val);
   }
 });
-function changeJiaozhi(row, val) {
-  if(val) {
-    row.subSpec = GOODS_SUB_SPEC_JIAOZHI;
-  } else {
-    row.subSpec = '';
-  }
-}
+
 function emptyRow() {
   return {
-    goodsId:     null,
-    goodsType:   null,
-    processType: GOODS_PROCESS_TYPE_PRODUCT,
-    spec:        '',
-    subSpec:     '',
-    num:         null,
-    unitId:      null,
-    price:       0,
-    total:       0
+    goodsId:   null,
+    goodsType: null,
+    spec:      '',
+    num:       null,
+    unitId:    null,
+    price:     null,
+    total:     null
   };
+}
+
+function changeGoodsType(goodsType) {
+  if(goodsType) {
+    localValue.value.details = [emptyRow()];
+  } else {
+    localValue.value.details = [];
+  }
 }
 
 function changeGoods(row, goodsId) {
@@ -190,6 +199,27 @@ function changeGoods(row, goodsId) {
   }
 }
 
+function numChange(row, num) {
+  if(num) {
+    if(row.price) {
+      row.total = num * row.price;
+    } else if(row.total) {
+      row.price = row.total / num;
+    }
+  }
+}
+
+function totalChange(row, total) {
+  if(total && row.num) {
+    row.price = total / row.num;
+  }
+}
+
+function priceChange(row, price) {
+  if(price && row.num) {
+    row.total = price * row.num;
+  }
+}
 function remove(index) {
   if(localValue.value.details.length === 1) {
     ElMessage.warning('至少保留一条明细');
@@ -200,13 +230,16 @@ function remove(index) {
 }
 
 function add() {
+  if(!localValue.value.goodsType) {
+    ElMessage.warning('请选择商品类型');
+    return;
+  }
   if(localValue.value.details.length >= 10) {
     ElMessage.warning('最多添加10条明细');
     return;
   }
   localValue.value.details.push(emptyRow());
 }
-
 
 function useQuerySearch(goodsId) {
   if(!goodsId) {
@@ -240,6 +273,7 @@ watch(() => props.model, val => {
 getStockAddOptions().then(data => {
   optionsById.value = data;
 });
+
 getMapping('goods').then(({ goods }) => {
   for(const id in goods) {
     if(goods[id].baseUnitId) {
@@ -253,7 +287,7 @@ async function doAdd() {
     ElMessage.warning('请添加明细');
     return;
   }
-  if(localValue.value.details.some(item => !item.goodsId || !item.spec || !item.num || !item.unitId)) {
+  if(localValue.value.details.some(item => !item.goodsId || !item.spec || !item.num || !item.unitId || !item.price || !item.total)) {
     ElMessage.warning('请填写完整明细');
     return;
   }

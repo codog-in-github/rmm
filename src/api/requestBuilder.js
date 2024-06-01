@@ -3,7 +3,8 @@ import {
   checkLoginStatus,
   decodeParams,
   encodeParams,
-  sign
+  sign,
+  toCamelCase
 } from './middleware';
 import { cloneDeep } from 'lodash';
 
@@ -18,10 +19,17 @@ class Request {
     this._data = {};
     this.targetUrl = url;
     this.requestMiddleware = [
-      sign, encodeParams
+      /**
+       * @date 2024-05-28
+       * 签名暂时不用 有问题
+       */
+      // sign,
+      // encodeParams
     ];
     this.responseMiddleware = [
-      checkLoginStatus, decodeParams
+      checkLoginStatus,
+      // decodeParams,
+      toCamelCase
     ];
   }
 
@@ -96,7 +104,7 @@ class Request {
     }
     return this;
   }
-  
+
 
   responseWithout() {
     return this._excludeMiddleware(
@@ -115,8 +123,8 @@ class Request {
   /**
    * 排除指定中间件
    * @access protected
-   * @param {'requestMiddleware' | 'responseMiddleware'} type 
-   * @param  {...Function} middlewares 
+   * @param {'requestMiddleware' | 'responseMiddleware'} type
+   * @param  {...Function} middlewares
    * @returns {Request}
    */
   _excludeMiddleware(type, ...middlewares) {
@@ -130,7 +138,7 @@ class Request {
     return this;
   }
   /**
-   * 
+   *
    * @returns {Promise<any>}
    */
   send() {
@@ -160,7 +168,7 @@ class Request {
         (rep, next) => {
           return next(rep.response.data.data);
         },
-        decodeParams,
+        // decodeParams,
         (rep) => {
           // eslint-disable-next-line no-console
           console.log('rep', rep);

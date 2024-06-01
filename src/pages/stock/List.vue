@@ -36,6 +36,13 @@
             </div>
           </template>
         </ElTableColumn>
+        <ElTableColumn label="操作" v-if="user.isRoot">
+          <template v-slot="{ row }">
+            <ElButton type="danger" link @click="del(row)">
+              删除
+            </ElButton>
+          </template>
+        </ElTableColumn>
       </ElTable>
     </div>
     <Dialog v-model:visible="showDialog" :model="dialogData" @success="getList" />
@@ -46,15 +53,17 @@
 </template>
 
 <script setup>
-import {getSelfStorehouse, getStock, printReduce} from '@/api';
+import {delStock, getSelfStorehouse, getStock, printReduce} from '@/api';
 import {ElMessage, ElMessageBox} from 'element-plus';
 import { ref, reactive } from 'vue';
 import Dialog from './Dialog.vue';
 import { GOODS_PROCESS_TYPE_MAP, GOODS_TYPE_MAP, GOODS_TYPE_RAW, STOCK_TYPE_MAP } from '@/constant';
 import { isStandardSpec, map2array } from '@/helpers';
 import DialogReduce from '@/pages/stock/DialogReduce.vue';
-import {useUser} from '@/store';
 import DialogProduct from '@/pages/stock/DialogProduct.vue';
+import {chukudan} from '@/helpers/printTemplates';
+import { useUser } from '@/store';
+const user = useUser();
 
 const goodsOptions = map2array(STOCK_TYPE_MAP);
 const storehouseId = ref(null);
@@ -68,6 +77,12 @@ const showDialogProduct = ref(false);
 const showDialogReduce = ref(false);
 const dialogData = ref(null);
 const productDialogData = ref(null);
+async function del(row) {
+  await ElMessageBox.confirm('确定删除该库存？');
+  await delStock(row.id);
+  ElMessage.success('删除成功');
+  getList();
+}
 function add() {
   dialogData.value = {
     storehouseId: storehouseId.value,
@@ -93,7 +108,7 @@ function specContent(row, _, value) {
   content += value;
   if(isStandardSpec(value)) {
     content += '(mm)';
-  } 
+  }
   return content;
 }
 
@@ -145,68 +160,8 @@ async function reduceSuccess(id) {
 async function doPrint(id) {
   const data = await printReduce(id);
   LODOP.PRINT_INITA();
-  LODOP.SET_PRINT_PAGESIZE(1, 0 ,0, 'A5');
   LODOP.SET_PRINTER_INDEX(printSettings.value.printerIndex);
-  let html = '<div>';
-  html += '<div style="text-align: center;font-size: 18px; font-weight: bold">' + data.title + '</div>';
-  html += '<div style="text-align: center;position: relative; margin-top: 0.5em; font-weight: bold">物资出库（送货单）' +
-      '<div style="position:absolute; right: 0;top: 0;">单号.'+ data.id.toString().padStart(8, '0') +  '</div>' +
-      '</div>';
-  html += '<div style="position: relative; margin-top: 0.5em">单据类型：销售发货'+
-      '<div style="position:absolute; right: 0;top: 0">' + data.date + '</div>' +
-      '</div>';
-  html += '<div style="position: relative; margin-top: 0.5em">接收单位：' + data.customerName + '</div>';
-  html += '<table style="margin-top: 0.5em" cellpadding="2" cellspacing="1" border="1" width="100%">';
-  html += '<tr>';
-  html += '<td>品名</td>';
-  html += '<td>规格</td>';
-  html += '<td>单位</td>';
-  html += '<td>数量</td>';
-  html += '<td>单价（元）</td>';
-  html += '<td>金额（元）</td>';
-  html += '<td>备注</td>';
-  html += '</tr>';
-  let amount = 0;
-  for(let i = 0; i < data.details.length; i++) {
-    const item = data.details[i];
-    html += '<tr>';
-    html += `<td>${item.goodsName}</td>`;
-    html += `<td>${item.spec}</td>`;
-    html += `<td>${item.unit}</td>`;
-    html += `<td>${item.num}</td>`;
-    html += `<td>${item.price}</td>`;
-    html += `<td>${item.total}</td>`;
-    html += '<td></td>';
-    html += '</tr>';
-    amount += item.total;
-  }
-  html += '<tr>';
-  html += '<td>合计</td>';
-  html += '<td></td>';
-  html += '<td></td>';
-  html += '<td></td>';
-  html += '<td></td>';
-  html += `<td>${amount}</td>`;
-  html += '<td></td>';
-  html += '</table>';
-  html += '</div>';
-  html+= '<table style="width: 100%; font-size: 12px; margin-top: 10px">';
-  html+= '<tr>';
-  html+= '<td width="12.5%">发货人：</td>';
-  html+= '<td width="12.5%"></td>';
-  html+= '<td width="12.5%">操作员：</td>';
-  html+= `<td width="12.5%">${useUser().name}</td>`;
-  html+= '<td width="12.5%">送货人：</td>';
-  html+= '<td width="12.5%"></td>';
-  html+= '<td width="12.5%">签收人：</td>';
-  html+= '<td width="12.5%"></td>';
-  html+= '</tr>';
-  html += '</table>';
-  html += '<div style="text-align: right">到货日期' +
-      '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
-      '年&nbsp;&nbsp;&nbsp;&nbsp;月&nbsp;&nbsp;&nbsp;&nbsp;日</div>';
-  html += '<div>注：红联请买受人盖章（或签字）后带回给出卖人</div>';
-  LODOP.ADD_PRINT_HTM(10, 10, 500, 500, html);
+  chukudan(data, LODOP);
   LODOP.PREVIEW();
 }
 getSelfStorehouse()

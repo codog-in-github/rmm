@@ -37,14 +37,6 @@
             >
               详情
             </GlAsyncButton>
-            <GlAsyncButton
-              v-if="user.can('process.list.delete')"
-              type="primary"
-              link
-              :click="() => confirmDel(row)"
-            >
-              删除
-            </GlAsyncButton>
             <ElButton
               type="primary"
               link
@@ -53,6 +45,14 @@
             >
               开始加工
             </ElButton>
+            <GlAsyncButton
+              v-if="user.isRoot"
+              type="danger"
+              link
+              :click="() => confirmDel(row)"
+            >
+              删除
+            </GlAsyncButton>
           </template>
         </ElTableColumn>
       </ElTable>
@@ -171,6 +171,7 @@ async function toProcessing(row) {
   await toProcessingApi(row.id);
   ElMessage.success('开始加工成功');
   row.status = PROCESS_STATUS_PROCESS;
+  showDetail(row.id);
 }
 async function showDetail(id) {
   if(id) {

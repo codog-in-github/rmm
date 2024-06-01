@@ -29,7 +29,7 @@
             <template v-slot="{ row }">
               <ElAutocomplete
                 v-model="row.spec"
-                :fetchSuggestions="querySearch(row.goodsId)"
+                :fetchSuggestions="useQuerySearch(row.goodsId)"
                 :disabled="!canEditRaw"
               />
             </template>
@@ -63,7 +63,7 @@
               <template v-slot="{ row }">
                 <ElAutocomplete
                   v-model="row.spec"
-                  :fetchSuggestions="querySearch(row.goodsId)"
+                  :fetchSuggestions="useQuerySearch(row.goodsId)"
                   :disabled="row.id || row.type === PROCESS_STEP_TYPE_JIAOZHI"
                 />
                 <div v-if="row.stockStatus === PROCESS_STEP_STOCK_TYPE_IN" class="tag">入 库</div>
@@ -192,6 +192,7 @@
       </ElButton>
       <ElButton
         type="primary"
+        :disabled="localForm.steps?.every(row => row.stockStatus !== PROCESS_STEP_STOCK_TYPE_IN)"
         v-else-if="canEditProduct"
         @click="finishProcess"
       >
@@ -206,7 +207,8 @@ import {
   rawApply,
   finishProcess as finishProcessApi,
   saveStep as saveStepApi,
-  toStock as toStockApi
+  toStock as toStockApi,
+  getSpecOptions
 } from '@/api';
 import {
   PROCESS_STATUS_MAP,
@@ -215,7 +217,7 @@ import {
   PROCESS_STEP_TYPE_JIAOZHI,
   PROCESS_STEP_TYPE_LAGUAN,
   PROCESS_STEP_MAP,
-  PROCESS_STEP_STOCK_TYPE_NONE, PROCESS_STEP_STOCK_TYPE_IN, PROCESS_STATUS_FINISH
+  PROCESS_STEP_STOCK_TYPE_NONE, PROCESS_STEP_STOCK_TYPE_IN, PROCESS_STATUS_FINISH, GOODS_SPEC_SCENES_WORKSHOP
 } from '@/constant';
 import { conversionSpec, isStandardSpec } from '@/helpers';
 import { ElMessage, ElMessageBox } from 'element-plus';
@@ -249,7 +251,7 @@ watch(() => props.model, val => {
   }
   localForm.value = form;
 });
-const { units, goodsDefaultUnitMapping, goods, specs, unitConversionMapping } = getOptions();
+const { units, goodsDefaultUnitMapping, goods, unitConversionMapping } = getOptions();
 
 // ------------ 属性计算 start -------------
 const totalWeight = computed(() => {
@@ -351,10 +353,28 @@ function spanMethod({ row, column, rowIndex }) {
 }
 
 // ------------ 选项 start -------------
-function querySearch(id) {
-  const _options = specs.value(id).map(item => ({ value: item.label }));
-  return function(_, cb) {
-    cb(_options);
+function useQuerySearch(goodsId) {
+  if(!goodsId) {
+    return function querySearch(_, cb) {
+      cb([]);
+    };
+  }
+  return async function querySearch(_, cb) {
+    const rep = await getSpecOptions({
+      goodsId,
+      scenes: GOODS_SPEC_SCENES_WORKSHOP
+    });
+    if(rep) {
+      cb(
+        rep.map(item => {
+          return {
+            value: item.value
+          };
+        })
+      );
+    } else {
+      cb([]);
+    }
   };
 }
 // ------------ 选项 end -------------

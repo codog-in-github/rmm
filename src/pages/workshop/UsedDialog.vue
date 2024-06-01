@@ -19,7 +19,7 @@
             <template v-slot="{ row }">
               <ElAutocomplete
                 v-model="row.spec"
-                :fetchSuggestions="querySearch(row.goodsId)"
+                :fetchSuggestions="useQuerySearch(row.goodsId)"
               />
             </template>
           </ElTableColumn> 
@@ -59,8 +59,8 @@
   </ElDialog>
 </template>
 <script setup>
-import { getNewProcessOptions } from '@/api';
-import { GOODS_TYPE_USE } from '@/constant';
+import { getNewProcessOptions, getSpecOptions } from '@/api';
+import { GOODS_SPEC_SCENES_WORKSHOP, GOODS_TYPE_USE } from '@/constant';
 import { ElMessage } from 'element-plus';
 import { cloneDeep } from 'lodash';
 import { computed, reactive, ref, watch } from 'vue';
@@ -82,8 +82,7 @@ const emit = defineEmits(['submit', 'update:visible']);
 const localForm = ref(null);
 const options = reactive({
   goods: [],
-  units: {},
-  specs: {}
+  units: {}
 });
 const visibleChanger = computed({
   get() {
@@ -100,7 +99,6 @@ async function init() {
   const rep = await getNewProcessOptions();
   options.goods = rep.goods[GOODS_TYPE_USE] ?? [];
   options.units = rep.units;
-  options.specs = rep.specs;
 }
 const units = computed(() => {
   return function(id) {
@@ -110,20 +108,31 @@ const units = computed(() => {
     return [];
   };
 });
-const specs = computed(() => {
-  return function(id) {
-    if(id && options.specs[id]) {
-      return options.specs[id];
+function useQuerySearch(goodsId) {
+  if(!goodsId) {
+    return function querySearch(_, cb) {
+      cb([]);
+    };
+  }
+  return async function querySearch(_, cb) {
+    const rep = await getSpecOptions({
+      goodsId,
+      scenes: GOODS_SPEC_SCENES_WORKSHOP
+    });
+    if(rep) {
+      cb(
+        rep.map(item => {
+          return {
+            value: item.value
+          };
+        })
+      );
+    } else {
+      cb([]);
     }
-    return [];
-  };
-});
-function querySearch(id) {
-  const _options = specs.value(id).map(item => ({ value: item.label }));
-  return function(_, cb) {
-    cb(_options);
   };
 }
+
 function handleAddRaw() {
   if(localForm.value.items) {
     localForm.value.items.push({

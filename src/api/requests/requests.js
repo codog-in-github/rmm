@@ -78,3 +78,8 @@ export const saveStep = makeRequest('/saveStep');
 
 export const toStock = makeRequest('/toStock', 'id', 'num');
 
+export const delStock = makeRequest('/delStock', 'id');
+
+export const delApply = makeRequest('/delApply', 'id');
+
+export const delStockChangeRecord = makeRequest('/delStockChangeRecord', 'id');

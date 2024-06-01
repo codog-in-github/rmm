@@ -4,6 +4,8 @@ import {formatDatetime, usePagination} from '@/helpers';
 import {customerDel, useGetCustomers} from '@/api';
 import Edit from '@/pages/customer/Editor.vue';
 import {ElMessage, ElMessageBox} from 'element-plus';
+import TemplateDialog from './TemplateDialog.vue';
+const TemplateDialogRef = ref(null);
 const filters = reactive({
   name: ''
 });
@@ -26,6 +28,9 @@ const getList = function() {
     list.value = res;
   });
 };
+function showTemplate(id) {
+  TemplateDialogRef.value.show(id);
+}
 getList();
 </script>
 
@@ -43,7 +48,11 @@ getList();
       height="100%"
       :data="list"
     >
-      <ElTableColumn label="客户名称" prop="name" />
+      <ElTableColumn label="客户名称" prop="name">
+        <template v-slot:default="{ row }">
+          <ElButton type="primary" link @click="showTemplate(row.id)">{{ row.name }}</ElButton>
+        </template>
+      </ElTableColumn>
       <ElTableColumn label="客户代码" prop="code" />
       <ElTableColumn label="创建人" prop="showName" />
       <ElTableColumn label="创建时间" prop="createdAt" :formatter="formatDatetime" />
@@ -56,6 +65,7 @@ getList();
     </ElTable>
     <GlPagination class="m-t-2" :pagination="pagination" :requestHook="getList" />
     <Edit ref="editor" v-model:show="showEdit" @success="getList" />
+    <TemplateDialog ref="TemplateDialogRef" />
   </div>
 </template>
 

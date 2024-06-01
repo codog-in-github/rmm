@@ -36,6 +36,7 @@
       "semi": "error",
       "no-empty": "warn",
       "quotes": ["error", "single"],
+      "complexity": ["warn", 10],
       "vue/no-child-content": "warn",
       "vue/no-dupe-keys": "error",
       "vue/no-dupe-v-else-if": "error",

@@ -1,6 +1,7 @@
 import { changeKeysCase } from '@/helpers';
 import CryptoJS from 'crypto-js';
 import { ElMessage } from 'element-plus';
+import {camelCase} from 'lodash';
 
 /**
  * 将字符串填充或截断为16字节长度
@@ -77,8 +78,12 @@ export function decodeParams(data, next) {
     }
   );
   return next(
-    changeKeysCase(JSON.parse(d.toString(CryptoJS.enc.Utf8)))
+    JSON.parse(d.toString(CryptoJS.enc.Utf8))
   );
+}
+
+export function toCamelCase(data, next) {
+  return next(changeKeysCase(data));
 }
 
 export function checkLoginStatus(response, next) {

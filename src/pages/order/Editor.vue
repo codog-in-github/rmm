@@ -1,9 +1,9 @@
 <script setup>
 import {computed, nextTick, ref} from 'vue';
 import { getOptions } from '@/helpers/process';
-import {getOptions as getOptionsHelpers, orderDetail, orderSave } from '@/api';
+import {getOptions as getOptionsHelpers, getSpecOptions, orderDetail, orderSave } from '@/api';
 import CustomerEditor from '@/pages/customer/Editor.vue';
-import {GOODS_TYPE_RAW, ORDER_UNIT_GEN, ORDER_UNIT_KG, ORDER_UNIT_MAP} from '@/constant';
+import {GOODS_SPEC_SCENES_ORDER, GOODS_TYPE_RAW, ORDER_UNIT_GEN, ORDER_UNIT_KG, ORDER_UNIT_MAP} from '@/constant';
 import {isStandardSpec, map2array} from '@/helpers';
 import moment from 'moment';
 import TemplateEditor from '@/pages/template/Editor.vue';
@@ -87,12 +87,33 @@ defineExpose({
   }
 });
 const customers = ref([]);
-function querySearch(id) {
-  const _options = specs.value(id).map(item => ({ value: item.label }));
-  return function(_, cb) {
-    cb(_options);
+
+function useQuerySearch(goodsId, customerId) {
+  if(!goodsId) {
+    return function querySearch(_, cb) {
+      cb([]);
+    };
+  }
+  return async function querySearch(_, cb) {
+    const rep = await getSpecOptions({
+      goodsId,
+      scenes: GOODS_SPEC_SCENES_ORDER,
+      customerId
+    });
+    if(rep) {
+      cb(
+        rep.map(item => {
+          return {
+            value: item.value
+          };
+        })
+      );
+    } else {
+      cb([]);
+    }
   };
 }
+
 
 function addDetail() {
   const row = emptyDetails();
@@ -166,7 +187,7 @@ const goodsOptions = computed(() => {
               <ElAutocomplete
                 class="w-full"
                 v-model="row.spec"
-                :fetchSuggestions="querySearch(row.goodsId)"
+                :fetchSuggestions="useQuerySearch(row.goodsId, row.customerId)"
               />
             </template>
           </ElTableColumn>

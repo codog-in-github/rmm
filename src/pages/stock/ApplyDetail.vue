@@ -24,7 +24,7 @@
                   v-model.number="realNums[row.id]"
                   type="number"
                   min="0"
-                  :disabled="row.spec === GOODS_SPECIFICATION_TRASH"
+                  :disabled="row.spec === GOODS_SPEC_TRASH"
                   @change="calTrashNum"
                   :placeholder="row.num"
                 />
@@ -80,7 +80,7 @@
 <script setup>
 
 import {
-  GOODS_SPECIFICATION_TRASH,
+  GOODS_SPEC_TRASH,
   STOCK_APPLY_STATUS_WAITING, STOCK_APPLY_TYPE_IN, STOCK_APPLY_TYPE_OUT
 } from '@/constant';
 import moment from 'moment';
@@ -107,7 +107,7 @@ const trashIndex = computed(() => {
   if(!props.model?.raws) {
     return  -1;
   }
-  return props.model.raws.findIndex(raw => raw.spec === GOODS_SPECIFICATION_TRASH);
+  return props.model.raws.findIndex(raw => raw.spec === GOODS_SPEC_TRASH);
 });
 
 const rawTotal = computed(() => {

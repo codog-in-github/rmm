@@ -2,6 +2,8 @@ import {defineStore} from 'pinia';
 import {computed, ref} from 'vue';
 import {onBeforeUnload} from '@/helpers';
 
+const ROLE_ID_ROOT = -1;
+
 export const useUser = defineStore('user', () => {
   const auths = ref([]);
   const user = ref({ showName: '' });
@@ -23,6 +25,9 @@ export const useUser = defineStore('user', () => {
     user.value = cache.user;
     localStorage.removeItem('user');
   }
+  const isRoot = computed(() => {
+    return user.value.roleId === ROLE_ID_ROOT;
+  });
 
   function logout() {
     user.value = {
@@ -56,6 +61,7 @@ export const useUser = defineStore('user', () => {
     }),
     logout,
     login,
-    can
+    can,
+    isRoot
   };
 });

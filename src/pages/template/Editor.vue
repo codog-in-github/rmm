@@ -3,14 +3,15 @@ import { computed, nextTick, ref } from 'vue';
 import { getOptions } from '@/helpers/process';
 import {
   getOptions as getOptionsHelpers,
+  getSpecOptions,
   templateDetail,
   templateDetailSearch,
   templateSave
 } from '@/api';
-import { GOODS_TYPE_RAW } from '@/constant';
+import { GOODS_SPEC_SCENES_ORDER, GOODS_TYPE_RAW } from '@/constant';
 import {isStandardSpec} from '@/helpers';
 import { ElMessage, ElMessageBox } from 'element-plus';
-const { goods, specs } = getOptions();
+const { goods } = getOptions();
 const elFormRef = ref(null);
 const emit = defineEmits(['success']);
 const emptyForm = function() {
@@ -95,10 +96,28 @@ defineExpose({
   }
 });
 const customers = ref([]);
-function querySearch(id) {
-  const _options = specs.value(id).map(item => ({ value: item.label }));
-  return function(_, cb) {
-    cb(_options);
+function useQuerySearch(goodsId) {
+  if(!goodsId) {
+    return function querySearch(_, cb) {
+      cb([]);
+    };
+  }
+  return async function querySearch(_, cb) {
+    const rep = await getSpecOptions({
+      goodsId,
+      scenes: GOODS_SPEC_SCENES_ORDER
+    });
+    if(rep) {
+      cb(
+        rep.map(item => {
+          return {
+            value: item.value
+          };
+        })
+      );
+    } else {
+      cb([]);
+    }
   };
 }
 
@@ -141,7 +160,7 @@ const goodsOptions = computed(() => {
         <ElAutocomplete
           v-model="form.targetSpec"
           :disabled="readonly"
-          :fetchSuggestions="querySearch(form.goodsId)"
+          :fetchSuggestions="useQuerySearch(form.goodsId)"
         >
           <template #append>MM</template>
         </ElAutocomplete>
@@ -150,7 +169,7 @@ const goodsOptions = computed(() => {
         <ElAutocomplete
           v-model="form.rawSpec"
           :disabled="readonly"
-          :fetchSuggestions="querySearch(form.goodsId)"
+          :fetchSuggestions="useQuerySearch(form.goodsId)"
         >
           <template #append>MM</template>
         </ElAutocomplete>
