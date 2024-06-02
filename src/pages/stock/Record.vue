@@ -18,6 +18,9 @@
         type="daterange"
         label="操作时间"
       />
+      <template v-slot:after>
+        <Component :is="showButton" />
+      </template>
     </GlFilterBar>
     <div class="flex-auto overflow-auto h-1" v-loading="pagination.paginate.loading">
       <ElTable
@@ -103,6 +106,8 @@ import * as CONSTANT from '@/constant';
 import { usePagination, formatDatetime, map2array } from '@/helpers';
 import {chukudan} from '@/helpers/printTemplates';
 import { useUser } from '@/store';
+import { usePrinter } from '@/helpers/lodop';
+
 const user = useUser();
 const storehouseId = ref(null);
 const list = ref([]);
@@ -117,6 +122,7 @@ const pagination = usePagination();
 const goodsTypeList = map2array(CONSTANT.GOODS_TYPE_MAP);
 const stockChangeList = map2array(CONSTANT.STOCK_CHANGE_TYPE_MAP);
 const getStockRecord = useGetStockRecord(pagination);
+const { printSettings, showButton } = usePrinter();
 
 function getList() {
   return getStockRecord(storehouseId.value, filters)
@@ -151,17 +157,6 @@ async function undo(id) {
     //
   }
 }
-let _printSettings = JSON.parse(
-  localStorage.getItem('printSettings')
-);
-if(!_printSettings) {
-  _printSettings = {
-    printerIndex:   null,
-    paperSizeIndex: null
-  };
-}
-
-const printSettings = ref(_printSettings);
 async function doPrint(id) {
   try {
     const data = await printReduce(id);

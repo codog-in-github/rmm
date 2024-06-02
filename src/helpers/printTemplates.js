@@ -1,11 +1,13 @@
 import {getMoneyUppercase} from '@/api/helpers';
+import { useUser } from '@/store';
+import moment from 'moment';
 
 export function chukudan(data, LODOP){
   const PAGE_WIDTH = 2260;
   const PAGE_HEIGHT = 1400;
   const PAGE_PADDING = 100;
   const MAX_COUNT_PER_PAGE = 8;
-  const RATIO = 0.52 / (window.devicePixelRatio ?? 1);
+  const RATIO = 0.23111 * (window.devicePixelRatio ?? 1);
   const maxPage = Math.ceil(data.details.length / MAX_COUNT_PER_PAGE);
   LODOP.SET_PRINT_PAGESIZE(0, PAGE_WIDTH, PAGE_HEIGHT);
   for(let currentPage = 0; currentPage < maxPage; currentPage++) {
@@ -85,6 +87,29 @@ export function chukudan(data, LODOP){
       PAGE_PADDING * RATIO,
       (PAGE_WIDTH - PAGE_PADDING * 2) * RATIO,
       (PAGE_HEIGHT - PAGE_PADDING * 2) * RATIO,
-      html);
+      html
+    );
   }
+}
+
+export function peiliaoShenqing(data, LODOP){
+  const user = useUser();
+  LODOP.SET_PRINT_STYLE('FontSize', 16);
+  LODOP.ADD_PRINT_TEXT(20, 20, 200, 20, '名称');
+  LODOP.ADD_PRINT_TEXT(20, 120, 200, 20, data.process.name);
+  LODOP.ADD_PRINT_TEXT(60, 20, 200, 20, '材料');
+  LODOP.ADD_PRINT_TEXT(60, 120, 200, 20, '名称');
+  LODOP.ADD_PRINT_TEXT(100, 120, 200, 20, data.raw.goodsName);
+  LODOP.ADD_PRINT_TEXT(60, 220, 200, 20, '规格(MM)');
+  LODOP.ADD_PRINT_TEXT(100, 220, 200, 20, data.raw.spec);
+  LODOP.ADD_PRINT_TEXT(60, 340, 200, 20, '数量');
+  LODOP.ADD_PRINT_TEXT(100, 340, 200, 20, data.raw.num);
+  LODOP.ADD_PRINT_TEXT(60, 420, 200, 20, '单位');
+  LODOP.ADD_PRINT_TEXT(100, 420, 200, 20, data.raw.unitName);
+  LODOP.ADD_PRINT_TEXT(140, 20, 200, 20, '备注');
+  LODOP.ADD_PRINT_TEXT(140, 120, 300, 500, data.process.comment);
+  LODOP.ADD_PRINT_TEXT(260, 20, 200, 20, '打印人');
+  LODOP.ADD_PRINT_TEXT(260, 120, 200, 20, user.name);
+  LODOP.ADD_PRINT_TEXT(300, 20, 200, 20, '打印时间');
+  LODOP.ADD_PRINT_TEXT(300, 120, 200, 20, moment().format('YYYY-MM-DD HH:mm'));
 }

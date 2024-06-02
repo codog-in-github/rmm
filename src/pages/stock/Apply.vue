@@ -1,6 +1,10 @@
 <template>
   <div class="flex flex-col">
-    <GlFilterBar class="m-b-2" :model="filters" @search="pagnation.reset(getList)" />
+    <GlFilterBar class="m-b-2" :model="filters" @search="pagnation.reset(getList)">
+      <template v-slot:after>
+        <Component :is="showButton" />
+      </template>
+    </GlFilterBar>
     <div class="flex-auto h-1">
       <ElTable :data="list" height="100%" v-loading="pagnation.paginate.loading">
         <ElTableColumn label="名称" prop="name" />
@@ -15,6 +19,14 @@
         <ElTableColumn label="操作">
           <template v-slot="{ row }">
             <ElButton type="primary" link @click="showDetail(row.id)">详情</ElButton>
+            <ElButton
+              v-if="row.type === STOCK_APPLY_TYPE_OUT"
+              link
+              type="primary"
+              @click="print(row.id)"
+            >
+              打印
+            </ElButton>
             <ElButton
               type="danger"
               link
@@ -32,14 +44,16 @@
   </div>
 </template>
 <script setup>
-import {delApply, doApply, getApplyDetail, getSelfStorehouse, useGetApplyList} from '@/api';
+import {delApply, doApply, getApplyDetail, getSelfStorehouse, printApplyRaw, useGetApplyList} from '@/api';
 import {formatDatetime, usePagination} from '@/helpers';
 import {ElMessage, ElMessageBox} from 'element-plus';
 import {ref} from 'vue';
 import * as CONSTANT from '@/constant';
 import ApplyDetail from './ApplyDetail.vue';
 import { useUser } from '@/store';
-
+import {STOCK_APPLY_TYPE_OUT} from '@/constant';
+import { usePrinter } from '@/helpers/lodop';
+import { peiliaoShenqing } from '@/helpers/printTemplates';
 
 const pagnation = usePagination();
 const getApplyList =  useGetApplyList(pagnation);
@@ -48,7 +62,17 @@ const list = ref([]);
 const detailVisible = ref(false);
 const detailData = ref(null);
 const user = useUser();
-
+const { printSettings, showButton } = usePrinter();
+async function print(id) {
+  const data = await printApplyRaw(id);
+  if(!LODOP) {
+    ElMessage.error('请先安装LODOP插件');
+  }
+  LODOP.PRINT_INITA();
+  LODOP.SET_PRINTER_INDEX(printSettings.value.printerIndex);
+  peiliaoShenqing(data, LODOP);
+  LODOP.PREVIEW();
+}
 async function del(id) {
   await ElMessageBox.confirm('确定删除吗？');
   await delApply(id);

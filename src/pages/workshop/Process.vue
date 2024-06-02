@@ -6,7 +6,7 @@
         <ElButton type="primary" @click="add" icon="plus">配料申请</ElButton>
         <ElButton type="primary" @click="showUsedDetail" icon="plus">耗材申请</ElButton>
         <GlAsyncButton icon="Checked" type="primary" :click="showTodayOrder">查看订单</GlAsyncButton>
-        <ElButton type="primary" @click="printSettingsShow = true" icon="tools">打印设置</ElButton>
+        <Component class="m-l-2" :is="showButton" />
       </template>
     </GlFilterBar>
     <div class="flex-auto h-1">
@@ -73,7 +73,6 @@
       @submit="submit"
     />
     <DateOrder ref="dateOrderRef" @showNewProcess="add" />
-    <GlPrintSetting v-model:visible="printSettingsShow" :model="printSettings" @submit="savePrintSettings" />
   </div>
 </template>
 <script setup>
@@ -84,7 +83,7 @@ import {
   getOptions,
   getProcessDetail,
   toProcessing as toProcessingApi,
-  usedApply, delProcess
+  usedApply, delProcess, printApplyRaw
 } from '@/api';
 import { PROCESS_STATUS_MAP, PROCESS_STATUS_PROCESS, PROCESS_STATUS_WAIT } from '@/constant';
 import { usePagination } from '@/helpers';
@@ -94,7 +93,11 @@ import UsedDialog from './UsedDialog.vue';
 import moment from 'moment';
 import { useUser } from '@/store';
 import DateOrder from './DateOrder.vue';
+import { usePrinter } from '@/helpers/lodop';
+import { peiliaoShenqing } from '@/helpers/printTemplates';
+
 const user = useUser();
+const { printSettings, showButton } = usePrinter();
 const dateOrderRef = ref(null);
 const canPrint = Boolean(LODOP);
 const workshopId = ref(null);
@@ -109,23 +112,6 @@ const form = ref(null);
 const usedDialogVisible = ref(false);
 const usedForm = ref(null);
 const storehouses = ref([]);
-const printSettingsShow = ref(false);
-let _printSettings = JSON.parse(
-  localStorage.getItem('printSettings')
-);
-if(!_printSettings) {
-  _printSettings = {
-    printerIndex:   null,
-    paperSizeIndex: null
-  };
-}
-const printSettings = ref(_printSettings);
-function savePrintSettings(settings) {
-  if(settings) {
-    localStorage.setItem('printSettings', JSON.stringify(settings));
-    printSettings.value = settings;
-  }
-}
 async function confirmDel(row) {
   await ElMessageBox.confirm('确认删除吗？');
   await delProcess(row.id);
@@ -184,30 +170,14 @@ async function showDetail(id) {
     }
   }
 }
-function doPrint(data) {
+async function doPrint(id) {
+  const data = await printApplyRaw(id);
   if(!canPrint) {
     ElMessage.error('请先安装LODOP插件');
   }
   LODOP.PRINT_INITA();
   LODOP.SET_PRINTER_INDEX(printSettings.value.printerIndex);
-  LODOP.SET_PRINT_STYLE('FontSize', 16);
-  LODOP.ADD_PRINT_TEXT(20, 20, 200, 20, '名称');
-  LODOP.ADD_PRINT_TEXT(20, 120, 200, 20, data.name);
-  LODOP.ADD_PRINT_TEXT(60, 20, 200, 20, '材料');
-  LODOP.ADD_PRINT_TEXT(60, 120, 200, 20, '名称');
-  LODOP.ADD_PRINT_TEXT(100, 120, 200, 20, data.raw.goodsName);
-  LODOP.ADD_PRINT_TEXT(60, 220, 200, 20, '规格(MM)');
-  LODOP.ADD_PRINT_TEXT(100, 220, 200, 20, data.raw.spec);
-  LODOP.ADD_PRINT_TEXT(60, 340, 200, 20, '数量');
-  LODOP.ADD_PRINT_TEXT(100, 340, 200, 20, data.raw.num);
-  LODOP.ADD_PRINT_TEXT(60, 420, 200, 20, '单位');
-  LODOP.ADD_PRINT_TEXT(100, 420, 200, 20, data.raw.unitName);
-  LODOP.ADD_PRINT_TEXT(140, 20, 200, 20, '备注');
-  LODOP.ADD_PRINT_TEXT(140, 120, 300, 500, data.comment);
-  LODOP.ADD_PRINT_TEXT(260, 20, 200, 20, '打印人');
-  LODOP.ADD_PRINT_TEXT(260, 120, 200, 20, user.name);
-  LODOP.ADD_PRINT_TEXT(300, 20, 200, 20, '打印时间');
-  LODOP.ADD_PRINT_TEXT(300, 120, 200, 20, moment().format('YYYY-MM-DD HH:mm'));
+  peiliaoShenqing(data, LODOP);
   LODOP.PREVIEW();
 }
 async function submit(form) {

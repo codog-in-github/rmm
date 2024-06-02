@@ -452,7 +452,6 @@ async function toStock(row) {
   ElMessage.success('操作成功');
 }
 
-
 async function rawApplySubmit() {
   const form = localForm.value;
   if(!form.name) {
@@ -466,27 +465,15 @@ async function rawApplySubmit() {
   ) {
     return ElMessage.warning('原材料未填写完整');
   }
-  await rawApply(form);
+  const { applyId } = await rawApply(form);
   emit('reload');
   visibleChanger.value = false;
   try {
     await ElMessageBox.confirm('原料申请成功，是否打印？');
-    emit('print', printData());
+    emit('print', applyId);
   } catch (none) {
     //
   }
-}
-
-function printData() {
-  const data = cloneDeep(localForm.value);
-  data.raw.goodsName = goods.value(GOODS_TYPE_RAW)
-    .find(item => item.value === data.raw.goodsId).label;
-  data.raw.unitName = units.value(data.raw.goodsId)
-    .find(item => item.value === data.raw.unitId).label;
-  if(data.status === null) {
-    data.name = moment().format('YYYYMMDD') + '-' + data.name;
-  }
-  return data;
 }
 
 async function finishProcess() {

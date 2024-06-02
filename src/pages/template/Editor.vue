@@ -93,6 +93,11 @@ defineExpose({
     nextTick(() => {
       elFormRef.value.clearValidate();
     });
+  },
+  showAddCustomer(id) {
+    show.value = true;
+    form.value = emptyForm();
+    form.value.customerId = id;
   }
 });
 const customers = ref([]);
