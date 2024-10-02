@@ -33,6 +33,11 @@ function disabledDate(date) {
 function showTemplate(row) {
   return templateEditorRef.value.show(row.customerId, row.goodsId, row.spec);
 }
+
+function showNewProcess(row) {
+  emit('showNewProcess', row.goodsName + ' ' + row.spec);
+  show.value = false;
+}
 </script>
 
 <template>
@@ -64,7 +69,7 @@ function showTemplate(row) {
             v-else-if="row.status === ORDER_STATUS_WAIT"
             link
             type="primary"
-            @click="emit('showNewProcess');show = false"
+            @click="showNewProcess(row)"
           >
             配料申请
           </ElButton>

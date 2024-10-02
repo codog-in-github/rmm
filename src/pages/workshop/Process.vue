@@ -3,7 +3,7 @@
     <GlFilterBar class="m-b-2" :model="filters" @search="pagination.reset(getList)">
       <GlFilterItem label="名称" prop="name" />
       <template v-slot:after>
-        <ElButton type="primary" @click="add" icon="plus">配料申请</ElButton>
+        <ElButton type="primary" @click="add()" icon="plus">配料申请</ElButton>
         <ElButton type="primary" @click="showUsedDetail" icon="plus">耗材申请</ElButton>
         <GlAsyncButton icon="Checked" type="primary" :click="showTodayOrder">查看订单</GlAsyncButton>
         <Component class="m-l-2" :is="showButton" />
@@ -118,10 +118,10 @@ async function confirmDel(row) {
   ElMessage.success('删除成功');
   getList();
 }
-function add() {
+function add(name = '') {
   dialogVisible.value = true;
   form.value = {
-    name:         '',
+    name,
     workshopId:   workshopId.value,
     storehouseId: storehouses.value?.[0].value ?? null,
     status:       null,

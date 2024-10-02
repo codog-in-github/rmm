@@ -7,13 +7,10 @@ export function chukudan(data, LODOP){
   const PAGE_HEIGHT = 1400;
   const PAGE_PADDING = 100;
   const MAX_COUNT_PER_PAGE = 8;
-  const RATIO = 0.23111 * (window.devicePixelRatio ?? 1);
+  const RATIO = 0.346665;
   const maxPage = Math.ceil(data.details.length / MAX_COUNT_PER_PAGE);
   LODOP.SET_PRINT_PAGESIZE(0, PAGE_WIDTH, PAGE_HEIGHT);
   for(let currentPage = 0; currentPage < maxPage; currentPage++) {
-    if(currentPage > 0) {
-      LODOP.NEWPAGEA();
-    }
     let html = '<div>';
     html += '<div style="text-align: center;font-size: 22px; font-weight: bold">' + data.title + '</div>';
     html += '<div style="text-align: center;position: relative; margin-top: 0.5em; font-weight: bold; font-size: 16px">物资出库（送货单）' +
@@ -40,8 +37,8 @@ export function chukudan(data, LODOP){
       html += `<td style="text-align: center">${item.spec}</td>`;
       html += `<td style="text-align: center">${item.unit}</td>`;
       html += `<td style="text-align: center">${item.num}</td>`;
-      html += `<td style="text-align: center">${item.price}</td>`;
-      html += `<td style="text-align: center">${item.total}</td>`;
+      html += `<td style="text-align: center">${item.price ?? ''}</td>`;
+      html += `<td style="text-align: center">${item.total ?? ''}</td>`;
       html += '<td></td>';
       html += '</tr>';
       amount += item.total;
@@ -61,8 +58,10 @@ export function chukudan(data, LODOP){
     }
     html += '<tr>';
     html += '<td style="text-align: center">合计金额：</td>';
-    html += `<td style="" colspan="6">${getMoneyUppercase(amount, 1)}`
-            + `<span style="float: right; letter-spacing: 0">￥<span style="text-decoration: underline;">&nbsp;&nbsp;${amount.toFixed(1)}&nbsp;&nbsp;</span></span>`
+    html += `<td style="" colspan="6">${amount ? getMoneyUppercase(amount, 1) : ''}`
+            + `<span style="float: right; letter-spacing: 0">￥<span style="text-decoration: underline;">&nbsp;&nbsp;${
+              amount ? amount.toFixed(1) : '&nbsp;'.repeat(6)
+            }&nbsp;&nbsp;</span></span>`
             + '</td>';
     html += '</table>';
     html += '</div>';
@@ -89,6 +88,7 @@ export function chukudan(data, LODOP){
       (PAGE_HEIGHT - PAGE_PADDING * 2) * RATIO,
       html
     );
+    LODOP.NEWPAGEA();
   }
 }
 

@@ -45,7 +45,6 @@
                 <ElInputNumber
                   controlsPosition="right"
                   v-model.lazy="row.realNum"
-                  @change="numChange(row, $event)"
                 />
               </template>
             </ElTableColumn>
@@ -109,7 +108,7 @@
           <ElAutocomplete class="w-full" v-model="localValue.fromName" :fetchSuggestions="getTitle" />
         </ElFormItem>
         <ElFormItem label="接收单位">
-          <ElInput v-model="localValue.toName"  />
+          <ElAutocomplete v-model="localValue.toName" :fetchSuggestions="fetchCustomers" class="w-full" />
         </ElFormItem>
         <ElFormItem label="备注">
           <ElInput type="textarea" v-model="localValue.comment"  />
@@ -128,7 +127,7 @@ import { STOCK_TYPE_MAP, STOCK_TYPE_PRODUCT } from '@/constant';
 import { map2array } from '@/helpers/utils';
 import { ElMessage } from 'element-plus';
 import {ref, watch, computed, nextTick} from 'vue';
-import {getItemStock, getMapping, getStockReduceOptions, stockReduce} from '@/api';
+import {getItemStock, getMapping, getOptions, getStockReduceOptions, stockReduce} from '@/api';
 import OrderSelect from '@/pages/stock/OrderSelect.vue';
 
 let goodsDefaultUnitMapping = {};
@@ -172,7 +171,7 @@ const options = {
   }),
   specs: computed(() => {
     return function(goodsId) {
-      if (goodsId && optionsOrigin.value.stocks[localValue.value.goodsType]?.[goodsId]) {
+      if (goodsId && optionsOrigin.value.stocks?.[localValue.value.goodsType]?.[goodsId]) {
         return optionsOrigin.value.stocks[localValue.value.goodsType]?.[goodsId].map(item => ({
           label: item.spec,
           value: item.id
@@ -234,6 +233,7 @@ function emptyRow() {
 async function setMaxTotal(row) {
   const rep = await getItemStock(row.spec);
   row.num = rep.num;
+  row.realNum = rep.num;
   row.unitId = rep.unitId;
 }
 function changeGoodsType(goodsType) {
@@ -261,6 +261,7 @@ function numChange(row, num) {
       row.price = row.total / num;
     }
   }
+  row.realNum = num;
 }
 
 function totalChange(row, total) {
@@ -322,7 +323,7 @@ async function doAdd() {
     ElMessage.warning('请添加明细');
     return;
   }
-  if(localValue.value.details.some(item => !item.goodsId || !item.spec || !item.num || !item.unitId || !item.price || !item.total)) {
+  if(localValue.value.details.some(item => !item.goodsId || !item.spec || !item.num || !item.unitId)) {
     ElMessage.warning('请填写完整明细');
     return;
   }
@@ -330,6 +331,15 @@ async function doAdd() {
   ElMessage.success('保存成功');
   emit('update:visible', false);
   emit('success', id);
+}
+
+async function fetchCustomers(input, cb) {
+  const { customer } = await getOptions('customer');
+  let suggestions =  customer.map(item => ({ value: item.label }));
+  if(input) {
+    suggestions = suggestions.filter(item => item.value.includes(input));
+  }
+  cb(suggestions);
 }
 
 </script>

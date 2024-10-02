@@ -61,12 +61,11 @@ async function doPrint(id, _isPrintTemplate = isPrintTemplate.value) {
     if(i > 0) {
       LODOP.NEWPAGE();
     }
-    let html = '<table cellpadding="2" cellspacing="1" border="1" width="100%">';
+    let html = '<table cellpadding="2" cellspacing="0" border="1" width="100%">';
     const data = dataList[i];
     html += `<tr><td>日期</td><td colspan="4">${data.orderDate}</td></tr>`;
     html += '<tr>' +
-        '<td>明细</td>' +
-        '<td>客户代码</td>' +
+        '<td colspan="2">客户代码</td>' +
         '<td>原料</td>' +
         '<td>规格（MM）</td>' +
         '<td>数量</td>' +
@@ -74,23 +73,23 @@ async function doPrint(id, _isPrintTemplate = isPrintTemplate.value) {
     for(let i = 0; i < data.details.length; i++) {
       const item = data.details[i];
       html += '<tr>';
-      html += '<td></td>';
-      html += `<td>${item.code ?? '-'}</td>`;
+      html += `<td colspan="2">${item.code ?? '-'}</td>`;
       html += `<td>${item.goodsName}</td>`;
       html += `<td>${item.spec}</td>`;
       html += `<td>${item.num}(${ORDER_UNIT_MAP[item.unit]})</td>`;
       html += '</tr>';
-      if(_isPrintTemplate && item.comment) {
-        const item = data.details[i];
+      if(item.orderComment) {
         html += '<tr>';
-        html += '<td></td>';
-        html += '<td>工艺说明：</td>';
-        html += `<td colspan="3">${item.comment}</td>`;
+        html += '<td>备注：</td>';
+        html += `<td colspan="4">${item.orderComment}</td>`;
         html += '</tr>';
       }
-    }
-    if(data.orderComment) {
-      html += `<tr><td>备注</td><td colspan="4">${data.orderComment.replaceAll('\n', '<br/>')}</td></tr>`;
+      if(_isPrintTemplate && item.comment) {
+        html += '<tr>';
+        html += '<td>工艺说明：</td>';
+        html += `<td colspan="4">${item.comment}</td>`;
+        html += '</tr>';
+      }
     }
     html += `<tr><td>打印人</td><td colspan="4">${data.user}</td></tr>`;
     html += `<tr><td>打印时间</td><td colspan="4">${data.printerTime}</td></tr>`;
