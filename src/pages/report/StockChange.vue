@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col">
+  <div class="inner-page-container flex flex-col">
     <GlFilterBar @search="getList" :model="filters">
       <GlFilterItem
         label="原材料类型"

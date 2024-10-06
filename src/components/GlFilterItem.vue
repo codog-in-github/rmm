@@ -8,13 +8,30 @@
           :placeholder="`请输入${props.label}`"
           v-model="localValue"
           v-bind="$attrs"
+          :style="props.controllerStyle"
         />
+        <ElRadioGroup
+          v-else-if="props.type === 'button'"
+          :placeholder="`请输入${props.label}`"
+          v-model="localValue"
+          v-bind="$attrs"
+          :style="props.controllerStyle"
+        >
+          <ElRadioButton
+            v-for="item of $attrs.options"
+            :key="item.value"
+            :label="item.value"
+          >
+            {{ item.label }}
+          </ElRadioButton>
+        </ElRadioGroup>
         <ElSelectV2
           v-if="props.type ==='select'"
           :placeholder="`请选择${props.label}`"
           v-model="localValue"
           @change="emit('change', $event)"
           v-bind="$attrs"
+          :style="props.controllerStyle"
         />
         <ElDatePicker
           v-if="props.type === 'daterange'"
@@ -23,6 +40,7 @@
           v-model="localValue"
           valueFormat="YYYY-MM-DD"
           v-bind="$attrs"
+          :style="props.controllerStyle"
         />
       </slot>
     </div>
@@ -30,7 +48,7 @@
 </template>
 
 <script setup>
-import { computed, inject } from 'vue';
+import {computed, inject} from 'vue';
 
 const props = defineProps({
   prop: {
@@ -44,6 +62,9 @@ const props = defineProps({
   type: {
     type:    String,
     default: 'input'
+  },
+  controllerStyle: {
+    type: [Object, String]
   }
 });
 

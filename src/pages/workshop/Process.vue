@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col">
+  <div class="inner-page-container flex flex-col">
     <GlFilterBar class="m-b-2" :model="filters" @search="pagination.reset(getList)">
       <GlFilterItem label="名称" prop="name" />
       <template v-slot:after>
@@ -12,7 +12,7 @@
     <div class="flex-auto h-1">
       <ElTable
         :data="list"
-        border
+        stripe
         height="100%"
         v-loading="pagination.paginate.loading"
       >

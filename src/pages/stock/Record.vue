@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col">
+  <div class="inner-page-container flex flex-col">
     <GlFilterBar :model="filters" @search="pagination.reset(getList)" class="m-b-4">
       <GlFilterItem
         prop="goodsType"

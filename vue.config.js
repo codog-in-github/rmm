@@ -3,6 +3,7 @@ const UnoCSS = require('@unocss/webpack').default
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
 module.exports = defineConfig({
+  lintOnSave: false,
   transpileDependencies: true,
   productionSourceMap: false,
   outputDir:  process.env.OUTPUT_DIR ?? 'dist',

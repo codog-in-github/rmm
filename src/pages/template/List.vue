@@ -39,7 +39,7 @@ getList();
 </script>
 
 <template>
-  <div class="flex flex-col">
+  <div class="inner-page-container flex flex-col">
     <GlFilterBar :model="filters" class="m-b-2" @search="getList">
       <GlFilterItem
         label="客户名称"
@@ -52,7 +52,7 @@ getList();
         <ElButton icon="Plus" type="primary" @click="add">新增模板</ElButton>
       </template>
     </GlFilterBar>
-    <ElTable :data="list" class="flex-1">
+    <ElTable :data="list" class="flex-1" stripe>
       <ElTableColumn prop="customerName" label="客户名称" />
       <ElTableColumn prop="goodsName" label="成品名称" />
       <ElTableColumn prop="rawSpec" label="原料规格" />

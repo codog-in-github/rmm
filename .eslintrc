@@ -57,7 +57,7 @@
       "vue/html-closing-bracket-spacing": ["error", {
         "startTag":  "never",
         "endTag": "never" ,
-        "selfClosingTag": "always" 
+        "selfClosingTag": "always"
       }],
       "vue/html-quotes": [ "error", "double", { "avoidEscape": true } ],
       "vue/html-self-closing": ["error", {
@@ -72,7 +72,7 @@
       "vue/max-attributes-per-line": ["error", {
         "singleline": {
           "max": 3
-        },      
+        },
         "multiline": {
           "max": 1
         }

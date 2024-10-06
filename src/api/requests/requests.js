@@ -21,11 +21,14 @@ export const getSelfStorehouse = makeRequest('/getSelfStorehouse');
 export const getSelfWorkshop = makeRequest('/getSelfWorkshop');
 
 /**
- * 
- * @param {number} storehouseId 
+ *
+ * @param {number} storehouseId
  * @returns {Promise<Stock[]>}
  */
 export const getStock = makeRequest('/getStock', 'id', 'filters');
+
+
+export const useGetStorehouse = makeUseRequestWidthPagination('/storehouse/list', 'filters');
 
 export const useGetStockRecord = makeUseRequestWidthPagination('/getStockRecord', 'id', 'filters');
 
@@ -35,6 +38,10 @@ export const getStockAddOptions = makeRequest('/getAddOptions');
 export const getStockReduceOptions = makeRequest('/getReduceOptions');
 
 export const stockAdd = makeRequest('/stockAdd');
+export const storehouseAdd = makeRequest('/storehouse/save');
+export const storehouseDetail = makeRequest('/storehouse/detail', 'id');
+export const storehouseDel = makeRequest('/storehouse/rm', 'id');
+export const getDefaultStorehouse = makeRequest('/storehouse/def');
 
 export const getItemStock = makeRequest('/getItemStock','id');
 

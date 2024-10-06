@@ -1,8 +1,8 @@
 <template>
-  <div class="flex flex-col">
+  <div class="inner-page-container flex flex-col">
     <GlFilterBar @search="pagnation.reset(getList)" />
     <div class="flex-auto">
-      <ElTable :data="list" v-loading="pagnation.paginate.loading">
+      <ElTable :data="list" v-loading="pagnation.paginate.loading" stripe>
         <ElTableColumn label="加工名称" prop="name" />
         <ElTableColumn label="理论成品率" prop="rate" :formatter="(_, __, value) => (value * 100).toFixed(2)+'%'" />
         <ElTableColumn label="实际成品率" prop="realRate" :formatter="(_, __, value) => value ?  ((value * 100).toFixed(2)+'%') : '-'" />
@@ -25,7 +25,7 @@ const api = useReportProcess(pagnation);
 const list = ref([]);
 async function getList() {
   const rep = await api();
-  list.value = rep; 
+  list.value = rep;
 }
 
 getList();

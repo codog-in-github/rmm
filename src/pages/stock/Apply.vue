@@ -1,12 +1,17 @@
 <template>
-  <div class="flex flex-col">
+  <div class="inner-page-container flex flex-col">
     <GlFilterBar class="m-b-2" :model="filters" @search="pagnation.reset(getList)">
       <template v-slot:after>
         <Component :is="showButton" />
       </template>
     </GlFilterBar>
     <div class="flex-auto h-1">
-      <ElTable :data="list" height="100%" v-loading="pagnation.paginate.loading">
+      <ElTable
+        :data="list"
+        height="100%"
+        stripe
+        v-loading="pagnation.paginate.loading"
+      >
         <ElTableColumn label="名称" prop="name" />
         <ElTableColumn label="申请状态">
           <template v-slot="{ row }">
@@ -73,6 +78,7 @@ async function print(id) {
   peiliaoShenqing(data, LODOP);
   LODOP.PREVIEW();
 }
+
 async function del(id) {
   await ElMessageBox.confirm('确定删除吗？');
   await delApply(id);

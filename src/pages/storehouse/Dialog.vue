@@ -1,5 +1,5 @@
 <template>
-  <ElDialog v-model="visibleChanger" title="新增入库" width="1000px">
+  <ElDialog v-model="visibleChanger" title="新增仓库" width="1000px">
     <template v-if="localValue">
       <ElForm
         labelWidth="6em"
@@ -7,19 +7,10 @@
         class="p-r-8"
         :disabled="props.readonly"
       >
-        <div class="flex justify-between">
-          <div class="flex items-center">
-            <label class="block w-18 mr-2">入库类型</label>
-            <GlStockTypeRadioButton v-model="localValue.goodsType"  @change="changeGoodsType" />
-          </div>
-          <div class="flex items-center">
-            <label class="block w-18 mr-2">入库时间</label>
-            <ElDatePicker
-              v-model="localValue.warehousedAt"
-              style="width: 160px"
-              :clearable="false"
-            />
-          </div>
+        <div class="flex items-center">
+          <label class="block w-18 mr-2 flex-shrink-0">仓库名称</label>
+          <ElInput v-model="localValue.name" class="w-48 mr-4" />
+          <GlStockTypeRadioButton v-model="localValue.type"  @change="changeGoodsType" />
         </div>
         <label class="block my-4">入库信息</label>
         <div class="p-4 bg-gray-100">
@@ -33,11 +24,10 @@
                 />
               </template>
             </ElTableColumn>
-            <ElTableColumn label="规格(MM)">
+            <ElTableColumn label="规格(MM)" v-if="localValue?.type !== STOCK_TYPE_TRASH">
               <template v-slot="{ row }">
                 <ElAutocomplete
                   v-model="row.spec"
-                  @blur="setDefStorehouse(row)"
                   :fetchSuggestions="useQuerySearch(row.goodsId)"
                 >
                   <template v-slot:suffix>
@@ -46,54 +36,7 @@
                 </ElAutocomplete>
               </template>
             </ElTableColumn>
-            <ElTableColumn
-              align="center"
-              width="80px"
-              label="矫直"
-              v-if="localValue.goodsType === STOCK_TYPE_PRODUCT"
-            >
-              <template v-slot="{ row }">
-                <ElCheckbox
-                  v-model="row.subSpec"
-                  :activeValue="GOODS_SUB_SPEC_JIAOZHI"
-                  inactiveValue=""
-                />
-              </template>
-            </ElTableColumn>
-            <ElTableColumn label="所属仓库">
-              <template v-slot="{ row }">
-                <ElSelectV2 v-model="row.storehouseId" :options="currentStorehouse" />
-              </template>
-            </ElTableColumn>
-            <ElTableColumn label="数量">
-              <template v-slot="{ row }">
-                <ElInput
-                  type="number"
-                  v-model.lazy="row.num"
-                  @change="numChange(row, $event)"
-                >
-                  <template v-slot:append>
-                    <ElSelect
-                      placeholder="单位"
-                      v-model="row.unitId"
-                    >
-                      <ElOption
-                        v-for="item in options.units.value(row.goodsId)"
-                        :key="item.id"
-                        :label="item.label"
-                        :value="item.value"
-                      />
-                    </ElSelect>
-                  </template>
-                </ElInput>
-              </template>
-            </ElTableColumn>
-            <ElTableColumn label="备注">
-              <template v-slot="{ row }">
-                <ElInput v-model="row.comment" />
-              </template>
-            </ElTableColumn>
-            <ElTableColumn label="操作" v-if="!props.readonly" width="80px">
+            <ElTableColumn label="操作" width="80px">
               <template v-slot="{ $index }">
                 <ElButton
                   type="danger"
@@ -109,7 +52,7 @@
             class="leading-loose bg-white"
             style="text-align: center"
             v-show="!props.readonly"
-            @click="localValue.goodsType && add()"
+            @click="localValue.type && add()"
           >
             <span>
               <ElIcon><CirclePlus /></ElIcon>
@@ -128,40 +71,28 @@
 
 <script setup>
 import {
-  GOODS_SUB_SPEC_JIAOZHI,
-  GOODS_TYPE_MAP,
+  GOODS_SPEC_SCENES_STOREHOUSE,
   GOODS_TYPE_RAW,
   GOODS_TYPE_USE,
-  STOCK_CHANGE_TYPE_OUT, STOCK_TYPE_PRODUCT,
-  STOCK_TYPE_RAW,
+  STOCK_TYPE_TRASH,
   STOCK_TYPE_USE
 } from '@/constant';
-import { map2array } from '@/helpers/utils';
-import { ElMessage } from 'element-plus';
-import { cloneDeep } from 'lodash';
-import { ref, watch, computed } from 'vue';
-import {getDefaultStorehouse, getMapping, getOptions, getSpecOptions, getStockAddOptions, stockAdd} from '@/api';
-import { isStandardSpec } from '@/helpers';
-import { GOODS_SPEC_SCENES_STOREHOUSE } from '@/constant';
+import {ElMessage} from 'element-plus';
+import {cloneDeep} from 'lodash';
+import {computed, ref, watch} from 'vue';
+import {getMapping, getOptions, getSpecOptions, getStockAddOptions, stockAdd, storehouseAdd} from '@/api';
+import {isStandardSpec} from '@/helpers';
 import GlStockTypeRadioButton from '@/components/GlStockTypeRadioButton.vue';
+
 let goodsDefaultUnitMapping = {};
-const storehouse = ref([]);
 const optionsById = ref({
   goods: {},
   units: {}
 });
 
-const currentStorehouse = computed(() => {
-  return storehouse.value.filter(item => item.origin.type === localValue.value.goodsType);
-});
-
-getOptions('storehouse').then(rep => {
-  storehouse.value = rep.storehouse;
-});
-
 const options = {
   goods: computed(() => {
-    const stockType = localValue.value?.goodsType;
+    const stockType = localValue.value?.type;
     let goodsType;
     if(stockType === STOCK_TYPE_USE) {
       goodsType = GOODS_TYPE_USE;
@@ -209,21 +140,11 @@ const visibleChanger = computed({
 });
 
 function emptyRow() {
-  const baseRowData = {
+  return {
     goodsId:      null,
-    goodsType:    null,
-    spec:         '',
     storehouseId: null,
-    comment:      '',
-    num:          null,
-    unitId:       null,
-    price:        null,
-    total:        null
+    spec:         ''
   };
-  if(localValue.value.goodsType === STOCK_TYPE_PRODUCT) {
-    baseRowData.subSpec = '';
-  }
-  return baseRowData;
 }
 
 function changeGoodsType(goodsType) {
@@ -237,27 +158,6 @@ function changeGoods(row, goodsId) {
   }
 }
 
-function numChange(row, num) {
-  if(num) {
-    if(row.price) {
-      row.total = num * row.price;
-    } else if(row.total) {
-      row.price = row.total / num;
-    }
-  }
-}
-
-function totalChange(row, total) {
-  if(total && row.num) {
-    row.price = total / row.num;
-  }
-}
-
-function priceChange(row, price) {
-  if(price && row.num) {
-    row.total = price * row.num;
-  }
-}
 function remove(index) {
   if(localValue.value.details.length === 1) {
     ElMessage.warning('至少保留一条明细');
@@ -268,14 +168,6 @@ function remove(index) {
 }
 
 function add() {
-  if(!localValue.value.goodsType) {
-    ElMessage.warning('请选择商品类型');
-    return;
-  }
-  if(localValue.value.details.length >= 10) {
-    ElMessage.warning('最多添加10条明细');
-    return;
-  }
   localValue.value.details.push(emptyRow());
 }
 
@@ -325,28 +217,10 @@ async function doAdd() {
     ElMessage.warning('请添加明细');
     return;
   }
-  if(localValue.value.details.some(item => !item.goodsId || !item.spec || !item.num || !item.unitId)) {
-    ElMessage.warning('请填写完整明细');
-    return;
-  }
-  await stockAdd(localValue.value);
+  await storehouseAdd(localValue.value);
   ElMessage.success('保存成功');
   emit('update:visible', false);
   emit('success');
-}
-
-
-async function setDefStorehouse(row) {
-  if(localValue.value.goodsType && row.goodsId) {
-    const def = await getDefaultStorehouse({
-      goodsId: row.goodsId,
-      type:    localValue.value.goodsType,
-      spec:    row.spec
-    });
-    if(def) {
-      row.storehouseId = def.storehouseId;
-    }
-  }
 }
 
 </script>

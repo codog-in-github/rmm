@@ -142,7 +142,7 @@ getCustomerOptions();
 </script>
 
 <template>
-  <div class="flex flex-col">
+  <div class="inner-page-container flex flex-col">
     <GlFilterBar :model="filters" class="m-b-2" @search="getList">
       <GlFilterItem
         label="订单日期"
@@ -166,7 +166,7 @@ getCustomerOptions();
         <!--        </GlBorderCard>-->
       </template>
     </GlFilterBar>
-    <ElTable :data="list" class="flex-1">
+    <ElTable :data="list" class="flex-1" stripe>
       <ElTableColumn prop="date"  width="50px">
         <template v-slot="{ row }">
           <ElCheckbox :modelValue="selectedIds.includes(row.id)" @update:modelValue="(e) => toggleSelected(row.id, e)" />

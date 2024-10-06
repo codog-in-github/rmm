@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col">
+  <div class="inner-page-container flex flex-col">
     <GlFilterBar @search="pagnation.reset(getList)" />
     <div class="flex-auto h-1">
       <ElTable :data="list" height="100%" v-loading="pagnation.paginate.loading">

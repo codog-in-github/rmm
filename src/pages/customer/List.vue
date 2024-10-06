@@ -46,6 +46,7 @@ getList();
       v-loading="pagination.paginate.loading"
       class="flex-1 m-t-2"
       height="100%"
+      stripe
       :data="list"
     >
       <ElTableColumn label="客户名称" prop="name">

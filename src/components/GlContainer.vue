@@ -1,39 +1,36 @@
 <template>
   <ElContainer>
-    <ElHeader class="bg-primary color-white">
-      <ElRow align="middle" class="h-full">
-        <ElCol :span="20" class="font-size-6">
-          泓贝再生资源回收有限公司
-        </ElCol>
-        <ElCol :span="4" class="text-right">
-          <span class="p-r-4">
-            你好：{{ user.name }}
-          </span>
-          <GlAsyncButton
-            :click="logoutClick"
-            type="danger"
-            circle
-            size="small"
-            icon="SwitchButton"
-          />
-        </ElCol>
-      </ElRow>
+    <ElHeader class="main-header">
+      泓贝再生资源回收有限公司
     </ElHeader>
-    <ElContainer>
-      <ElAside class="bg-white" width="160px">
-        <ElMenu router>
-          <ElMenuItem v-for="item in menu" :key="item.key" :index="item.path">
-            <ElIcon>
-              <Component :is="item.icon" />
-            </ElIcon>
-            {{ item.label }}
-          </ElMenuItem>
-        </ElMenu> 
+    <ElContainer class="overflow-hidden">
+      <ElAside class="bg-white" width="200px">
+        <ElMenu router :defaultActive="route.path">
+          <template v-for="(menu, name) in group" :key="name">
+            <div class="group-title">{{ name }}</div>
+            <ElMenuItem v-for="item in menu" :key="item.key" :index="item.path">
+              <ElIcon>
+                <Component :is="item.icon" />
+              </ElIcon>
+              {{ item.label }}
+            </ElMenuItem>
+          </template>
+        </ElMenu>
       </ElAside>
       <ElMain>
-        <div class="bg-white rd h-full p3 box-border">
-          <RouterView class="h-full w-full overflow-auto" />
-        </div>
+        <ElContainer class="h-full">
+          <ElHeader v-if="activeMenu" class="breadcrumb-header">
+            <ElBreadcrumb :separatorIcon="ArrowRight">
+              <ElBreadcrumbItem>{{ activeMenu.group }}</ElBreadcrumbItem>
+              <ElBreadcrumbItem>{{ activeMenu.label }}</ElBreadcrumbItem>
+            </ElBreadcrumb>
+          </ElHeader>
+          <ElMain class="inset-main">
+            <div class="rd h-full box-border">
+              <RouterView class="h-full w-full overflow-auto" />
+            </div>
+          </ElMain>
+        </ElContainer>
       </ElMain>
     </ElContainer>
   </ElContainer>
@@ -42,31 +39,68 @@
 import routes from '@/router/routes';
 import { useUser } from '@/store';
 import { computed } from 'vue';
-import { logout } from '@/api';
-import { useRouter } from 'vue-router';
-import { clearRoutes } from '@/router';
+import {ArrowRight} from '@element-plus/icons-vue';
+import {useRoute} from 'vue-router';
 
+const route = useRoute();
 const user = useUser();
-const router = useRouter();
-const menu = computed(() => {
-  return routes
-    .filter(item => user.can(`menu.${item.key}`))
-    .map(item => ({
-      key:   item.key,
-      icon:  item.icon,
-      path:  item.path,
-      label: item.label
-    }));
+const group = computed(() => {
+  const menu = routes
+    .filter(item => user.can(`menu.${item.key}`));
+  const group = {};
+  for(const item of menu) {
+    if(!group[item.group]) {
+      group[item.group] = [];
+    }
+    group[item.group].push(item);
+  }
+  return group;
+});
+const activeMenu = computed(() => {
+  return routes.find(item => `menu.${item.key}` === route.name);
 });
 
-async function logoutClick() {
-  try {
-    await logout();
-    user.logout();
-    clearRoutes();
-    router.replace('/login');
-  } catch (error) {
-    //
+</script>
+<style lang="scss" scoped>
+.main-header{
+  background: #272A39;
+  font-weight: 400;
+  font-size: 24px;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  height: 65px;
+}
+.breadcrumb-header{
+  height: unset;
+  padding-left: 0;
+}
+
+.el-menu {
+  padding: 0 20px;
+}
+
+.inset-main{
+  padding: 0;
+  margin-top: 20px;
+}
+
+.group-title{
+  font-weight: 400;
+  font-size: 16px;
+  color: #848484;
+  padding-left: 20px;
+  margin: 12px 0;
+}
+
+.el-menu-item{
+  font-size: 14px;
+  border-radius: 4px;
+  height: 44px;
+
+  &.is-active{
+    background: var(--el-color-primary);
+    color: #FFFFFF;
   }
 }
-</script>
+</style>

@@ -115,7 +115,7 @@ getList();
         height="100%"
         :data="list"
         :spanMethod="spanMethod"
-        border
+        stripe
       >
         <ElTableColumn
           label="交易日期"
