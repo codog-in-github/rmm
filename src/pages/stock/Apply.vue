@@ -88,16 +88,7 @@ async function del(id) {
 async function getList() {
   list.value = await getApplyList(storehouseId.value);
 }
-async function init() {
-  pagnation.paginate.loading = true;
-  const storehouseList = await getSelfStorehouse();
-  if(storehouseList.length > 0) {
-    storehouseId.value = storehouseList[0].id;
-    return pagnation.reset(getList);
-  }
-  ElMessage.error('您的账号未绑定仓库，请联系管理员添加');
-}
-init();
+pagnation.reset(getList);
 
 async function showDetail(id) {
   const rep = await getApplyDetail(id);

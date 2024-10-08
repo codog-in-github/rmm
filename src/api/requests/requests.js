@@ -25,12 +25,12 @@ export const getSelfWorkshop = makeRequest('/getSelfWorkshop');
  * @param {number} storehouseId
  * @returns {Promise<Stock[]>}
  */
-export const getStock = makeRequest('/getStock', 'id', 'filters');
+export const getStock = makeRequest('/getStock', 'filters');
 
 
 export const useGetStorehouse = makeUseRequestWidthPagination('/storehouse/list', 'filters');
 
-export const useGetStockRecord = makeUseRequestWidthPagination('/getStockRecord', 'id', 'filters');
+export const useGetStockRecord = makeUseRequestWidthPagination('/getStockRecord', 'filters');
 
 export const getStockRecordDetail = makeRequest('/getStockRecordDetail', 'id');
 

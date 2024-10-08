@@ -1,5 +1,5 @@
 <template>
-  <ElDialog v-model="visibleChanger" title="新增仓库" width="1000px">
+  <ElDialog v-model="visibleChanger" :title="isEdit ? '编辑仓库': '新增仓库'" width="1000px">
     <template v-if="localValue">
       <ElForm
         labelWidth="6em"
@@ -10,7 +10,11 @@
         <div class="flex items-center">
           <label class="block w-18 mr-2 flex-shrink-0">仓库名称</label>
           <ElInput v-model="localValue.name" class="w-48 mr-4" />
-          <GlStockTypeRadioButton v-model="localValue.type"  @change="changeGoodsType" />
+          <GlStockTypeRadioButton
+            v-model="localValue.type"
+            @change="changeGoodsType"
+            :disabled="isEdit"
+          />
         </div>
         <label class="block my-4">入库信息</label>
         <div class="p-4 bg-gray-100">
@@ -128,6 +132,11 @@ const props = defineProps({
     default: false
   }
 });
+
+const isEdit = computed(() => {
+  return !!(localValue.value?.id);
+});
+
 const emit = defineEmits(['update:visible', 'success']);
 
 const visibleChanger = computed({
@@ -159,12 +168,7 @@ function changeGoods(row, goodsId) {
 }
 
 function remove(index) {
-  if(localValue.value.details.length === 1) {
-    ElMessage.warning('至少保留一条明细');
-    localValue.value.details = [emptyRow()];
-  } else {
-    localValue.value.details.splice(index, 1);
-  }
+  localValue.value.details.splice(index, 1);
 }
 
 function add() {
@@ -177,18 +181,25 @@ function useQuerySearch(goodsId) {
       cb([]);
     };
   }
-  return async function querySearch(_, cb) {
+  return async function querySearch(input, cb) {
     const rep = await getSpecOptions({
       goodsId,
       scenes: GOODS_SPEC_SCENES_STOREHOUSE
     });
     if(rep) {
+      input = input === 'null' ? null : input;
+      const map = {};
       cb(
-        rep.map(item => {
-          return {
-            value: item.value
-          };
+        rep.filter(item => {
+          const exists = map[item.value];
+          map[item.value] = true;
+          return !exists && (!input || item.value.includes(input));
         })
+          .map(item => {
+            return {
+              value: item.value
+            };
+          })
       );
     } else {
       cb([]);
@@ -213,10 +224,6 @@ getMapping('goods').then(({ goods }) => {
 });
 
 async function doAdd() {
-  if(!localValue.value.details || localValue.value.details.length === 0) {
-    ElMessage.warning('请添加明细');
-    return;
-  }
   await storehouseAdd(localValue.value);
   ElMessage.success('保存成功');
   emit('update:visible', false);

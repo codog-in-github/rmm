@@ -125,7 +125,7 @@ const getStockRecord = useGetStockRecord(pagination);
 const { printSettings, showButton } = usePrinter();
 
 function getList() {
-  return getStockRecord(storehouseId.value, filters)
+  return getStockRecord(filters)
     .then(rep => {
       list.value = rep;
     });
@@ -168,14 +168,6 @@ async function doPrint(id) {
     console.log(e);
   }
 }
-async function init() {
-  pagination.paginate.loading = true;
-  const storehouseList = await getSelfStorehouse();
-  if(storehouseList.length > 0) {
-    storehouseId.value = storehouseList[0].id;
-    return pagination.reset(getList);
-  }
-  ElMessage.error('您的账号未绑定仓库，请联系管理员添加');
-}
-init();
+
+pagination.reset(getList);
 </script>

@@ -42,4 +42,8 @@ import zhCn from 'element-plus/dist/locale/zh-cn.mjs';
 .el-form-item-content__flex-grow-0 .el-form-item__content{
   flex-grow: 0;
 }
+
+.el-select.no-arrow .el-input__suffix{
+  display: none;
+}
 </style>

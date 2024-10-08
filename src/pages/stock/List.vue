@@ -60,11 +60,7 @@
             {{ $index + 1 }}
           </template>
         </ElTableColumn>
-        <ElTableColumn label="所属仓库" prop="storehouse">
-          <template v-slot="{ row }">
-            {{ row.storehouse.name }}
-          </template>
-        </ElTableColumn>
+        <ElTableColumn label="所属仓库" prop="storehouseName" />
         <ElTableColumn label="入库日期" prop="updatedAt">
           <template v-slot="{ row }">
             {{ row.warehousedAt?.substring(0, 10) ?? '-' }}
@@ -97,6 +93,9 @@
         </ElTableColumn>
         <ElTableColumn label="操作" v-if="user.isRoot">
           <template v-slot="{ row }">
+            <ElButton type="primary" link @click="showTransfer(row)">
+              移仓
+            </ElButton>
             <ElButton type="danger" link @click="del(row)">
               删除
             </ElButton>
@@ -108,37 +107,109 @@
     <DialogProduct v-model:visible="showDialogProduct" :model="productDialogData" @success="getList" />
     <DialogReduce @success="reduceSuccess" v-model:visible="showDialogReduce" />
     <GlPrintSetting v-model:visible="printSettingsShow" :model="printSettings" @submit="savePrintSettings" />
+    <ElDialog
+      title="移仓"
+      v-model="trasVisible"
+      width="300px"
+    >
+      <ElForm :model="trasData" labelWidth="80px">
+        <ElFormItem label="移仓仓库" prop="to" required>
+          <ElSelectV2
+            v-model="trasData.to"
+            placeholder="请选择移仓仓库"
+            :options="trasData.storehouses"
+          />
+        </ElFormItem>
+        <ElFormItem label="移仓数量" prop="num" required>
+          <ElInput
+            type="number"
+            v-model="trasData.num"
+            :min="0"
+            :max="trasData.total"
+          >
+            <template v-slot:append>{{ trasData.unit }}</template>
+          </ElInput>
+        </ElFormItem>
+      </ElForm>
+      <template v-slot:footer>
+        <ElButton @click="trasVisible = false">取消</ElButton>
+        <ElButton type="primary" @click="tras">确定</ElButton>
+      </template>
+    </ElDialog>
   </div>
 </template>
 
 <script setup>
-import {delStock, getOptions, getSelfStorehouse, getStock, printReduce} from '@/api';
+import {delStock, getOptions, getStock, printReduce} from '@/api';
 import {ElMessage, ElMessageBox} from 'element-plus';
 import { ref, reactive } from 'vue';
 import Dialog from './Dialog.vue';
-import {GOODS_PROCESS_TYPE_MAP, GOODS_TYPE_MAP, GOODS_TYPE_RAW, STOCK_TYPE_MAP, STOCK_TYPE_RAW} from '@/constant';
+import {GOODS_PROCESS_TYPE_MAP, GOODS_TYPE_MAP, STOCK_TYPE_MAP, STOCK_TYPE_RAW} from '@/constant';
 import { isStandardSpec, map2array } from '@/helpers';
 import DialogReduce from '@/pages/stock/DialogReduce.vue';
 import DialogProduct from '@/pages/stock/DialogProduct.vue';
 import { chukudan } from '@/helpers/printTemplates';
 import { useUser } from '@/store';
 import moment from 'moment';
+import {makeRequest, pluck} from '@/api/helpers';
 
 const user = useUser();
 const storehouse = ref([]);
 const goods = ref([]);
 const stockTypes = map2array(STOCK_TYPE_MAP);
-const storehouseId = ref(null);
 const list = ref([]);
-const filters = reactive({
-  type: GOODS_TYPE_RAW
-});
+const filters = reactive({});
 const loading = ref(false);
 const showDialog = ref(false);
 const showDialogProduct = ref(false);
 const showDialogReduce = ref(false);
 const dialogData = ref(null);
 const productDialogData = ref(null);
+
+
+const getTransferInitData = makeRequest('/getTransferInitData', 'id');
+const stockTransfer = makeRequest('/stockTransfer');
+const trasVisible = ref(false);
+const trasData = ref({
+  from:        null,
+  to:          null,
+  num:         0,
+  total:       0,
+  unit:        '',
+  storehouses: []
+});
+async function showTransfer(row) {
+  const data = await getTransferInitData(row.id);
+  trasVisible.value = true;
+  trasData.value = {
+    to:          null,
+    from:        row.id,
+    num:         data.total,
+    total:       data.total,
+    unit:        row.baseUnitName,
+    storehouses: data.storehouses.map(item => ({
+      label: item.name,
+      value: item.id
+    }))
+  };
+}
+
+async function tras() {
+  const data = pluck(trasData.value, 'from', 'to', 'num');
+  if(!data.to) {
+    ElMessage.error('请选择移仓仓库');
+    return;
+  }
+  if(data.num <= 0 || data.num > trasData.value.total) {
+    ElMessage.error('移仓数量有误');
+    return;
+  }
+  await stockTransfer(data);
+  ElMessage.success('移仓成功');
+  trasVisible.value = false;
+  getList();
+}
+
 async function del(row) {
   await ElMessageBox.confirm('确定删除该库存？');
   await delStock(row.id);
@@ -149,20 +220,11 @@ async function del(row) {
 
 function add() {
   dialogData.value = {
-    details:      [],
+    details:      [{}],
     goodsType:    STOCK_TYPE_RAW,
     warehousedAt: moment().format('YYYY-MM-DD')
   };
   showDialog.value  = true;
-}
-function addProduct() {
-  productDialogData.value = {
-    storehouseId: storehouseId.value,
-    goodsType:    GOODS_TYPE_RAW,
-    details:      [],
-    comment:      ''
-  };
-  showDialogProduct.value  = true;
 }
 function specContent(row, _, value) {
   let content = '';
@@ -181,7 +243,7 @@ function formatNum(val) {
 }
 function getList() {
   loading.value = true;
-  getStock(storehouseId.value, filters)
+  getStock(filters)
     .then(rep => {
       list.value = rep;
     })

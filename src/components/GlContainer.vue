@@ -1,7 +1,19 @@
 <template>
   <ElContainer>
-    <ElHeader class="main-header">
-      泓贝再生资源回收有限公司
+    <ElHeader class="main-header flex justify-between">
+      <div>泓贝再生资源回收有限公司</div>
+      <div>
+        <span class="p-r-4 text-base">
+          {{ user.name }}
+        </span>
+        <GlAsyncButton
+          :click="logoutClick"
+          type="danger"
+          circle
+          size="small"
+          icon="SwitchButton"
+        />
+      </div>
     </ElHeader>
     <ElContainer class="overflow-hidden">
       <ElAside class="bg-white" width="200px">
@@ -40,9 +52,12 @@ import routes from '@/router/routes';
 import { useUser } from '@/store';
 import { computed } from 'vue';
 import {ArrowRight} from '@element-plus/icons-vue';
-import {useRoute} from 'vue-router';
+import {useRoute, useRouter} from 'vue-router';
+import {logout} from '@/api';
+import {clearRoutes} from '@/router';
 
 const route = useRoute();
+const router = useRouter();
 const user = useUser();
 const group = computed(() => {
   const menu = routes
@@ -59,7 +74,16 @@ const group = computed(() => {
 const activeMenu = computed(() => {
   return routes.find(item => `menu.${item.key}` === route.name);
 });
-
+async function logoutClick() {
+  try {
+    await logout();
+    user.logout();
+    clearRoutes();
+    router.replace('/login');
+  } catch (error) {
+    //
+  }
+}
 </script>
 <style lang="scss" scoped>
 .main-header{

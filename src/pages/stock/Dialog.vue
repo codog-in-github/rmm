@@ -24,7 +24,7 @@
         <label class="block my-4">入库信息</label>
         <div class="p-4 bg-gray-100">
           <ElTable :data="localValue.details">
-            <ElTableColumn label="名称">
+            <ElTableColumn label="名称" width="120">
               <template v-slot="{ row }">
                 <ElSelectV2
                   :options="options.goods"
@@ -60,9 +60,9 @@
                 />
               </template>
             </ElTableColumn>
-            <ElTableColumn label="所属仓库">
+            <ElTableColumn label="所属仓库" width="140">
               <template v-slot="{ row }">
-                <ElSelectV2 v-model="row.storehouseId" :options="currentStorehouse" />
+                <ElSelectV2 v-model="row.storehouseId" filterable :options="currentStorehouse" />
               </template>
             </ElTableColumn>
             <ElTableColumn label="数量">
@@ -74,8 +74,10 @@
                 >
                   <template v-slot:append>
                     <ElSelect
-                      placeholder="单位"
+                      class="no-arrow"
+                      placeholder="&nbsp;"
                       v-model="row.unitId"
+                      style="width: 50px"
                     >
                       <ElOption
                         v-for="item in options.units.value(row.goodsId)"
@@ -92,7 +94,7 @@
               <template v-slot="{ row }">
                 <ElInput v-model="row.comment" />
               </template>
-            </ElTableColumn>
+            </ElTableColumn>`
             <ElTableColumn label="操作" v-if="!props.readonly" width="80px">
               <template v-slot="{ $index }">
                 <ElButton
@@ -145,18 +147,18 @@ import { isStandardSpec } from '@/helpers';
 import { GOODS_SPEC_SCENES_STOREHOUSE } from '@/constant';
 import GlStockTypeRadioButton from '@/components/GlStockTypeRadioButton.vue';
 let goodsDefaultUnitMapping = {};
-const storehouse = ref([]);
+const storehouses = ref([]);
 const optionsById = ref({
   goods: {},
   units: {}
 });
 
 const currentStorehouse = computed(() => {
-  return storehouse.value.filter(item => item.origin.type === localValue.value.goodsType);
+  return storehouses.value.filter(item => item.origin.type === localValue.value.goodsType);
 });
 
 getOptions('storehouse').then(rep => {
-  storehouse.value = rep.storehouse;
+  storehouses.value = rep.storehouse;
 });
 
 const options = {
@@ -226,8 +228,10 @@ function emptyRow() {
   return baseRowData;
 }
 
-function changeGoodsType(goodsType) {
-  localValue.value.details = [];
+function changeGoodsType() {
+  localValue.value.details = [
+    emptyRow()
+  ];
 }
 
 function changeGoods(row, goodsId) {
@@ -247,17 +251,6 @@ function numChange(row, num) {
   }
 }
 
-function totalChange(row, total) {
-  if(total && row.num) {
-    row.price = total / row.num;
-  }
-}
-
-function priceChange(row, price) {
-  if(price && row.num) {
-    row.total = price * row.num;
-  }
-}
 function remove(index) {
   if(localValue.value.details.length === 1) {
     ElMessage.warning('至少保留一条明细');
@@ -285,18 +278,25 @@ function useQuerySearch(goodsId) {
       cb([]);
     };
   }
-  return async function querySearch(_, cb) {
+  return async function querySearch(input, cb) {
     const rep = await getSpecOptions({
       goodsId,
       scenes: GOODS_SPEC_SCENES_STOREHOUSE
     });
     if(rep) {
+      input = input === 'null' ? null : input;
+      const map = {};
       cb(
-        rep.map(item => {
-          return {
-            value: item.value
-          };
+        rep.filter(item => {
+          const exists = map[item.value];
+          map[item.value] = true;
+          return !exists && (!input || item.value.includes(input));
         })
+          .map(item => {
+            return {
+              value: item.value
+            };
+          })
       );
     } else {
       cb([]);
@@ -338,13 +338,15 @@ async function doAdd() {
 
 async function setDefStorehouse(row) {
   if(localValue.value.goodsType && row.goodsId) {
-    const def = await getDefaultStorehouse({
+    const storehouses = await getDefaultStorehouse({
       goodsId: row.goodsId,
       type:    localValue.value.goodsType,
       spec:    row.spec
     });
-    if(def) {
-      row.storehouseId = def.storehouseId;
+    if(storehouses && storehouses.length) {
+      row.storehouseId = storehouses[0].storehouseId;
+    } else {
+      row.storehouseId = null;
     }
   }
 }

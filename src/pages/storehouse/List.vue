@@ -88,7 +88,7 @@ const goods = ref([]);
 const stockTypes = map2array(STOCK_TYPE_MAP);
 const list = ref([]);
 const filters = reactive({
-  type: GOODS_TYPE_RAW
+
 });
 const loading = ref(false);
 const showDialog = ref(false);
@@ -138,7 +138,6 @@ if(!_printSettings) {
   };
 }
 const printSettings = ref(_printSettings);
-const canPrint = Boolean(LODOP);
 
 
 getOptions('storehouse,goods').then((rep) => {

@@ -74,3 +74,22 @@ export function getMoneyUppercase(money, toFix = 2) {
   return res;
 }
 
+/**
+ * @description 提取对象中的指定键值
+ * @template {Record<string, any>} T
+ * @template {pick<T, typeof keys[number]>[]} R
+ * @param {T|T[]} obj
+ * @param {string} keys
+ * @return {T extend Array ? R[] : R}
+ */
+export function pluck(obj, ...keys) {
+  if(Array.isArray(obj)) {
+    return obj.map(item => pluck(item, ...keys));
+  }
+  const newObj = {};
+  keys.forEach(key => {
+    newObj[key] = obj[key];
+  });
+  return newObj;
+}
+

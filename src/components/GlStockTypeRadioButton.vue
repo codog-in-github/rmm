@@ -6,6 +6,10 @@ defineProps({
   modelValue: {
     type:    Boolean,
     default: false
+  },
+  disabled: {
+    type:    Boolean,
+    default: false
   }
 });
 
@@ -14,7 +18,7 @@ const goodsTypeList = map2array(STOCK_TYPE_MAP);
 </script>
 
 <template>
-  <div class="container">
+  <div class="container" :class="{ disabled }">
     <div
       v-for="item in goodsTypeList"
       :key="item.value"
@@ -23,7 +27,7 @@ const goodsTypeList = map2array(STOCK_TYPE_MAP);
       :class="{
         active: item.value === modelValue
       }"
-      @click="emit('update:modelValue', item.value); emit('change', item.value)"
+      @click="!disabled && emit('update:modelValue', item.value); emit('change', item.value)"
     >
       {{ item.label }}
     </div>
@@ -34,6 +38,10 @@ const goodsTypeList = map2array(STOCK_TYPE_MAP);
 .container {
   display: inline-flex;
   gap: 10px;
+
+  &.disabled .btn {
+    cursor: not-allowed;
+  }
 }
 
 .btn {
