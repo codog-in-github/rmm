@@ -91,12 +91,17 @@
             {{ moment(row.updatedAt).format('YYYY-MM-DD HH:mm') }}
           </template>
         </ElTableColumn>
-        <ElTableColumn label="操作" v-if="user.isRoot">
+        <ElTableColumn label="操作">
           <template v-slot="{ row }">
             <ElButton type="primary" link @click="showTransfer(row)">
               移仓
             </ElButton>
-            <ElButton type="danger" link @click="del(row)">
+            <ElButton
+              v-if="user.isRoot"
+              type="danger"
+              link
+              @click="del(row)"
+            >
               删除
             </ElButton>
           </template>
