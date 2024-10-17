@@ -25,7 +25,7 @@
     <div class="flex-auto overflow-auto h-1" v-loading="pagination.paginate.loading">
       <ElTable
         :data="list"
-        border
+        stripe
         height="100%"
       >
         <ElTableColumn label="库存类型" prop="goodsType" width="120px">
@@ -41,14 +41,7 @@
             <span v-else class="color-info">未知</span>
           </template>
         </ElTableColumn>
-        <ElTableColumn label="内容">
-          <template v-slot="{ row }">
-            {{ row.goodsName }}【{{ row.spec }}】
-            <template v-if="row.count > 1">
-              等 {{ row.count }} 件
-            </template>
-          </template>
-        </ElTableColumn>
+        <ElTableColumn label="内容" prop="details" :formatter="detailsFormatter" />
         <ElTableColumn label="订单" prop="orders" width="280px">
           <template v-slot="{ row }">
             <template v-if="row.orders && row.orders.length > 0">
@@ -93,20 +86,15 @@
 </template>
 
 <script setup>
-import {
-  getSelfStorehouse,
-  getStockRecordDetail,
-  useGetStockRecord,
-  stockRecordUndo, printReduce, delStockChangeRecord
-} from '@/api';
-import { ElMessage, ElMessageBox } from 'element-plus';
-import { ref, reactive } from 'vue';
+import {delStockChangeRecord, getStockRecordDetail, printReduce, stockRecordUndo, useGetStockRecord} from '@/api';
+import {ElMessage, ElMessageBox} from 'element-plus';
+import {reactive, ref} from 'vue';
 import DialogRecord from './DialogRecord.vue';
 import * as CONSTANT from '@/constant';
-import { usePagination, formatDatetime, map2array } from '@/helpers';
+import {formatDatetime, map2array, usePagination} from '@/helpers';
 import {chukudan} from '@/helpers/printTemplates';
-import { useUser } from '@/store';
-import { usePrinter } from '@/helpers/lodop';
+import {useUser} from '@/store';
+import {usePrinter} from '@/helpers/lodop';
 
 const user = useUser();
 const storehouseId = ref(null);
@@ -124,6 +112,12 @@ const stockChangeList = map2array(CONSTANT.STOCK_CHANGE_TYPE_MAP);
 const getStockRecord = useGetStockRecord(pagination);
 const { printSettings, showButton } = usePrinter();
 
+const detailsFormatter = (value) => {
+  return value.details.map(item => {
+    return `${item.goods.name}【${item.spec}】${item.num}${item.unit.name}`;
+  }).join('、');
+};
+
 function getList() {
   return getStockRecord(filters)
     .then(rep => {
@@ -139,8 +133,7 @@ async function del(id) {
 }
 
 async function showDetail(row) {
-  const rep = await getStockRecordDetail(row.id);
-  dialogData.value = rep;
+  dialogData.value = await getStockRecordDetail(row.id);
   showDialog.value = true;
 }
 

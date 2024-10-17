@@ -26,6 +26,12 @@ export const STOCK_TYPE_MAP = {
   [STOCK_TYPE_TRASH]:   '废料',
   [STOCK_TYPE_USE]:     '耗材'
 };
+export const STOCK_TYPE_STOREHOUSE_ALIAS = {
+  [STOCK_TYPE_RAW]:     '料仓',
+  [STOCK_TYPE_PRODUCT]: '成品仓',
+  [STOCK_TYPE_USE]:     '耗材仓',
+  [STOCK_TYPE_TRASH]:   '废料仓'
+};
 
 export const GOODS_PROCESS_TYPE_RAW     = 1;
 export const GOODS_PROCESS_TYPE_PRODUCT = 2;

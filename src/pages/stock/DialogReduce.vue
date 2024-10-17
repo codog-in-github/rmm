@@ -209,6 +209,21 @@ const props = defineProps({
 const localValue = ref(emptyData());
 const emit = defineEmits(['update:visible', 'success']);
 
+defineExpose({
+  show(goodsType, goodsId, stockId, num) {
+    visibleChanger.value = true;
+    nextTick(() => {
+      const data = emptyData();
+      data.goodsType = goodsType;
+      data.details[0].goodsId = goodsId;
+      data.details[0].spec = stockId;
+      data.details[0].num = num;
+      data.details[0].realNum = num;
+      localValue.value = data;
+    });
+  }
+});
+
 const visibleChanger = computed({
   get() {
     return props.visible;
