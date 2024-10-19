@@ -184,8 +184,8 @@ getCustomerOptions();
           <ElCheckbox :modelValue="selectedIds.includes(row.id)" @update:modelValue="(e) => toggleSelected(row.id, e)" />
         </template>
       </ElTableColumn>
-      <ElTableColumn prop="date" label="订单日期" />
-      <ElTableColumn prop="customerName" label="客户名称">
+      <ElTableColumn prop="date" label="订单日期" width="120" />
+      <ElTableColumn prop="customerName" label="客户名称" width="220">
         <template v-slot="{ row }">
           <template v-if="row.customerName">
             <ElButton type="primary" @click="filterCustomer(row)" link>{{ row.customerName }}</ElButton>
