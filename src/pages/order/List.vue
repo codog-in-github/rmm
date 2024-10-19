@@ -6,6 +6,7 @@ import Editor from './Editor.vue';
 import {ElMessage, ElMessageBox} from 'element-plus';
 import {ORDER_STATUS_WAIT, ORDER_UNIT_MAP} from '@/constant';
 import TemplateDialog from './TemplateDialog.vue';
+import SpecFormatter from '@/components/SpecFormatter.vue';
 const isPrintTemplate = ref(true);
 const printSettingsShow = ref(false);
 const selectedIds = ref([]);
@@ -38,7 +39,8 @@ const pagination = usePagination();
 const listApi = useOrderList(pagination);
 const list = ref([]);
 const filters = reactive({
-  date: []
+  date:       [],
+  customerId: null
 });
 const editor = ref(null);
 
@@ -137,6 +139,11 @@ function showTemplate(val) {
   templateDialogRef.value.show(val.customerId);
 }
 
+function filterCustomer(row) {
+  filters.customerId = row.customerId;
+  getList();
+}
+
 getList();
 getCustomerOptions();
 </script>
@@ -166,7 +173,12 @@ getCustomerOptions();
         <!--        </GlBorderCard>-->
       </template>
     </GlFilterBar>
-    <ElTable :data="list" class="flex-1" stripe>
+    <ElTable
+      :data="list"
+      class="flex-1"
+      stripe
+      v-loading="pagination.paginate.loading"
+    >
       <ElTableColumn prop="date"  width="50px">
         <template v-slot="{ row }">
           <ElCheckbox :modelValue="selectedIds.includes(row.id)" @update:modelValue="(e) => toggleSelected(row.id, e)" />
@@ -176,18 +188,25 @@ getCustomerOptions();
       <ElTableColumn prop="customerName" label="客户名称">
         <template v-slot="{ row }">
           <template v-if="row.customerName">
-            <ElButton type="primary" @click="showTemplate(row)" link>{{ row.customerName }}</ElButton>
+            <ElButton type="primary" @click="filterCustomer(row)" link>{{ row.customerName }}</ElButton>
           </template>
           <template v-else>
             无
           </template>
         </template>
       </ElTableColumn>
-      <ElTableColumn label="名称">
+      <ElTableColumn label="名称" prop="name" width="120" />
+      <ElTableColumn label="规格" width="300">
         <template v-slot="{ row }">
-          {{ row.name }} - {{ row.spec }} - {{ row.num }} {{ ORDER_UNIT_MAP[row.unit] }}
+          <SpecFormatter :spec="row.spec" placeholder="无规格" />
         </template>
       </ElTableColumn>
+      <ElTableColumn label="数量">
+        <template v-slot="{ row }">
+          {{ row.num }} {{ ORDER_UNIT_MAP[row.unit] }}
+        </template>
+      </ElTableColumn>
+      <ElTableColumn label="硬度" prop="hard" width="120" />
       <ElTableColumn label="状态" prop="status">
         <template v-slot="{ row }">
           <ElTag v-if="row.status === ORDER_STATUS_WAIT">处理中</ElTag>

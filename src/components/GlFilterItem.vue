@@ -2,7 +2,7 @@
   <div class="gl-filter-item">
     <label>{{ props.label }}</label>
     <div class="gl-filter-item__control">
-      <slot :value="localValue">
+      <slot>
         <ElInput
           v-if="props.type === 'input'"
           :placeholder="`请输入${props.label}`"

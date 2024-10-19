@@ -8,13 +8,16 @@
         showReset
         :defaultValue="() => ({})"
       >
-        <GlFilterItem
-          label="所属仓库"
-          prop="type"
-          type="select"
-          :options="stockTypes"
-          :controllerStyle="{ width: '120px' }"
-        />
+        <GlFilterItem label="所属仓库">
+          <ElCascader
+            v-model="filters.belong"
+            clearable
+            :options="stockTypes"
+            :props="{
+              checkStrictly: true,
+            }"
+          />
+        </GlFilterItem>
         <GlFilterItem
           label="入库日期"
           prop="warehousedAt"
@@ -164,10 +167,8 @@ import Dialog from './Dialog.vue';
 import {
   GOODS_PROCESS_TYPE_MAP,
   GOODS_TYPE_MAP,
-  STOCK_TYPE_RAW,
-  STOCK_TYPE_STOREHOUSE_ALIAS
+  STOCK_TYPE_RAW, STOCK_TYPE_STOREHOUSE_ALIAS
 } from '@/constant';
-import { isStandardSpec, map2array } from '@/helpers';
 import DialogReduce from '@/pages/stock/DialogReduce.vue';
 import DialogProduct from '@/pages/stock/DialogProduct.vue';
 import { chukudan } from '@/helpers/printTemplates';
@@ -178,9 +179,10 @@ import {makeRequest, pluck} from '@/api/helpers';
 const user = useUser();
 const storehouse = ref([]);
 const goods = ref([]);
-const stockTypes = map2array(STOCK_TYPE_STOREHOUSE_ALIAS);
 const list = ref([]);
-const filters = reactive({});
+const filters = reactive({
+  belong: ''
+});
 const loading = ref(false);
 const showDialog = ref(false);
 const showDialogProduct = ref(false);
@@ -188,7 +190,19 @@ const showDialogReduce = ref(false);
 const dialogData = ref(null);
 const productDialogData = ref(null);
 const reduceRef = ref(null);
-
+const stockTypes = ref([]);
+makeRequest('/storehouse/tree')().then(rep => {
+  stockTypes.value = Object.keys(rep).map(key => {
+    return {
+      label:    STOCK_TYPE_STOREHOUSE_ALIAS[key],
+      value:    ~~key,
+      children: rep[key].map(item => ({
+        label: item.name,
+        value: item.id
+      }))
+    };
+  });
+});
 const getTransferInitData = makeRequest('/getTransferInitData', 'id');
 const stockTransfer = makeRequest('/stockTransfer');
 const trasVisible = ref(false);

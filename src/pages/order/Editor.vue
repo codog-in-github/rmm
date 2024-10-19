@@ -3,13 +3,16 @@ import {computed, nextTick, ref} from 'vue';
 import { getOptions } from '@/helpers/process';
 import {getOptions as getOptionsHelpers, getSpecOptions, orderDetail, orderSave } from '@/api';
 import CustomerEditor from '@/pages/customer/Editor.vue';
-import {GOODS_SPEC_SCENES_ORDER, GOODS_TYPE_RAW, ORDER_UNIT_GEN, ORDER_UNIT_KG, ORDER_UNIT_MAP} from '@/constant';
-import {isStandardSpec, map2array} from '@/helpers';
+import {GOODS_SPEC_SCENES_ORDER, GOODS_TYPE_RAW, ORDER_UNIT_KG, ORDER_UNIT_MAP} from '@/constant';
+import {map2array} from '@/helpers';
 import moment from 'moment';
 import TemplateEditor from '@/pages/template/Editor.vue';
 import {ElMessage} from 'element-plus';
+import SpecInput from '@/pages/order/SpecInput.vue';
+import SpecFormatter from '@/components/SpecFormatter.vue';
 
-const { goods, specs, update } = getOptions();
+const specInputRef = ref(null);
+const { goods, update } = getOptions();
 const elFormRef = ref(null);
 const templateEditorRef = ref(null);
 const isPrintTemplate = ref(true);
@@ -19,6 +22,12 @@ const customerAddData = ref({
   show:  false
 });
 
+async function inputSpec(row) {
+  const newValue = await specInputRef.value?.input(row.spec);
+  if(newValue) {
+    row.spec = newValue;
+  }
+}
 
 function onCustomerAdd(customer) {
   customers.value.push({
@@ -50,9 +59,11 @@ const emptyDetails = function() {
     subSpec:    '',
     num:        null,
     unit:       ORDER_UNIT_KG,
-    comment:    ''
+    comment:    '',
+    hard:       ''
   };
 };
+
 
 const show = ref(false);
 const form = ref(emptyForm());
@@ -65,9 +76,6 @@ const rules = {
       }
       if(value.some(item => !item.goodsId ||!item.spec || !item.num || !item.unit)) {
         return cb(new Error('订单请填写完整'));
-      }
-      if(value.some(item => !isStandardSpec(item.spec))) {
-        return cb(new Error('规格格式错误'));
       }
       cb();
     }
@@ -117,6 +125,9 @@ function useQuerySearch(goodsId, customerId) {
 
 function addDetail() {
   const row = emptyDetails();
+  if(form.value.details.length > 0) {
+    row.customerId = form.value.details[form.value.details.length - 1].customerId;
+  }
   form.value.details.push(row);
 }
 function delDetail(index) {
@@ -153,6 +164,7 @@ const goodsOptions = computed(() => {
       :model="form"
       :rules="rules"
       labelWidth="100px"
+      labelPosition="top"
     >
       <ElFormItem label="日期" prop="customerId">
         <div class="flex justify-between w-full p-r-2">
@@ -163,8 +175,8 @@ const goodsOptions = computed(() => {
         </div>
       </ElFormItem>
       <ElFormItem label="订单商品" prop="details">
-        <ElTable :data="form.details">
-          <ElTableColumn label="客户名称">
+        <ElTable :data="form.details" stripe>
+          <ElTableColumn label="客户名称" width="260px" fixed>
             <template v-slot="{ row, $index }">
               <div class="flex gap-2">
                 <ElSelectV2
@@ -177,18 +189,16 @@ const goodsOptions = computed(() => {
               </div>
             </template>
           </ElTableColumn>
-          <ElTableColumn label="原料名称" width="120px">
+          <ElTableColumn label="原料名称" width="150px" fixed>
             <template v-slot="{ row }">
               <ElSelectV2 v-model="row.goodsId" :options="goodsOptions" />
             </template>
           </ElTableColumn>
-          <ElTableColumn label="规格(MM)" width="180px">
+          <ElTableColumn label="规格(MM)" width="220px" fixed>
             <template v-slot="{ row }">
-              <ElAutocomplete
-                class="w-full"
-                v-model="row.spec"
-                :fetchSuggestions="useQuerySearch(row.goodsId, row.customerId)"
-              />
+              <ElButton link type="primary" @click="inputSpec(row)">
+                <SpecFormatter :spec="row.spec"  placeholder="点击输入" />
+              </ElButton>
             </template>
           </ElTableColumn>
           <ElTableColumn label="数量" width="120px">
@@ -210,7 +220,12 @@ const goodsOptions = computed(() => {
               />
             </template>
           </ElTableColumn>
-          <ElTableColumn label="备注">
+          <ElTableColumn label="硬度" width="120px">
+            <template v-slot="{ row }">
+              <ElInput v-model="row.hard" />
+            </template>
+          </ElTableColumn>
+          <ElTableColumn label="备注" width="200px">
             <template v-slot="{ row }">
               <ElInput
                 type="textarea"
@@ -221,7 +236,7 @@ const goodsOptions = computed(() => {
               />
             </template>
           </ElTableColumn>
-          <ElTableColumn width="90px">
+          <ElTableColumn width="180px">
             <template v-slot="{ $index, row }">
               <GlAsyncButton link type="primary" :click="() => showTemplate(row)">查看工艺</GlAsyncButton>
               <ElButton link type="danger" @click="delDetail($index)">删除</ElButton>
@@ -239,6 +254,7 @@ const goodsOptions = computed(() => {
     </template>
     <TemplateEditor ref="templateEditorRef" />
     <CustomerEditor v-model:show="customerAddData.show" @success="onCustomerAdd" />
+    <SpecInput ref="specInputRef" />
   </ElDialog>
 </template>
 

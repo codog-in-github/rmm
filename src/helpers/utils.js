@@ -17,7 +17,7 @@ export function map2array(map, ...exclude) {
       label
     });
   }
-  return list; 
+  return list;
 }
 
 /**
@@ -82,3 +82,49 @@ export function loadJs(src) {
     document.head.appendChild(script);
   });
 }
+
+/**
+ * 解析规格
+ * 外径 R
+ * 壁厚 w
+ * 内孔 r
+ * 长度 l
+ * 硬度 h
+ * @param {string} specStr
+ * @returns {{
+ *  R: [string, string, string],
+ *  w: [string, string, string],
+ *  r: [string, string, string],
+ *  l: [string, string, string],
+ * }}
+ */
+export const specParse = (specStr) => {
+  let R = '', w = '', r = '', l = '';
+  const arr = specStr.split('*');
+  if(arr.length === 2) {
+    [R, w] = arr;
+  } if(arr.length === 3) {
+    [R, w, l] = arr;
+  } else {
+    [R = '', w = '', r = '', l = ''] = arr;
+  }
+  [R, w, r, l] = [R, w, r, l].map(item => {
+    const [v, u = '', d = ''] = item.split('+');
+    return [v, u, d];
+  });
+  return {
+    R, w, r, l
+  };
+};
+
+export const specStringify = (specObj) => {
+  let { R, w , r, l } = specObj;
+  [R, w, r, l] = [R, w, r, l].map(item => item.join('+'));
+  return [R, w, r, l].join('*');
+};
+
+export const spec2base = (specStr) => {
+  const specObj = specParse(specStr);
+  let { R, w, l } = specObj;
+  return [R, w, l].map(item => item[0]).join('*');
+};

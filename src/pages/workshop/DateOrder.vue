@@ -4,11 +4,18 @@ import {dateOrder} from '@/api';
 import TemplateEditor from '@/pages/template/Editor.vue';
 import moment from 'moment';
 import {ORDER_STATUS_FINISH, ORDER_STATUS_WAIT, ORDER_UNIT_MAP} from '@/constant';
-const date = ref(moment().format('YYYY-MM-DD'));
+import SpecFormatter from '@/components/SpecFormatter.vue';
+import {spec2base} from '@/helpers';
+
+const date = ref([
+  moment().subtract(3, 'months').format('YYYY-MM-DD'),
+  moment().format('YYYY-MM-DD')
+]);
 const templateEditorRef = ref(null);
 const show = ref(false);
 const loading = ref(false);
 const list = ref([]);
+
 
 const emit = defineEmits(['showNewProcess']);
 async function reload() {
@@ -31,11 +38,11 @@ function disabledDate(date) {
 }
 
 function showTemplate(row) {
-  return templateEditorRef.value.show(row.customerId, row.goodsId, row.spec);
+  return templateEditorRef.value.show(row.customerId, row.goodsId, spec2base(row.spec));
 }
 
 function showNewProcess(row) {
-  emit('showNewProcess', row.goodsName + ' ' + row.spec);
+  emit('showNewProcess', row.goodsName + ' ' + spec2base(row.spec));
   show.value = false;
 }
 </script>
@@ -45,6 +52,7 @@ function showNewProcess(row) {
     <template #header>
       <div>
         <ElDatePicker
+          type="daterange"
           v-model="date"
           valueFormat="YYYY-MM-DD"
           :clearable="false"
@@ -53,10 +61,14 @@ function showNewProcess(row) {
         />
       </div>
     </template>
-    <ElTable :data="list" v-loading="loading">
+    <ElTable :data="list" v-loading="loading" stripe>
       <ElTableColumn prop="code" label="客户代码" />
       <ElTableColumn prop="goodsName" label="成品" />
-      <ElTableColumn prop="spec" label="规格(MM)" />
+      <ElTableColumn prop="spec" label="规格(MM)">
+        <template v-slot="{ row }">
+          <SpecFormatter :spec="row.spec" placeholder="无规格" />
+        </template>
+      </ElTableColumn>
       <ElTableColumn prop="num" label="数量">
         <template v-slot="{ row }">
           {{ row.num }} ({{ ORDER_UNIT_MAP[row.unit] }})
