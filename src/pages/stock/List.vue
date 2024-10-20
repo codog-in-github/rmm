@@ -297,7 +297,7 @@ function specContent(row, _, value) {
 }
 
 const showOut = (row) => {
-  reduceRef.value.show(row.goodsType, row.goodsId, row.id, row.goodsNum);
+  reduceRef.value.show(row.goodsType, row.goodsId, row.id, row.goodsNum, row.unitId);
 };
 
 function formatNum(val) {

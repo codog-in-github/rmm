@@ -210,7 +210,7 @@ const localValue = ref(emptyData());
 const emit = defineEmits(['update:visible', 'success']);
 
 defineExpose({
-  show(goodsType, goodsId, stockId, num) {
+  show(goodsType, goodsId, stockId, num, unitId) {
     visibleChanger.value = true;
     nextTick(() => {
       const data = emptyData();
@@ -219,6 +219,7 @@ defineExpose({
       data.details[0].spec = stockId;
       data.details[0].num = num;
       data.details[0].realNum = num;
+      data.details[0].unitId = unitId;
       localValue.value = data;
     });
   }
