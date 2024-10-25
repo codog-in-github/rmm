@@ -24,7 +24,7 @@
         <label class="block my-4">入库信息</label>
         <div class="p-4 bg-gray-100">
           <ElTable :data="localValue.details">
-            <ElTableColumn label="名称" width="120">
+            <ElTableColumn label="名称" width="150">
               <template v-slot="{ row }">
                 <ElSelectV2
                   :options="options.goods"

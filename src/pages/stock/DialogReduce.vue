@@ -12,7 +12,7 @@
         </ElFormItem>
         <ElFormItem label="明细">
           <ElTable :data="localValue.details" border>
-            <ElTableColumn label="名称">
+            <ElTableColumn label="名称" width="150">
               <template v-slot="{ row }">
                 <ElSelectV2
                   :options="options.goods"
