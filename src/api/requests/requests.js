@@ -73,7 +73,7 @@ export const getApplyDetail = makeRequest('/getApplyDetail', 'id');
 
 export const printApplyRaw = makeRequest('/printApplyRaw', 'id');
 
-export const doApply = makeRequest('/doApply', 'id', 'realNums');
+export const doApply = makeRequest('/doApply', 'id', 'realNums', 'lathe_id');
 
 export const toProcessing = makeRequest('/toProcessing','id');
 

@@ -76,11 +76,10 @@
   </div>
 </template>
 <script setup>
-import { reactive, ref } from 'vue';
+import {reactive, ref} from 'vue';
 import {
   getSelfWorkshop,
   useGetProcessList,
-  getOptions,
   getProcessDetail,
   toProcessing as toProcessingApi,
   usedApply, delProcess, printApplyRaw
@@ -95,6 +94,7 @@ import { useUser } from '@/store';
 import DateOrder from './DateOrder.vue';
 import { usePrinter } from '@/helpers/lodop';
 import { peiliaoShenqing } from '@/helpers/printTemplates';
+import {makeRequest} from '@/api/helpers';
 
 const user = useUser();
 const { printSettings, showButton } = usePrinter();
@@ -123,7 +123,7 @@ function add(name = '') {
   form.value = {
     name,
     workshopId:   workshopId.value,
-    storehouseId: storehouses.value?.[0].value ?? null,
+    storehouseId: null,
     status:       null,
     raw:          {
       goodsId: null,
@@ -135,6 +135,7 @@ function add(name = '') {
     comment: ''
   };
 }
+
 function showTodayOrder() {
   return dateOrderRef.value?.show();
 }
@@ -142,9 +143,6 @@ async function getList() {
   list.value =  await getProcessList(workshopId.value, filters);
 }
 async function init() {
-  getOptions('storehouse').then(res => {
-    storehouses.value = res.storehouse;
-  });
   const rep = await getSelfWorkshop();
   if(!rep || rep.length < 1) {
     ElMessage.error('您的账号未绑定车间，请联系管理员添加');

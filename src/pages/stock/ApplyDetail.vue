@@ -64,6 +64,14 @@
       <ElFormItem label="申请人">
         {{ model.apply.applyUserName }}
       </ElFormItem>
+      <ElFormItem label="车床" v-if="model.apply.latheId || (model.apply.type === STOCK_APPLY_TYPE_OUT && model.apply.status === STOCK_APPLY_STATUS_WAITING)">
+        <ElSelectV2
+          :disabled="!editable"
+          v-model="latheId"
+          :props="{ label: 'name', value: 'id' }"
+          :options="lathes"
+        />
+      </ElFormItem>
       <ElFormItem label="申请时间">
         {{ moment(model.apply.createdAt).format('YYYY-MM-DD hh:mm') }}
       </ElFormItem>
@@ -71,6 +79,7 @@
     <template #footer>
       <ElButton @click="visibleChanger = false">关闭</ElButton>
       <template v-if="editable">
+        <ElButton type="danger" @click="doReject">驳回</ElButton>
         <ElButton v-if="model.apply.type === STOCK_APPLY_TYPE_IN" type="primary" @click="submit">确认入库</ElButton>
         <ElButton v-else-if="model.apply.type === STOCK_APPLY_TYPE_OUT" type="primary" @click="submit">确认出库</ElButton>
       </template>
@@ -86,6 +95,8 @@ import {
 import moment from 'moment';
 import {computed, ref, watch} from 'vue';
 import { isStandardSpec } from '@/helpers';
+import {makeRequest} from '@/api/helpers';
+import {ElMessage, ElMessageBox} from 'element-plus';
 
 const props = defineProps({
   visible: {
@@ -97,7 +108,7 @@ const props = defineProps({
   }
 });
 const realNums = ref({ _: false });
-const emit = defineEmits(['update:visible', 'submit']);
+const emit = defineEmits(['update:visible', 'submit', 'reload']);
 const visibleChanger = computed({
   get: () => props.visible,
   set: val => emit('update:visible', val)
@@ -118,6 +129,21 @@ const rawTotal = computed(() => {
     return total + raw.applyNum;
   }, 0);
 });
+const latheId = ref(null);
+const lathes = ref([]);
+const getLathes = makeRequest('/storehouse/lathes');
+getLathes().then(rep => {
+  lathes.value = rep;
+});
+
+const reject = makeRequest('/storehouse/reject', 'id');
+const doReject = async () => {
+  await ElMessageBox.confirm('确定驳回该申请？');
+  await reject(props.model.apply.id);
+  ElMessage.success('驳回成功');
+  visibleChanger.value = false;
+  emit('reload');
+};
 
 function calTrashNum() {
   if(trashIndex.value === -1) {
@@ -147,7 +173,7 @@ const editable = computed(() => {
 });
 
 function submit() {
-  emit('submit', props.model.apply.id, realNums.value);
+  emit('submit', props.model.apply.id, realNums.value, latheId.value);
 }
 
 </script>

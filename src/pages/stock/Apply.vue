@@ -45,11 +45,16 @@
       </ElTable>
     </div>
     <GlPagination class="m-t-2" :pagination="pagnation" :requestHook="getList" />
-    <ApplyDetail v-model:visible="detailVisible" :model="detailData" @submit="submitHandler" />
+    <ApplyDetail
+      v-model:visible="detailVisible"
+      :model="detailData"
+      @submit="submitHandler"
+      @reload="getList"
+    />
   </div>
 </template>
 <script setup>
-import {delApply, doApply, getApplyDetail, getSelfStorehouse, printApplyRaw, useGetApplyList} from '@/api';
+import {delApply, doApply, getApplyDetail, printApplyRaw, useGetApplyList} from '@/api';
 import {formatDatetime, usePagination} from '@/helpers';
 import {ElMessage, ElMessageBox} from 'element-plus';
 import {ref} from 'vue';
@@ -96,9 +101,9 @@ async function showDetail(id) {
   detailData.value = rep;
 }
 
-async function submitHandler(id, realNums) {
+async function submitHandler(id, realNums, latheId) {
   try {
-    await doApply(id, realNums);
+    await doApply(id, realNums, latheId);
     ElMessage.success('操作成功');
     const item = list.value.find(item => item.id === id);
     if(item.type === CONSTANT.STOCK_APPLY_TYPE_IN) {

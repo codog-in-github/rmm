@@ -10,15 +10,21 @@
           <template v-if="localForm.status === null" v-slot:prepend>{{ moment().format('YYYYMMDD') }}-</template>
         </ElInput>
       </ElFormItem>
+      <ElFormItem label="车床" v-if="localForm.lathe">{{ localForm.lathe.name }}</ElFormItem>
       <ElFormItem label="仓库">
-        <ElSelectV2 v-model="localForm.storehouseId" :options="storehouses" :disabled="!canEditRaw" />
+        <ElSelectV2
+          v-model="localForm.storehouseId"
+          :options="storehouses"
+          :props="{ label: 'name', value: 'id' }"
+          :disabled="!canEditRaw"
+        />
       </ElFormItem>
       <ElFormItem label="原材料">
         <ElTable :data="[localForm.raw]">
           <ElTableColumn prop="name" label="材料名称">
             <template v-slot="{ row }">
               <ElSelectV2
-                v-model="row.goodsId" 
+                v-model="row.goodsId"
                 :options="goods(GOODS_TYPE_RAW)"
                 :disabled="!canEditRaw"
                 @change="rawChange($event, row)"
@@ -33,7 +39,7 @@
                 :disabled="!canEditRaw"
               />
             </template>
-          </ElTableColumn> 
+          </ElTableColumn>
           <ElTableColumn prop="num" label="数量">
             <template v-slot="{ row}">
               <ElInputNumber
@@ -207,8 +213,7 @@ import {
   rawApply,
   finishProcess as finishProcessApi,
   saveStep as saveStepApi,
-  toStock as toStockApi,
-  getSpecOptions
+  toStock as toStockApi
 } from '@/api';
 import {
   PROCESS_STATUS_MAP,
@@ -219,13 +224,14 @@ import {
   PROCESS_STEP_MAP,
   PROCESS_STEP_STOCK_TYPE_NONE, PROCESS_STEP_STOCK_TYPE_IN, PROCESS_STATUS_FINISH, GOODS_SPEC_SCENES_WORKSHOP
 } from '@/constant';
-import { conversionSpec, isStandardSpec } from '@/helpers';
+import {conversionSpec, isStandardSpec, pipe} from '@/helpers';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { cloneDeep } from 'lodash';
+import {cloneDeep, union} from 'lodash';
 import moment from 'moment';
 import {computed, ref, watch} from 'vue';
 import { getOptions } from '@/helpers/process';
 import NumInput from './NumInput.vue';
+import {makeRequest} from '@/api/helpers';
 
 const props = defineProps({
   visible: {
@@ -234,12 +240,11 @@ const props = defineProps({
   },
   model: {
     type: Object
-  },
-  storehouses: {
-    type:    Array,
-    default: () => []
   }
 });
+const storehouses = ref([]);
+const getRawStorehouses = makeRequest('/storehouse/raw');
+getRawStorehouses().then(rep => { storehouses.value = rep; });
 const emit = defineEmits(['update:visible', 'reload', 'print']);
 watch(() => props.model, val => {
   const form = cloneDeep(val);
@@ -354,24 +359,18 @@ function spanMethod({ row, column, rowIndex }) {
 
 // ------------ 选项 start -------------
 function useQuerySearch(goodsId) {
-  if(!goodsId) {
+  if(!goodsId || !localForm.value?.storehouseId) {
     return function querySearch(_, cb) {
       cb([]);
     };
   }
   return async function querySearch(_, cb) {
-    const rep = await getSpecOptions({
-      goodsId,
-      scenes: GOODS_SPEC_SCENES_WORKSHOP
-    });
-    if(rep) {
-      cb(
-        rep.map(item => {
-          return {
-            value: item.value
-          };
-        })
-      );
+    const stocks = storehouses.value.find(item => item.id === localForm.value.storehouseId).stock;
+    if(stocks && stocks.length) {
+      const specs = stocks
+        .filter(item => item.goodsId === goodsId && item.goodsNum > 0)
+        .map(item => item.spec);
+      cb(union(specs).map(value => ({ value })));
     } else {
       cb([]);
     }
@@ -419,9 +418,6 @@ async function saveStep(row, index) {
   if(!isStandardSpec(row.spec)){
     return ElMessage.warning('规格不符合标准');
   }
-  if(!row.pricePerLength){
-    return ElMessage.warning('单价未填写');
-  }
   const params = cloneDeep(row);
   params.processId = localForm.value.id;
   params.sort = localForm.value.steps.length;
@@ -465,6 +461,17 @@ async function rawApplySubmit() {
   ) {
     return ElMessage.warning('原材料未填写完整');
   }
+
+  const stock = storehouses.value.
+    find(item => item.id === form.storehouseId)
+    .stock
+    .find(item => item.goodsId === form.raw.goodsId && item.spec === form.raw.spec)
+    ?.goodsNum ?? 0;
+
+  if(stock < form.raw.num) {
+    await ElMessageBox.confirm('库存不足，是否继续申请？');
+  }
+
   const { applyId } = await rawApply(form);
   emit('reload');
   visibleChanger.value = false;
@@ -488,7 +495,7 @@ async function finishProcess() {
     visibleChanger.value = false;
     emit('reload');
   } catch (none) {
-    // 
+    //
   }
 }
 // ------------ 表单相关操作 end -------------

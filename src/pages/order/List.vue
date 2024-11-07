@@ -1,6 +1,6 @@
 <script setup>
 import {ref, reactive} from 'vue';
-import {usePagination} from '@/helpers';
+import {spec2html, usePagination} from '@/helpers';
 import {getOptions, ordelDel, printOrder, useOrderList} from '@/api';
 import Editor from './Editor.vue';
 import {ElMessage, ElMessageBox} from 'element-plus';
@@ -63,13 +63,14 @@ async function doPrint(id, _isPrintTemplate = isPrintTemplate.value) {
     if(i > 0) {
       LODOP.NEWPAGE();
     }
-    let html = '<table cellpadding="2" cellspacing="0" border="1" width="100%">';
+    let html = '<table cellpadding="2" cellspacing="0" border="1" width="100%" style="font-size: 18px">';
     const data = dataList[i];
-    html += `<tr><td>日期</td><td colspan="4">${data.orderDate}</td></tr>`;
+    html += `<tr><td>日期</td><td colspan="5">${data.orderDate}</td></tr>`;
     html += '<tr>' +
         '<td colspan="2">客户代码</td>' +
         '<td>原料</td>' +
         '<td>规格（MM）</td>' +
+        '<td>硬度</td>' +
         '<td>数量</td>' +
         '</tr>';
     for(let i = 0; i < data.details.length; i++) {
@@ -77,24 +78,25 @@ async function doPrint(id, _isPrintTemplate = isPrintTemplate.value) {
       html += '<tr>';
       html += `<td colspan="2">${item.code ?? '-'}</td>`;
       html += `<td>${item.goodsName}</td>`;
-      html += `<td>${item.spec}</td>`;
+      html += `<td>${spec2html(item.spec)}</td>`;
+      html += `<td>${item.hard}</td>`;
       html += `<td>${item.num}(${ORDER_UNIT_MAP[item.unit]})</td>`;
       html += '</tr>';
       if(item.orderComment) {
         html += '<tr>';
         html += '<td>备注：</td>';
-        html += `<td colspan="4">${item.orderComment}</td>`;
+        html += `<td colspan="5">${item.orderComment}</td>`;
         html += '</tr>';
       }
       if(_isPrintTemplate && item.comment) {
         html += '<tr>';
         html += '<td>工艺说明：</td>';
-        html += `<td colspan="4">${item.comment}</td>`;
+        html += `<td colspan="5">${item.comment}</td>`;
         html += '</tr>';
       }
     }
-    html += `<tr><td>打印人</td><td colspan="4">${data.user}</td></tr>`;
-    html += `<tr><td>打印时间</td><td colspan="4">${data.printerTime}</td></tr>`;
+    html += `<tr><td>打印人</td><td colspan="5">${data.user}</td></tr>`;
+    html += `<tr><td>打印时间</td><td colspan="5">${data.printerTime}</td></tr>`;
     html += '</table>';
     LODOP.ADD_PRINT_HTM(10, 10, 500, 500, html);
   }

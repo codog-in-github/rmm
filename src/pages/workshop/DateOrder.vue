@@ -16,7 +16,6 @@ const show = ref(false);
 const loading = ref(false);
 const list = ref([]);
 
-
 const emit = defineEmits(['showNewProcess']);
 async function reload() {
   try{
@@ -42,13 +41,12 @@ function showTemplate(row) {
 }
 
 function showNewProcess(row) {
-  emit('showNewProcess', row.goodsName + ' ' + spec2base(row.spec));
-  show.value = false;
+  emit('showNewProcess', row.goodsName + '-' + spec2base(row.spec) + '-' + row.num + ORDER_UNIT_MAP[row.unit]);
 }
 </script>
 
 <template>
-  <ElDrawer v-model="show" size="800px">
+  <ElDrawer v-model="show" size="1200px">
     <template #header>
       <div>
         <ElDatePicker
@@ -63,12 +61,14 @@ function showNewProcess(row) {
     </template>
     <ElTable :data="list" v-loading="loading" stripe>
       <ElTableColumn prop="code" label="客户代码" />
+      <ElTableColumn prop="date" label="订单日期" />
       <ElTableColumn prop="goodsName" label="成品" />
-      <ElTableColumn prop="spec" label="规格(MM)">
+      <ElTableColumn prop="spec" label="规格(MM)" width="280px">
         <template v-slot="{ row }">
           <SpecFormatter :spec="row.spec" placeholder="无规格" />
         </template>
       </ElTableColumn>
+      <ElTableColumn prop="hard" label="硬度" width="60px" />
       <ElTableColumn prop="num" label="数量">
         <template v-slot="{ row }">
           {{ row.num }} ({{ ORDER_UNIT_MAP[row.unit] }})

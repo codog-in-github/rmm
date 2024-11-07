@@ -21,6 +21,9 @@
 }
 
 .gl-filter-item__control {
+  .el-select{
+    width: 180px;
+  }
   .el-date-editor.el-date-editor--daterange{
     width: 220px;
   }

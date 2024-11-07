@@ -133,6 +133,7 @@ import OrderSelect from '@/pages/stock/OrderSelect.vue';
 let goodsDefaultUnitMapping = {};
 const optionsOrigin = ref({});
 const orderSelectRef = ref(null);
+
 function emptyData() {
   return {
     goodsType:    STOCK_TYPE_PRODUCT,

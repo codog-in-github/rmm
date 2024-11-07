@@ -1,4 +1,4 @@
-import { camelCase, isArray, isObject } from 'lodash';
+import {camelCase, isArray, isFunction, isObject, isString} from 'lodash';
 
 /**
  *
@@ -125,6 +125,73 @@ export const specStringify = (specObj) => {
 
 export const spec2base = (specStr) => {
   const specObj = specParse(specStr);
-  let { R, w, l } = specObj;
+  let { R, w, r, l } = specObj;
+  if(!R[0]) R[0] = w[0] * 2 + Number(r[0]);
   return [R, w, l].map(item => item[0]).join('*');
+};
+
+export const spec2html = (specStr) => {
+  let spec = specParse(specStr);
+  spec.r[0] = spec.r[0] ? '孔' + spec.r[0] : '';
+  spec = [spec.R, spec.w, spec.r, spec.l]
+    .filter(item => item[0])
+    .map(item => {
+      const value = [item[0]];
+      let sup = [];
+      if (item[1]) {
+        sup.push(['+', item[1]]);
+      }
+      if (item[2]) {
+        sup.push(['-', item[2]]);
+      }
+      if (sup.length) {
+        value.push(sup);
+      }
+      return value;
+    });
+  /**
+   *  h('div', [
+   *       h('span', { style: { display: 'inline-block', width: '1em', textAlign: 'center' } }, content[0]),
+   *       h('span', content[1])
+   *     ])
+   * @param value
+   * @param unit
+   */
+  const sub = (content) => {
+    let html = '<div>';
+    if(content[0]) {
+      html += `<span style="display: inline-block; width: 1em; text-align: center">${content[0]}</span>`;
+    }
+    if(content[1]) {
+      html += `<span>${content[1]}</span>`;
+    }
+    return html + '</div>';
+  };
+  let html = '';
+
+  html += '<span class="inline-flex gap-1 items-end text" :style="{ lineHeight: \'1\' }">';
+  html += spec.map((value, i) => {
+    let html = `<span>${i ? '*' : ''}${value[0]}</span>`;
+    if(value[1]) {
+      html += '<span style="display: inline-block; font-size: 0.5em ">';
+      html += sub(value[1][0]);
+      if(value[1][1]) {
+        html += sub(value[1][1]);
+      }
+      html += '</span>';
+    }
+    return html;
+  }).join('');
+  html += '</span>';
+  return html;
+  return `
+        <div v-if="index">*</div>
+        <div class="flex items-end">
+          <div>{{ value[0] }}</div>
+          <div v-if="value[1]" class="relative" :style="{ fontSize: '0.5em', bottom: '0.6em' }">
+            <Sup :content="value[1][0]" />
+            <Sup v-if="value[1][1]" :content="value[1][1]" />
+          </div>
+        </div>
+      </template>`;
 };
