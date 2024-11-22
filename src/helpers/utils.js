@@ -89,7 +89,6 @@ export function loadJs(src) {
  * 壁厚 w
  * 内孔 r
  * 长度 l
- * 硬度 h
  * @param {string} specStr
  * @returns {{
  *  R: [string, string, string],

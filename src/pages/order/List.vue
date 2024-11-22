@@ -7,6 +7,10 @@ import {ElMessage, ElMessageBox} from 'element-plus';
 import {ORDER_STATUS_WAIT, ORDER_UNIT_MAP} from '@/constant';
 import TemplateDialog from './TemplateDialog.vue';
 import SpecFormatter from '@/components/SpecFormatter.vue';
+import moment from 'moment';
+import {isEmptyDateString} from '@/helpers/check';
+import UploadDialog from "@/pages/order/UploadDialog.vue";
+
 const isPrintTemplate = ref(true);
 const printSettingsShow = ref(false);
 const selectedIds = ref([]);
@@ -54,6 +58,13 @@ const getList = async function() {
   selectedIds.value = [];
   list.value = await listApi(filters);
 };
+
+const uploadRef = ref(null);
+function showUpload () {
+  uploadRef.value.show();
+}
+
+
 async function doPrint(id, _isPrintTemplate = isPrintTemplate.value) {
   const dataList = await printOrder(id);
   LODOP.PRINT_INITA();
@@ -170,6 +181,7 @@ getCustomerOptions();
         <ElButton icon="Plus" type="primary" @click="add">新增订单</ElButton>
         <ElButton icon="Setting" type="primary" @click="printSettingsShow = true">打印设置</ElButton>
         <ElButton icon="Printer" type="primary" @click="printMultiple">批量打印</ElButton>
+        <ElButton icon="Upload" type="primary" @click="showUpload">excel导入</ElButton>
         <!--        <GlBorderCard title="工艺说明" class="m-b-2">-->
         <!--          <ElSwitch v-model="isPrintTemplate" activeText="打印" inactiveText="不打印" />-->
         <!--        </GlBorderCard>-->
@@ -203,19 +215,31 @@ getCustomerOptions();
           <SpecFormatter :spec="row.spec" placeholder="无规格" />
         </template>
       </ElTableColumn>
+      <ElTableColumn label="壁厚上下限（mm）" width="150" prop="wLimit" />
       <ElTableColumn label="数量">
         <template v-slot="{ row }">
           {{ row.num }} {{ ORDER_UNIT_MAP[row.unit] }}
         </template>
       </ElTableColumn>
       <ElTableColumn label="硬度" prop="hard" width="120" />
+      <ElTableColumn label="特殊要求" prop="customerNote" width="220" />
+      <ElTableColumn label="一般贸易" prop="normalBusiness" width="120">
+        <template #="{ row }">
+          {{ row.normalBusiness || '' }}
+        </template>
+      </ElTableColumn>
+      <ElTableColumn label="要求交期" prop="deadline" width="120">
+        <template #="{ row }">
+          {{ isEmptyDateString(row.deadline) ? '' : moment(row.deadline).format('YYYY-MM-DD') }}
+        </template>
+      </ElTableColumn>
       <ElTableColumn label="状态" prop="status">
         <template v-slot="{ row }">
           <ElTag v-if="row.status === ORDER_STATUS_WAIT">处理中</ElTag>
           <ElTag v-else type="success">已完成</ElTag>
         </template>
       </ElTableColumn>
-      <ElTableColumn label="操作">
+      <ElTableColumn label="操作" width="180" fixed="right">
         <template v-slot="{ row }">
           <GlAsyncButton link type="primary" :click="() => edit(row)">查看</GlAsyncButton>
           <GlAsyncButton link type="primary" :click="() => doPrint(row.id)">打印</GlAsyncButton>
@@ -227,6 +251,7 @@ getCustomerOptions();
     <GlPagination class="m-t-2" :pagination="pagination" :requestHook="getList" />
     <Editor ref="editor" @success="addSuccess" />
     <GlPrintSetting v-model:visible="printSettingsShow" :model="printSettings" @submit="savePrintSettings" />
+    <UploadDialog ref="uploadRef" @success="getList" />
   </div>
 </template>
 

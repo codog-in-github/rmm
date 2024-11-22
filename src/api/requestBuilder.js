@@ -15,7 +15,7 @@ class Request {
     this.baseURL = baseURL;
     this.targetUrl = '';
     this.method = 'post';
-    this.headers = {};
+    this._headers = {};
     this._data = {};
     this.targetUrl = url;
     this.requestMiddleware = [
@@ -50,6 +50,37 @@ class Request {
     return this;
   }
 
+  /**
+   * @param {FormData|Record<string, any>} formData
+   * @returns
+   */
+  form(formData) {
+    if (formData) {
+      if(!(formData instanceof FormData)) {
+        const _formData = new FormData();
+        for(const key in formData) {
+          if(formData[key] instanceof FileList) {
+            for(const file of formData[key]) {
+              _formData.append(`${key}[]`, file);
+            }
+          } else {
+            _formData.append(key, formData[key]);
+          }
+        }
+        formData = _formData;
+      }
+      this.data(formData, true);
+    }
+    return this.headers({
+      'Content-Type': 'multipart/form-data'
+    });
+  }
+
+  headers(headerObj) {
+    this._headers = Object.assign(this._headers, headerObj);
+    return this;
+  }
+
   data(data, replace = false) {
     if(replace) {
       this._data = data;
@@ -68,7 +99,7 @@ class Request {
     request.baseURL = this.baseURL;
     request.targetUrl = this.targetUrl;
     request.method = this.method;
-    request.headers = cloneDeep(this.headers);
+    request._headers = cloneDeep(this._headers);
     request._data = cloneDeep(this._data);
     request.requestMiddleware = [...this.requestMiddleware];
     request.responseMiddleware = [...this.responseMiddleware];
@@ -181,7 +212,7 @@ class Request {
       url:     this.targetUrl,
       method:  this.method,
       data:    this._data,
-      headers: this.headers
+      headers: this._headers
     });
   }
 }

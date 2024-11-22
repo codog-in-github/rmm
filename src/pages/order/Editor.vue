@@ -53,14 +53,18 @@ const emptyForm = function() {
 
 const emptyDetails = function() {
   return {
-    customerId: null,
-    goodsId:    2, // 紫铜管id
-    spec:       '',
-    subSpec:    '',
-    num:        null,
-    unit:       ORDER_UNIT_KG,
-    comment:    '',
-    hard:       ''
+    customerId:     null,
+    goodsId:        2, // 紫铜管id
+    spec:           '',
+    subSpec:        '',
+    num:            null,
+    unit:           ORDER_UNIT_KG,
+    comment:        '',
+    hard:           '',
+    wLimit:         '',
+    normalBusiness: '',
+    customerNote:   '',
+    deadline:       ''
   };
 };
 
@@ -201,12 +205,30 @@ const goodsOptions = computed(() => {
               </ElButton>
             </template>
           </ElTableColumn>
+          <ElTableColumn label="壁厚上下限" width="120px">
+            <template v-slot="{ row }">
+              <ElInput
+                class="w-full"
+                v-model="row.wLimit"
+              />
+            </template>
+          </ElTableColumn>
           <ElTableColumn label="数量" width="120px">
             <template v-slot="{ row }">
               <ElInput
                 type="number"
                 class="w-full"
                 v-model="row.num"
+                min="0"
+              />
+            </template>
+          </ElTableColumn>
+          <ElTableColumn label="一般贸易" width="120px">
+            <template v-slot="{ row }">
+              <ElInput
+                type="number"
+                class="w-full"
+                v-model="row.normalBusiness"
                 min="0"
               />
             </template>
@@ -233,6 +255,27 @@ const goodsOptions = computed(() => {
                 autosize
                 v-model="row.comment"
                 min="0"
+              />
+            </template>
+          </ElTableColumn>
+          <ElTableColumn label="特殊要求" width="200px">
+            <template v-slot="{ row }">
+              <ElInput
+                type="textarea"
+                class="w-full"
+                autosize
+                v-model="row.customerNote"
+                min="0"
+              />
+            </template>
+          </ElTableColumn>
+          <ElTableColumn label="要求交期" width="200px">
+            <template v-slot="{ row }">
+              <ElDatePicker
+                type="date"
+                class="w-full"
+                v-model="row.deadline"
+                valueFormat="YYYY-MM-DD"
               />
             </template>
           </ElTableColumn>

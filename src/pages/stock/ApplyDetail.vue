@@ -72,6 +72,18 @@
           :options="lathes"
         />
       </ElFormItem>
+      <ElFormItem
+        required
+        label="仓库"
+        v-if="model.apply.type === STOCK_APPLY_TYPE_IN || (model.apply.storehouseId)"
+      >
+        <ElSelectV2
+          v-model="storehouseId"
+          :disabled="!editable"
+          :props="{ label: 'name', value: 'id' }"
+          :options="storehouses"
+        />
+      </ElFormItem>
       <ElFormItem label="申请时间">
         {{ moment(model.apply.createdAt).format('YYYY-MM-DD hh:mm') }}
       </ElFormItem>
@@ -90,7 +102,7 @@
 
 import {
   GOODS_SPEC_TRASH,
-  STOCK_APPLY_STATUS_WAITING, STOCK_APPLY_TYPE_IN, STOCK_APPLY_TYPE_OUT
+  STOCK_APPLY_STATUS_WAITING, STOCK_APPLY_TYPE_IN, STOCK_APPLY_TYPE_OUT, STOCK_TYPE_PRODUCT
 } from '@/constant';
 import moment from 'moment';
 import {computed, ref, watch} from 'vue';
@@ -136,6 +148,13 @@ getLathes().then(rep => {
   lathes.value = rep;
 });
 
+const storehouseId = ref(null);
+const storehouses = ref([]);
+const getStorehouses = makeRequest('/storehouse/allHouse', 'type');
+getStorehouses(STOCK_TYPE_PRODUCT).then(rep => {
+  storehouses.value = rep;
+});
+
 const reject = makeRequest('/storehouse/reject', 'id');
 const doReject = async () => {
   await ElMessageBox.confirm('确定驳回该申请？');
@@ -173,7 +192,7 @@ const editable = computed(() => {
 });
 
 function submit() {
-  emit('submit', props.model.apply.id, realNums.value, latheId.value);
+  emit('submit', props.model.apply.id, realNums.value, latheId.value, storehouseId.value);
 }
 
 </script>

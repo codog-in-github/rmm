@@ -101,9 +101,9 @@ async function showDetail(id) {
   detailData.value = rep;
 }
 
-async function submitHandler(id, realNums, latheId) {
+async function submitHandler(id, realNums, latheId, storehouseId) {
   try {
-    await doApply(id, realNums, latheId);
+    await doApply(id, realNums, latheId, storehouseId);
     ElMessage.success('操作成功');
     const item = list.value.find(item => item.id === id);
     if(item.type === CONSTANT.STOCK_APPLY_TYPE_IN) {
