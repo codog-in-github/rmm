@@ -1,15 +1,14 @@
 <script setup>
 import {ref, reactive} from 'vue';
-import {spec2html, usePagination} from '@/helpers';
+import {spec2html, specParse, usePagination} from '@/helpers';
 import {getOptions, ordelDel, printOrder, useOrderList} from '@/api';
 import Editor from './Editor.vue';
 import {ElMessage, ElMessageBox} from 'element-plus';
 import {ORDER_STATUS_WAIT, ORDER_UNIT_MAP} from '@/constant';
 import TemplateDialog from './TemplateDialog.vue';
-import SpecFormatter from '@/components/SpecFormatter.vue';
 import moment from 'moment';
 import {isEmptyDateString} from '@/helpers/check';
-import UploadDialog from "@/pages/order/UploadDialog.vue";
+import UploadDialog from '@/pages/order/UploadDialog.vue';
 
 const isPrintTemplate = ref(true);
 const printSettingsShow = ref(false);
@@ -56,14 +55,22 @@ const edit = function(row) {
 };
 const getList = async function() {
   selectedIds.value = [];
-  list.value = await listApi(filters);
+  const rep = await listApi(filters);
+  list.value = rep.map(item => {
+    const spec = specParse(item.spec);
+    const wLimit = item.wLimit ? item.wLimit.split('/') : ['', ''];
+    return {
+      ...item,
+      spec,
+      wLimit
+    };
+  });
 };
 
 const uploadRef = ref(null);
-function showUpload () {
+function showUpload() {
   uploadRef.value.show();
 }
-
 
 async function doPrint(id, _isPrintTemplate = isPrintTemplate.value) {
   const dataList = await printOrder(id);
@@ -210,12 +217,64 @@ getCustomerOptions();
         </template>
       </ElTableColumn>
       <ElTableColumn label="名称" prop="name" width="120" />
-      <ElTableColumn label="规格" width="300">
-        <template v-slot="{ row }">
-          <SpecFormatter :spec="row.spec" placeholder="无规格" />
-        </template>
-      </ElTableColumn>
-      <ElTableColumn label="壁厚上下限（mm）" width="150" prop="wLimit" />
+
+      <ElTableColumn
+        label="规格"
+        prop="spec"
+        width="120"
+        :formatter="row => `${row.spec.R[0]}*${row.spec.w[0]}`"
+      />
+
+      <ElTableColumn
+        label="内径下公差"
+        width="100"
+        :formatter="row => row.spec.r[0] - row.spec.r[2]"
+      />
+
+      <ElTableColumn
+        label="内径上公差"
+        width="100"
+        :formatter="row => Number(row.spec.r[0]) + Number(row.spec.r[1])"
+      />
+
+      <ElTableColumn
+        label="外径下公差"
+        width="100"
+        :formatter="row => row.spec.R[0] - row.spec.R[2]"
+      />
+
+      <ElTableColumn
+        label="外径上公差"
+        width="100"
+        :formatter="row => Number(row.spec.R[0]) + Number(row.spec.R[1])"
+      />
+
+      <ElTableColumn
+        label="平均壁厚下限"
+        width="150"
+        prop="wLimit"
+        :formatter="row => row.wLimit[1]"
+      />
+
+      <ElTableColumn
+        label="平均壁厚上限"
+        width="150"
+        prop="wLimit"
+        :formatter="row => row.wLimit[0]"
+      />
+
+      <ElTableColumn
+        label="平均壁厚下公差"
+        width="140"
+        :formatter="row => row.spec.w[0] - row.spec.w[2]"
+      />
+
+      <ElTableColumn
+        label="平均壁厚上公差"
+        width="140"
+        :formatter="row => Number(row.spec.w[0]) + Number(row.spec.w[1])"
+      />
+
       <ElTableColumn label="数量">
         <template v-slot="{ row }">
           {{ row.num }} {{ ORDER_UNIT_MAP[row.unit] }}

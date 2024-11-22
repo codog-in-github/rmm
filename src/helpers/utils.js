@@ -55,6 +55,12 @@ export function bitHas(num, bit) {
   return (num & bit) === bit;
 }
 
+export const pipeExec = (input, ...fns) => {
+  return fns.reduce((acc, fn) => {
+    return fn(acc);
+  }, input);
+};
+
 /**
  * 规格长度换算比例
  * @param {string} spec
@@ -122,11 +128,14 @@ export const specStringify = (specObj) => {
   return [R, w, r, l].join('*');
 };
 
-export const spec2base = (specStr) => {
-  const specObj = specParse(specStr);
+export const specObj2base = (specObj) => {
   let { R, w, r, l } = specObj;
   if(!R[0]) R[0] = w[0] * 2 + Number(r[0]);
   return [R, w, l].map(item => item[0]).join('*');
+};
+
+export const spec2base = (specStr) => {
+  return pipeExec(specStr, specParse, specObj2base);
 };
 
 export const spec2html = (specStr) => {
@@ -183,14 +192,4 @@ export const spec2html = (specStr) => {
   }).join('');
   html += '</span>';
   return html;
-  return `
-        <div v-if="index">*</div>
-        <div class="flex items-end">
-          <div>{{ value[0] }}</div>
-          <div v-if="value[1]" class="relative" :style="{ fontSize: '0.5em', bottom: '0.6em' }">
-            <Sup :content="value[1][0]" />
-            <Sup v-if="value[1][1]" :content="value[1][1]" />
-          </div>
-        </div>
-      </template>`;
 };

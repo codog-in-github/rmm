@@ -52,7 +52,7 @@
       </div>
       <ElTable
         :data="list"
-        stripe
+        :rowStyle="rowStyle"
       >
         <ElTableColumn label="序号" width="80px">
           <template v-slot="{ $index }">
@@ -191,6 +191,23 @@ const dialogData = ref(null);
 const productDialogData = ref(null);
 const reduceRef = ref(null);
 const stockTypes = ref([]);
+
+const rowColors = ['#d2e1ff', '#ccffdd', '#ffd4c3'];
+const colorCache = {};
+
+const rowStyle = ({ row, rowIndex }) => {
+  if(rowIndex === 0) {
+    return {};
+  }
+  if(!colorCache[row.storehouseId]) {
+    const i = Object.keys(colorCache).length % rowColors.length;
+    colorCache[row.storehouseId] = rowColors[i];
+  }
+  return {
+    background: colorCache[row.storehouseId]
+  };
+};
+
 makeRequest('/storehouse/tree')().then(rep => {
   stockTypes.value = Object.keys(rep).map(key => {
     return {

@@ -222,9 +222,9 @@ import {
   PROCESS_STEP_TYPE_JIAOZHI,
   PROCESS_STEP_TYPE_LAGUAN,
   PROCESS_STEP_MAP,
-  PROCESS_STEP_STOCK_TYPE_NONE, PROCESS_STEP_STOCK_TYPE_IN, PROCESS_STATUS_FINISH, GOODS_SPEC_SCENES_WORKSHOP
+  PROCESS_STEP_STOCK_TYPE_NONE, PROCESS_STEP_STOCK_TYPE_IN, PROCESS_STATUS_FINISH
 } from '@/constant';
-import {conversionSpec, isStandardSpec, pipe} from '@/helpers';
+import {conversionSpec, isStandardSpec} from '@/helpers';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import {cloneDeep, union} from 'lodash';
 import moment from 'moment';
@@ -364,13 +364,14 @@ function useQuerySearch(goodsId) {
       cb([]);
     };
   }
-  return async function querySearch(_, cb) {
+  return async function querySearch(value, cb) {
     const stocks = storehouses.value.find(item => item.id === localForm.value.storehouseId).stock;
     if(stocks && stocks.length) {
       const specs = stocks
         .filter(item => item.goodsId === goodsId && item.goodsNum > 0)
         .map(item => item.spec);
-      cb(union(specs).map(value => ({ value })));
+
+      cb(union(specs).filter(item => !value || item.includes(value)).map(value => ({ value })));
     } else {
       cb([]);
     }

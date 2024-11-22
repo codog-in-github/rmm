@@ -4,8 +4,8 @@ import {dateOrder} from '@/api';
 import TemplateEditor from '@/pages/template/Editor.vue';
 import moment from 'moment';
 import {ORDER_STATUS_FINISH, ORDER_STATUS_WAIT, ORDER_UNIT_MAP} from '@/constant';
-import SpecFormatter from '@/components/SpecFormatter.vue';
-import {spec2base} from '@/helpers';
+import {specObj2base, specParse} from '@/helpers';
+import {ElMessage, ElMessageBox} from 'element-plus';
 
 const date = ref([
   moment().subtract(3, 'months').format('YYYY-MM-DD'),
@@ -15,12 +15,53 @@ const templateEditorRef = ref(null);
 const show = ref(false);
 const loading = ref(false);
 const list = ref([]);
+const selected = ref([]);
+const onChecked = (e, row) => {
+  if(e) {
+    selected.value.push(row);
+  } else {
+    selected.value = selected.value.filter(item => item.id !== row.id);
+  }
+};
+const multiNewProcess = () => {
+  if(!selected.value.length) {
+    return ElMessage.error('请先选择要批量新建的订单');
+  }
+  let R, w;
+  if(selected.value.some(item => {
+    if(!R) {
+      R = item.spec.R[0];
+      w = item.spec.w[0];
+      return false;
+    }
+    return R !== item.spec.R[0] || w !== item.spec.w[0];
+  })) {
+    return ElMessage.error('批量新建的订单规格必须一致');
+  }
+  const row = selected.value[0];
+  emit('showNewProcess',
+    row.goodsName + '-' +
+    specObj2base(row.spec) + '-' +
+    selected.value.reduce((acc, item) => acc + item.num * 1, 0) +
+    ORDER_UNIT_MAP[row.unit]
+  );
+  selected.value = [];
+};
 
 const emit = defineEmits(['showNewProcess']);
 async function reload() {
   try{
     loading.value = true;
-    list.value = await dateOrder(date.value);
+    const rep = await dateOrder(date.value);
+    list.value = rep.map(item => {
+      const spec = specParse(item.spec);
+      const wLimit = item.wLimit ? item.wLimit.split('/') : ['', ''];
+      return {
+        ...item,
+        spec,
+        wLimit
+      };
+    });
   } finally {
     loading.value = false;
   }
@@ -37,19 +78,20 @@ function disabledDate(date) {
 }
 
 function showTemplate(row) {
-  return templateEditorRef.value.show(row.customerId, row.goodsId, spec2base(row.spec));
+  return templateEditorRef.value.show(row.customerId, row.goodsId, specObj2base(row.spec));
 }
 
 function showNewProcess(row) {
-  emit('showNewProcess', row.goodsName + '-' + spec2base(row.spec) + '-' + row.num + ORDER_UNIT_MAP[row.unit]);
+  emit('showNewProcess', row.goodsName + '-' + specObj2base(row.spec) + '-' + row.num + ORDER_UNIT_MAP[row.unit]);
 }
 </script>
 
 <template>
   <ElDrawer v-model="show" size="1200px">
     <template #header>
-      <div>
+      <div class="flex gap-2 items-center">
         <ElDatePicker
+          class="flex-grow-0"
           type="daterange"
           v-model="date"
           valueFormat="YYYY-MM-DD"
@@ -57,24 +99,86 @@ function showNewProcess(row) {
           :disabledDate="disabledDate"
           @change="reload"
         />
+        <ElButton type="primary" @click="multiNewProcess">批量配料</ElButton>
       </div>
     </template>
     <ElTable :data="list" v-loading="loading" stripe>
-      <ElTableColumn prop="code" label="客户代码" />
-      <ElTableColumn prop="date" label="订单日期" />
-      <ElTableColumn prop="goodsName" label="成品" />
-      <ElTableColumn prop="spec" label="规格(MM)" width="280px">
-        <template v-slot="{ row }">
-          <SpecFormatter :spec="row.spec" placeholder="无规格" />
+      <ElTableColumn width="40" align="center">
+        <template #="{ row }">
+          <ElCheckbox
+            :checked="selected.some(item => item.id === row.id)"
+            @change="onChecked($event, row)"
+          />
         </template>
       </ElTableColumn>
+      <ElTableColumn prop="code" label="客户代码" />
+      <ElTableColumn prop="date" label="订单日期" width="120" />
+      <ElTableColumn prop="goodsName" label="成品" />
+
+      <ElTableColumn
+        label="规格"
+        prop="spec"
+        width="120"
+        :formatter="row => `${row.spec.R[0]}*${row.spec.w[0]}`"
+      />
+
+      <ElTableColumn
+        label="内径下公差"
+        width="100"
+        :formatter="row => row.spec.r[0] - row.spec.r[2]"
+      />
+
+      <ElTableColumn
+        label="内径上公差"
+        width="100"
+        :formatter="row => Number(row.spec.r[0]) + Number(row.spec.r[1])"
+      />
+
+      <ElTableColumn
+        label="外径下公差"
+        width="100"
+        :formatter="row => row.spec.R[0] - row.spec.R[2]"
+      />
+
+      <ElTableColumn
+        label="外径上公差"
+        width="100"
+        :formatter="row => Number(row.spec.R[0]) + Number(row.spec.R[1])"
+      />
+
+      <ElTableColumn
+        label="平均壁厚下限"
+        width="150"
+        prop="wLimit"
+        :formatter="row => row.wLimit[1]"
+      />
+
+      <ElTableColumn
+        label="平均壁厚上限"
+        width="150"
+        prop="wLimit"
+        :formatter="row => row.wLimit[0]"
+      />
+
+      <ElTableColumn
+        label="平均壁厚下公差"
+        width="140"
+        :formatter="row => row.spec.w[0] - row.spec.w[2]"
+      />
+
+      <ElTableColumn
+        label="平均壁厚上公差"
+        width="140"
+        :formatter="row => Number(row.spec.w[0]) + Number(row.spec.w[1])"
+      />
+
       <ElTableColumn prop="hard" label="硬度" width="60px" />
       <ElTableColumn prop="num" label="数量">
         <template v-slot="{ row }">
           {{ row.num }} ({{ ORDER_UNIT_MAP[row.unit] }})
         </template>
       </ElTableColumn>
-      <ElTableColumn width="220px">
+      <ElTableColumn width="220px" fixed="right">
         <template v-slot="{ row }">
           <ElButton v-if="row.status === ORDER_STATUS_FINISH" link type="success">已完成</ElButton>
           <ElButton
