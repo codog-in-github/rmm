@@ -192,7 +192,7 @@ const productDialogData = ref(null);
 const reduceRef = ref(null);
 const stockTypes = ref([]);
 
-const rowColors = ['#d2e1ff', '#ccffdd', '#ffd4c3'];
+const rowColors = ['transparent', '#E8F1FD'];
 const colorCache = {};
 
 const rowStyle = ({ row, rowIndex }) => {

@@ -3,6 +3,7 @@
     <GlFilterBar class="m-b-2" :model="filters" @search="pagnation.reset(getList)">
       <template v-slot:after>
         <Component :is="showButton" />
+        <GlAsyncButton v-if="user.isRoot" type="primary" :click="multiPrint">批量打印</GlAsyncButton>
       </template>
     </GlFilterBar>
     <div class="flex-auto h-1">
@@ -12,6 +13,15 @@
         stripe
         v-loading="pagnation.paginate.loading"
       >
+        <ElTableColumn width="80" align="center">
+          <template v-slot="{ row }">
+            <ElCheckbox
+              :modelValue="selected.some(item => item.id === row.id)"
+              @change="onCheckboxChange($event, row)"
+              :disabled="row.type !== STOCK_APPLY_TYPE_OUT"
+            />
+          </template>
+        </ElTableColumn>
         <ElTableColumn label="名称" prop="name" />
         <ElTableColumn label="申请状态">
           <template v-slot="{ row }">
@@ -64,6 +74,7 @@ import { useUser } from '@/store';
 import {STOCK_APPLY_TYPE_OUT} from '@/constant';
 import { usePrinter } from '@/helpers/lodop';
 import { peiliaoShenqing } from '@/helpers/printTemplates';
+import GlAsyncButton from '@/components/GlAsyncButton.vue';
 
 const pagnation = usePagination();
 const getApplyList =  useGetApplyList(pagnation);
@@ -94,6 +105,31 @@ async function getList() {
   list.value = await getApplyList(storehouseId.value);
 }
 pagnation.reset(getList);
+
+const selected = ref([]);
+const onCheckboxChange = function(val, row) {
+  if(val) {
+    selected.value.push(row);
+  } else {
+    selected.value = selected.value.filter(item => item.id !== row.id);
+  }
+};
+const multiPrint = async () => {
+  if(!LODOP) {
+    return ElMessage.error('请先安装LODOP插件');
+  }
+  if(selected.value.length === 0) {
+    return ElMessage.error('请选择要打印的数据');
+  }
+  const ids = selected.value.map(item => item.id).join(',');
+  const data = await printApplyRaw(ids);
+  LODOP.PRINT_INITA();
+  LODOP.SET_PRINTER_INDEX(printSettings.value.printerIndex);
+  peiliaoShenqing(data, LODOP);
+  LODOP.PREVIEW();
+  selected.value = [];
+};
+
 
 async function showDetail(id) {
   const rep = await getApplyDetail(id);

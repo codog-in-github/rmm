@@ -12,12 +12,18 @@
       </ElFormItem>
       <ElFormItem label="车床" v-if="localForm.lathe">{{ localForm.lathe.name }}</ElFormItem>
       <ElFormItem label="仓库">
-        <ElSelectV2
+        <ElSelect
           v-model="localForm.storehouseId"
-          :options="storehouses"
-          :props="{ label: 'name', value: 'id' }"
           :disabled="!canEditRaw"
-        />
+        >
+          <ElOption
+            v-for="item in storehouses"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+            :disabled="isDisabledOption(item)"
+          />
+        </ElSelect>
       </ElFormItem>
       <ElFormItem label="原材料">
         <ElTable :data="[localForm.raw]">
@@ -226,7 +232,7 @@ import {
 } from '@/constant';
 import {conversionSpec, isStandardSpec} from '@/helpers';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import {cloneDeep, union} from 'lodash';
+import {cloneDeep, union, uniq} from 'lodash';
 import moment from 'moment';
 import {computed, ref, watch} from 'vue';
 import { getOptions } from '@/helpers/process';
@@ -356,25 +362,38 @@ function spanMethod({ row, column, rowIndex }) {
     }
   }
 }
-
+function isDisabledOption(item) {
+  if(!localForm.value?.raw.goodsId || !localForm.value?.raw.spec) {
+    return false;
+  }
+  return item.stock.every(
+    st => st.goodsId !== localForm.value.raw.goodsId
+          && st.spec !== localForm.value.raw.spec
+  );
+}
 // ------------ 选项 start -------------
 function useQuerySearch(goodsId) {
-  if(!goodsId || !localForm.value?.storehouseId) {
+  if(!goodsId) {
     return function querySearch(_, cb) {
       cb([]);
     };
   }
-  return async function querySearch(value, cb) {
-    const stocks = storehouses.value.find(item => item.id === localForm.value.storehouseId).stock;
-    if(stocks && stocks.length) {
-      const specs = stocks
-        .filter(item => item.goodsId === goodsId && item.goodsNum > 0)
-        .map(item => item.spec);
-
-      cb(union(specs).filter(item => !value || item.includes(value)).map(value => ({ value })));
-    } else {
+  const stocks = storehouses.value.map(item => item.stock).flat();
+  if(!stocks || !stocks.length) {
+    return function querySearch(_, cb) {
       cb([]);
-    }
+    };
+  }
+  let specs = stocks
+    .filter(item => item.goodsId === goodsId && item.goodsNum > 0)
+    .map(item => item.spec);
+  specs = uniq(specs);
+  return async function querySearch(value, cb) {
+    cb(
+      specs
+        .filter(item => item.includes(value))
+        .map(value => ({ value }))
+    );
   };
 }
 // ------------ 选项 end -------------

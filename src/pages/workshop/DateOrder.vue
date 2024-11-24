@@ -102,7 +102,12 @@ function showNewProcess(row) {
         <ElButton type="primary" @click="multiNewProcess">批量配料</ElButton>
       </div>
     </template>
-    <ElTable :data="list" v-loading="loading" stripe>
+    <ElTable
+      :data="list"
+      v-loading="loading"
+      stripe
+      height="80vh"
+    >
       <ElTableColumn width="40" align="center">
         <template #="{ row }">
           <ElCheckbox

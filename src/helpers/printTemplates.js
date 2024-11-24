@@ -92,24 +92,61 @@ export function chukudan(data, LODOP){
   }
 }
 
+/**
+ *
+ * @param data
+ * @param {typeof window.LODOP} LODOP
+ */
 export function peiliaoShenqing(data, LODOP){
   const user = useUser();
-  LODOP.SET_PRINT_STYLE('FontSize', 16);
-  LODOP.ADD_PRINT_TEXT(20, 20, 200, 20, '名称');
-  LODOP.ADD_PRINT_TEXT(20, 120, 200, 20, data.process.name);
-  LODOP.ADD_PRINT_TEXT(60, 20, 200, 20, '材料');
-  LODOP.ADD_PRINT_TEXT(60, 120, 200, 20, '名称');
-  LODOP.ADD_PRINT_TEXT(100, 120, 200, 20, data.raw.goodsName);
-  LODOP.ADD_PRINT_TEXT(60, 220, 200, 20, '规格(MM)');
-  LODOP.ADD_PRINT_TEXT(100, 220, 200, 20, data.raw.spec);
-  LODOP.ADD_PRINT_TEXT(60, 340, 200, 20, '数量');
-  LODOP.ADD_PRINT_TEXT(100, 340, 200, 20, data.raw.num);
-  LODOP.ADD_PRINT_TEXT(60, 420, 200, 20, '单位');
-  LODOP.ADD_PRINT_TEXT(100, 420, 200, 20, data.raw.unitName);
-  LODOP.ADD_PRINT_TEXT(140, 20, 200, 20, '备注');
-  LODOP.ADD_PRINT_TEXT(140, 120, 300, 500, data.process.comment);
-  LODOP.ADD_PRINT_TEXT(260, 20, 200, 20, '打印人');
-  LODOP.ADD_PRINT_TEXT(260, 120, 200, 20, user.name);
-  LODOP.ADD_PRINT_TEXT(300, 20, 200, 20, '打印时间');
-  LODOP.ADD_PRINT_TEXT(300, 120, 200, 20, moment().format('YYYY-MM-DD HH:mm'));
+  let html = '<div style="padding: 40px; font-size: 18px; line-height: 1.5em">';
+
+  html += '<h1 style="text-align: center; font-weight: bold; font-size: 22px; font-family: \'微软雅黑\'; letter-spacing: 0.5em">订单配料表</h1>';
+
+  for (let i = 0; i < data.length; i++) {
+    if(i) {
+      html += '<div style="border-top: 2px dashed #eee; margin: 20px 0 10px"></div>';
+    }
+    const row = data[i];
+    html += '<div style="text-align: center; margin-bottom: 8px">'
+        + '<span>订单名称</span>'
+        + `<span style="display: inline-block; width: 45%; border-bottom: 1px solid #000">${row.process.name}</span>`
+        + '<span style="margin-left: 10px">配货车床</span>'
+        + `<span style="display: inline-block; width: 10%; border-bottom: 1px solid #000">${row.process.lathe?.name ?? '&nbsp;'}</span>`
+      + '</div>';
+
+    html += '<table style="width: 100%; line-height: 2em; border-collapse: collapse;" border="1" >';
+
+    html += '<tr>' +
+      '<td style="width: 20%">名称</td>' +
+      '<td style="width: 20%">规格(MM)</td>' +
+      '<td style="width: 20%">数量</td>' +
+      '<td style="width: 20%">单位</td>' +
+      '<td style="width: 20%">实际重量</td>' +
+    '</tr>';
+
+    html += '<tr>'
+      + `<td>${row.raw.goodsName}</td>`
+      + `<td>${row.raw.spec}</td>`
+      + `<td>${row.raw.apply_num || row.raw.num}</td>`
+      + `<td>${row.raw.unitName}</td>`
+      + `<td>${row.raw.num}</td>`
+      + '</tr>';
+
+    if(row.process.comment) {
+      html += '<tr>';
+      + `<td colspan="4">${row.process.comment}</td>`;
+      html += '</tr>';
+    }
+
+    html += '</table>';
+  }
+
+  html += '<div style="margin-top: 10px;">打印人：' + user.name;
+  html += `<span style="float: right">打印时间：${moment().format('YYYY-MM-DD HH:mm')}</span>`;
+  html += '</div>';
+
+  html += '</div>';
+
+  LODOP.ADD_PRINT_HTM(0, 0, '100%', '100%', html);
 }
