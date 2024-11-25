@@ -1,6 +1,7 @@
 import {getMoneyUppercase} from '@/api/helpers';
 import { useUser } from '@/store';
 import moment from 'moment';
+import {openHtml} from "@/helpers/utils";
 
 export function chukudan(data, LODOP){
   const PAGE_WIDTH = 2260;
@@ -99,7 +100,7 @@ export function chukudan(data, LODOP){
  */
 export function peiliaoShenqing(data, LODOP){
   const user = useUser();
-  let html = '<div style="padding: 40px; font-size: 18px; line-height: 1.5em">';
+  let html = '<meta charset="utf-8" /><div style="padding: 40px; font-size: 18px; line-height: 1.5em">';
 
   html += '<h1 style="text-align: center; font-weight: bold; font-size: 22px; font-family: \'微软雅黑\'; letter-spacing: 0.5em">订单配料表</h1>';
 
@@ -120,7 +121,7 @@ export function peiliaoShenqing(data, LODOP){
     html += '<tr>' +
       '<td style="width: 20%">名称</td>' +
       '<td style="width: 20%">规格(MM)</td>' +
-      '<td style="width: 20%">数量</td>' +
+      '<td style="width: 20%">申请数量</td>' +
       '<td style="width: 20%">单位</td>' +
       '<td style="width: 20%">实际重量</td>' +
     '</tr>';
@@ -128,7 +129,7 @@ export function peiliaoShenqing(data, LODOP){
     html += '<tr>'
       + `<td>${row.raw.goodsName}</td>`
       + `<td>${row.raw.spec}</td>`
-      + `<td>${row.raw.apply_num || row.raw.num}</td>`
+      + `<td>${row.raw.applyNum || row.raw.num}</td>`
       + `<td>${row.raw.unitName}</td>`
       + `<td>${row.raw.num}</td>`
       + '</tr>';

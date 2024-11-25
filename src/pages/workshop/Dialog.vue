@@ -368,7 +368,8 @@ function isDisabledOption(item) {
   }
   return item.stock.every(
     st => st.goodsId !== localForm.value.raw.goodsId
-          && st.spec !== localForm.value.raw.spec
+          || st.spec !== localForm.value.raw.spec
+          || st.goodsNum <= 0
   );
 }
 // ------------ 选项 start -------------

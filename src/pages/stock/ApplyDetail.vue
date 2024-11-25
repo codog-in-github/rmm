@@ -75,7 +75,7 @@
       <ElFormItem
         required
         label="仓库"
-        v-if="model.apply.type === STOCK_APPLY_TYPE_IN || (model.apply.storehouseId)"
+        v-if="model.apply.type === STOCK_APPLY_TYPE_IN && (model.apply.storehouseId)"
       >
         <ElSelectV2
           v-model="storehouseId"

@@ -193,3 +193,9 @@ export const spec2html = (specStr) => {
   html += '</span>';
   return html;
 };
+
+export const openHtml = (html) => {
+  const htmlFileBlob = new Blob([html], { type: 'text/html' });
+  const htmlFileUrl = URL.createObjectURL(htmlFileBlob);
+  window.open(htmlFileUrl);
+};
