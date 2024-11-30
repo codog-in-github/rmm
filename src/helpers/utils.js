@@ -199,3 +199,8 @@ export const openHtml = (html) => {
   const htmlFileUrl = URL.createObjectURL(htmlFileBlob);
   window.open(htmlFileUrl);
 };
+
+export const toleranceFormat = (base, cur) => {
+  return Math.abs(base - cur).toFixed(3).replace(/\.?0+$/, '');
+};
+

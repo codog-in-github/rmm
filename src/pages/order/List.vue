@@ -1,6 +1,6 @@
 <script setup>
 import {ref, reactive} from 'vue';
-import {spec2html, specParse, usePagination} from '@/helpers';
+import {spec2html, specParse, toleranceFormat, usePagination} from '@/helpers';
 import {getOptions, ordelDel, printOrder, useOrderList} from '@/api';
 import Editor from './Editor.vue';
 import {ElMessage, ElMessageBox} from 'element-plus';
@@ -221,32 +221,38 @@ getCustomerOptions();
       <ElTableColumn
         label="规格"
         prop="spec"
-        width="120"
-        :formatter="row => `${row.spec.R[0]}*${row.spec.w[0]}`"
+        width="160"
+        :formatter="row => {
+          const spec = `${row.spec.R[0]}*${row.spec.w[0]}`
+          if(row.spec.l[0]) {
+            return `${spec}*${row.spec.l[0]}`
+          }
+          return spec;
+        }"
       />
 
       <ElTableColumn
         label="内径下公差"
         width="100"
-        :formatter="row => row.spec.r[0] - row.spec.r[2]"
+        :formatter="row => toleranceFormat(row.spec.r[0], row.spec.r[2])"
       />
 
       <ElTableColumn
         label="内径上公差"
         width="100"
-        :formatter="row => Number(row.spec.r[0]) + Number(row.spec.r[1])"
+        :formatter="row => toleranceFormat(row.spec.r[0], row.spec.r[1])"
       />
 
       <ElTableColumn
         label="外径下公差"
         width="100"
-        :formatter="row => row.spec.R[0] - row.spec.R[2]"
+        :formatter="row => toleranceFormat(row.spec.R[0], row.spec.R[2])"
       />
 
       <ElTableColumn
         label="外径上公差"
         width="100"
-        :formatter="row => Number(row.spec.R[0]) + Number(row.spec.R[1])"
+        :formatter="row => toleranceFormat(row.spec.R[0], row.spec.R[1])"
       />
 
       <ElTableColumn
@@ -266,13 +272,13 @@ getCustomerOptions();
       <ElTableColumn
         label="平均壁厚下公差"
         width="140"
-        :formatter="row => row.spec.w[0] - row.spec.w[2]"
+        :formatter="row => toleranceFormat(row.spec.w[0], row.spec.w[2])"
       />
 
       <ElTableColumn
         label="平均壁厚上公差"
         width="140"
-        :formatter="row => Number(row.spec.w[0]) + Number(row.spec.w[1])"
+        :formatter="row => toleranceFormat(row.spec.w[0], row.spec.w[1])"
       />
 
       <ElTableColumn label="数量">

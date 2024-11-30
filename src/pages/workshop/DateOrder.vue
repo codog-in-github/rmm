@@ -4,7 +4,7 @@ import {dateOrder} from '@/api';
 import TemplateEditor from '@/pages/template/Editor.vue';
 import moment from 'moment';
 import {ORDER_STATUS_FINISH, ORDER_STATUS_WAIT, ORDER_UNIT_MAP} from '@/constant';
-import {specObj2base, specParse} from '@/helpers';
+import {specObj2base, specParse, toleranceFormat} from '@/helpers';
 import {ElMessage, ElMessageBox} from 'element-plus';
 
 const date = ref([
@@ -123,20 +123,26 @@ function showNewProcess(row) {
       <ElTableColumn
         label="规格"
         prop="spec"
-        width="120"
-        :formatter="row => `${row.spec.R[0]}*${row.spec.w[0]}`"
+        width="160"
+        :formatter="row => {
+          const spec = `${row.spec.R[0]}*${row.spec.w[0]}`
+          if(row.spec.l[0]) {
+            return `${spec}*${row.spec.l[0]}`
+          }
+          return spec;
+        }"
       />
 
       <ElTableColumn
         label="内径下公差"
         width="100"
-        :formatter="row => row.spec.r[0] - row.spec.r[2]"
+        :formatter="row => toleranceFormat(row.spec.r[0], row.spec.r[2])"
       />
 
       <ElTableColumn
         label="内径上公差"
         width="100"
-        :formatter="row => Number(row.spec.r[0]) + Number(row.spec.r[1])"
+        :formatter="row => toleranceFormat(row.spec.r[0], row.spec.r[1])"
       />
 
       <ElTableColumn
