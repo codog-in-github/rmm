@@ -59,7 +59,7 @@ async function reload() {
       return {
         ...item,
         spec,
-        wLimit
+        wLimit: wLimit.map(item => item.replace(/\.?0+$/, ''))
       };
     });
   } finally {
@@ -136,7 +136,7 @@ function showNewProcess(row) {
       <ElTableColumn
         label="内径下公差"
         width="100"
-        :formatter="row => toleranceFormat(row.spec.r[0], row.spec.r[2])"
+        :formatter="row => toleranceFormat(row.spec.r[0], row.spec.r[2], '-')"
       />
 
       <ElTableColumn
@@ -148,13 +148,13 @@ function showNewProcess(row) {
       <ElTableColumn
         label="外径下公差"
         width="100"
-        :formatter="row => row.spec.R[0] - row.spec.R[2]"
+        :formatter="row => toleranceFormat(row.spec.R[0], row.spec.R[2], '-')"
       />
 
       <ElTableColumn
         label="外径上公差"
         width="100"
-        :formatter="row => Number(row.spec.R[0]) + Number(row.spec.R[1])"
+        :formatter="row => toleranceFormat(row.spec.R[0], row.spec.R[1])"
       />
 
       <ElTableColumn
@@ -174,17 +174,17 @@ function showNewProcess(row) {
       <ElTableColumn
         label="平均壁厚下公差"
         width="140"
-        :formatter="row => row.spec.w[0] - row.spec.w[2]"
+        :formatter="row => toleranceFormat(row.spec.w[0], row.spec.w[2], '-')"
       />
 
       <ElTableColumn
         label="平均壁厚上公差"
         width="140"
-        :formatter="row => Number(row.spec.w[0]) + Number(row.spec.w[1])"
+        :formatter="row => toleranceFormat(row.spec.w[0], row.spec.w[1])"
       />
 
       <ElTableColumn prop="hard" label="硬度" width="60px" />
-      <ElTableColumn prop="num" label="数量">
+      <ElTableColumn prop="num" label="数量" width="180px">
         <template v-slot="{ row }">
           {{ row.num }} ({{ ORDER_UNIT_MAP[row.unit] }})
         </template>

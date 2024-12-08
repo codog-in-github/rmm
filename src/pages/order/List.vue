@@ -62,7 +62,7 @@ const getList = async function() {
     return {
       ...item,
       spec,
-      wLimit
+      wLimit: wLimit.map(item => item.replace(/\.?0+$/, ''))
     };
   });
 };
@@ -234,7 +234,7 @@ getCustomerOptions();
       <ElTableColumn
         label="内径下公差"
         width="100"
-        :formatter="row => toleranceFormat(row.spec.r[0], row.spec.r[2])"
+        :formatter="row => toleranceFormat(row.spec.r[0], row.spec.r[2], '-')"
       />
 
       <ElTableColumn
@@ -246,7 +246,7 @@ getCustomerOptions();
       <ElTableColumn
         label="外径下公差"
         width="100"
-        :formatter="row => toleranceFormat(row.spec.R[0], row.spec.R[2])"
+        :formatter="row => toleranceFormat(row.spec.R[0], row.spec.R[2], '-')"
       />
 
       <ElTableColumn
@@ -272,7 +272,7 @@ getCustomerOptions();
       <ElTableColumn
         label="平均壁厚下公差"
         width="140"
-        :formatter="row => toleranceFormat(row.spec.w[0], row.spec.w[2])"
+        :formatter="row => toleranceFormat(row.spec.w[0], row.spec.w[2], '-')"
       />
 
       <ElTableColumn
@@ -286,24 +286,35 @@ getCustomerOptions();
           {{ row.num }} {{ ORDER_UNIT_MAP[row.unit] }}
         </template>
       </ElTableColumn>
+
       <ElTableColumn label="硬度" prop="hard" width="120" />
       <ElTableColumn label="特殊要求" prop="customerNote" width="220" />
+
+      <ElTableColumn label="来料">
+        <template #="{ row }">
+          {{ row.num - row.normalBusiness }}
+        </template>
+      </ElTableColumn>
+
       <ElTableColumn label="一般贸易" prop="normalBusiness" width="120">
         <template #="{ row }">
           {{ row.normalBusiness || '' }}
         </template>
       </ElTableColumn>
+
       <ElTableColumn label="要求交期" prop="deadline" width="120">
         <template #="{ row }">
           {{ isEmptyDateString(row.deadline) ? '' : moment(row.deadline).format('YYYY-MM-DD') }}
         </template>
       </ElTableColumn>
+
       <ElTableColumn label="状态" prop="status">
         <template v-slot="{ row }">
           <ElTag v-if="row.status === ORDER_STATUS_WAIT">处理中</ElTag>
           <ElTag v-else type="success">已完成</ElTag>
         </template>
       </ElTableColumn>
+
       <ElTableColumn label="操作" width="180" fixed="right">
         <template v-slot="{ row }">
           <GlAsyncButton link type="primary" :click="() => edit(row)">查看</GlAsyncButton>

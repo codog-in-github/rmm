@@ -4,12 +4,14 @@ import { getOptions } from '@/helpers/process';
 import {getOptions as getOptionsHelpers, getSpecOptions, orderDetail, orderSave } from '@/api';
 import CustomerEditor from '@/pages/customer/Editor.vue';
 import {GOODS_SPEC_SCENES_ORDER, GOODS_TYPE_RAW, ORDER_UNIT_KG, ORDER_UNIT_MAP} from '@/constant';
-import {map2array} from '@/helpers';
+import {map2array, specParse} from '@/helpers';
 import moment from 'moment';
 import TemplateEditor from '@/pages/template/Editor.vue';
 import {ElMessage} from 'element-plus';
 import SpecInput from '@/pages/order/SpecInput.vue';
 import SpecFormatter from '@/components/SpecFormatter.vue';
+import {cloneDeep} from "lodash";
+import {presets} from "../../../babel.config";
 
 const specInputRef = ref(null);
 const { goods, update } = getOptions();
@@ -61,7 +63,8 @@ const emptyDetails = function() {
     unit:           ORDER_UNIT_KG,
     comment:        '',
     hard:           '',
-    wLimit:         '',
+    wLimitU:        '',
+    wLimitD:        '',
     normalBusiness: '',
     customerNote:   '',
     deadline:       ''
@@ -88,7 +91,20 @@ const rules = {
 defineExpose({
   async show(id) {
     if(id) {
-      form.value = await orderDetail(id);
+      const rep = await orderDetail(id);
+
+      const getPercent = (specObj, value) => {
+        if(!value || value === '0' || !specObj?.r?.[0]) return '';
+        return Math.abs((value - specObj.w[0]) / specObj.w[0] * 100).toFixed(3).replace(/\.?0+$/, '');
+      };
+
+      for(const item of rep.details) {
+        let [wLimitU, wLimitD] = item.wLimit.split('/');
+        const specObj = specParse(item.spec);
+        item.wLimitU = getPercent(specObj, wLimitU);
+        item.wLimitD = getPercent(specObj, wLimitD);
+      }
+      form.value = rep;
     } else {
       form.value = emptyForm();
     }
@@ -99,33 +115,6 @@ defineExpose({
   }
 });
 const customers = ref([]);
-
-function useQuerySearch(goodsId, customerId) {
-  if(!goodsId) {
-    return function querySearch(_, cb) {
-      cb([]);
-    };
-  }
-  return async function querySearch(_, cb) {
-    const rep = await getSpecOptions({
-      goodsId,
-      scenes: GOODS_SPEC_SCENES_ORDER,
-      customerId
-    });
-    if(rep) {
-      cb(
-        rep.map(item => {
-          return {
-            value: item.value
-          };
-        })
-      );
-    } else {
-      cb([]);
-    }
-  };
-}
-
 
 function addDetail() {
   const row = emptyDetails();
@@ -146,7 +135,20 @@ function showTemplate(row) {
 
 async function submit() {
   await elFormRef.value.validate();
-  const { id } = await orderSave(form.value);
+  const formData = cloneDeep(form.value);
+
+  const wLimitFormat = (specObj, percent, operator) => {
+    if(!percent || percent === '0') return '0';
+    const op = (operator === '+' ? 1 : -1);
+    return (specObj.w[0] * (1 + percent / 100 * op)).toFixed(3);
+  };
+
+  for(const item of formData.details) {
+    const spec = specParse(item.spec);
+    item.wLimit = wLimitFormat(spec, item.wLimitU, '+') + '/' + wLimitFormat(spec, item.wLimitD, '-');
+  }
+
+  const { id } = await orderSave(formData);
   ElMessage.success('保存成功');
   update();
   show.value = false;
@@ -193,11 +195,13 @@ const goodsOptions = computed(() => {
               </div>
             </template>
           </ElTableColumn>
+
           <ElTableColumn label="原料名称" width="150px" fixed>
             <template v-slot="{ row }">
               <ElSelectV2 v-model="row.goodsId" :options="goodsOptions" />
             </template>
           </ElTableColumn>
+
           <ElTableColumn label="规格(MM)" width="220px" fixed>
             <template v-slot="{ row }">
               <ElButton link type="primary" @click="inputSpec(row)">
@@ -205,14 +209,33 @@ const goodsOptions = computed(() => {
               </ElButton>
             </template>
           </ElTableColumn>
-          <ElTableColumn label="壁厚上下限" width="120px">
+
+          <ElTableColumn label="壁厚上限" width="160px">
             <template v-slot="{ row }">
-              <ElInput
-                class="w-full"
-                v-model="row.wLimit"
-              />
+              <ElSelect
+                style="width: 80%"
+                v-model="row.wLimitU"
+                filterable
+              >
+                <ElOption v-for="i in 15" :value="i" :key="i" />
+              </ElSelect>
+              %
             </template>
           </ElTableColumn>
+
+          <ElTableColumn label="壁厚下限" width="160px">
+            <template v-slot="{ row }">
+              <ElSelect
+                style="width: 80%"
+                v-model="row.wLimitD"
+                filterable
+              >
+                <ElOption v-for="i in 15" :value="i" :key="i" />
+              </ElSelect>
+              %
+            </template>
+          </ElTableColumn>
+
           <ElTableColumn label="数量" width="120px">
             <template v-slot="{ row }">
               <ElInput
@@ -223,6 +246,7 @@ const goodsOptions = computed(() => {
               />
             </template>
           </ElTableColumn>
+
           <ElTableColumn label="一般贸易" width="120px">
             <template v-slot="{ row }">
               <ElInput
@@ -233,6 +257,7 @@ const goodsOptions = computed(() => {
               />
             </template>
           </ElTableColumn>
+
           <ElTableColumn label="单位" width="120px">
             <template v-slot="{ row }">
               <ElSelectV2
@@ -242,11 +267,13 @@ const goodsOptions = computed(() => {
               />
             </template>
           </ElTableColumn>
+
           <ElTableColumn label="硬度" width="120px">
             <template v-slot="{ row }">
               <ElInput v-model="row.hard" />
             </template>
           </ElTableColumn>
+
           <ElTableColumn label="备注" width="200px">
             <template v-slot="{ row }">
               <ElInput
@@ -258,6 +285,7 @@ const goodsOptions = computed(() => {
               />
             </template>
           </ElTableColumn>
+
           <ElTableColumn label="特殊要求" width="200px">
             <template v-slot="{ row }">
               <ElInput
@@ -269,6 +297,7 @@ const goodsOptions = computed(() => {
               />
             </template>
           </ElTableColumn>
+
           <ElTableColumn label="要求交期" width="200px">
             <template v-slot="{ row }">
               <ElDatePicker
@@ -279,6 +308,7 @@ const goodsOptions = computed(() => {
               />
             </template>
           </ElTableColumn>
+
           <ElTableColumn width="180px">
             <template v-slot="{ $index, row }">
               <GlAsyncButton link type="primary" :click="() => showTemplate(row)">查看工艺</GlAsyncButton>

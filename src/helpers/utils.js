@@ -200,7 +200,25 @@ export const openHtml = (html) => {
   window.open(htmlFileUrl);
 };
 
-export const toleranceFormat = (base, cur) => {
-  return Math.abs(base - cur).toFixed(3).replace(/\.?0+$/, '');
+/**
+ * 误差格式化
+ * @param {string|number} base
+ * @param {string|number} cur
+ * @param {'+' | '-'} operator
+ * @returns {string}
+ */
+export const toleranceFormat = (base, cur, operator = '+') => {
+  base = Number(base);
+  cur = Number(cur);
+
+  if(!cur) {
+    return '0';
+  }
+
+  if(operator === '-') {
+    cur = -cur;
+  }
+
+  return Math.abs(base + cur).toFixed(3).replace(/\.?0+$/, '');
 };
 
